@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">Better Orioks</string>
+    <string name="of">"из %1$s"</string>
+    <string name="blank">blank</string>
+    <string name="move_next">move next</string>
+</resources>
