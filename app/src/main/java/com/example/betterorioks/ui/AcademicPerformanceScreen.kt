@@ -1,6 +1,5 @@
 package com.example.betterorioks.ui
 
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -12,14 +11,14 @@ import com.example.betterorioks.ui.theme.BetterOrioksTheme
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.betterorioks.R
+import com.example.betterorioks.data.Subject
+import com.example.betterorioks.ui.components.RoundedMark
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
@@ -44,28 +43,6 @@ fun MyPreview(){
 }
 
 @Composable
-fun RoundedMark(userPoints: Double, systemPoints: Int,modifier: Modifier = Modifier){
-    val outlineColor = when((userPoints/systemPoints*100).toInt()){
-        in 50..69 -> Color.Yellow
-        in 70..85 -> colorResource(id = R.color.light_green)
-        in 86..100 -> Color.Green
-        else -> Color.Red
-    }
-    Card(
-        shape = RoundedCornerShape(50),
-        backgroundColor = MaterialTheme.colors.primaryVariant,
-        modifier = modifier.size(35.dp),
-        border = BorderStroke(width = 2.dp,color = outlineColor)
-    ){
-        Text(
-            text = userPoints.toInt().toString(),
-            modifier = Modifier.wrapContentSize(),
-            fontSize = 14.sp
-        )
-    }
-}
-
-@Composable
 fun AcademicPerformanceElement(
     modifier: Modifier = Modifier,
     subjectName: String = stringResource(R.string.blank),
@@ -82,7 +59,7 @@ fun AcademicPerformanceElement(
             .wrapContentHeight()
             .padding(horizontal = 16.dp, vertical = 3.dp)
             .defaultMinSize(minHeight = 72.dp)
-            .clickable { onClick }
+            .clickable(onClick = onClick)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -117,15 +94,24 @@ fun AcademicPerformanceElement(
         }
     }
 
-
 @Composable
-fun AcademicPerformance(viewModel: BetterOrioksViewModel){
+fun AcademicPerformance(
+    modifier: Modifier = Modifier,
+    onComponentClicked: () -> Unit = {},
+    getAcademicPerformance: () -> List<Subject>,
+    setCurrentSubject: (Subject) -> Unit
+){
     LazyColumn(){
-        items(viewModel.getAcademicPerformance()){
+
+        items(getAcademicPerformance()){
             AcademicPerformanceElement(
                 subjectName = it.name,
                 userPoints = it.current_grade,
-                systemPoints = it.max_grade
+                systemPoints = it.max_grade,
+                onClick = {
+                    onComponentClicked()
+                    setCurrentSubject(it)
+                }
             )
         }
     }

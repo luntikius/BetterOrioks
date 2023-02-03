@@ -2,5 +2,6 @@
     <string name="app_name">Better Orioks</string>
     <string name="of">"из %1$s"</string>
     <string name="blank">blank</string>
-    <string name="move_next">move next</string>
+    <string name="move_next">кнопка: узнать информацию о контрольных мероприятиях дисциплины</string>
+    <string name="back_button">Back Button</string>
 </resources>
