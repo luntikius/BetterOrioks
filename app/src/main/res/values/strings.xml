@@ -4,4 +4,11 @@
     <string name="blank">blank</string>
     <string name="move_next">кнопка: узнать информацию о контрольных мероприятиях дисциплины</string>
     <string name="back_button">Back Button</string>
+    <string name="ORIOKS">ОРИОКС</string>
+    <string name="control_form">Форма контроля: %1$s</string>
+    <string name="not_specified">Не назначено</string>
+    <string name="teachers">Преподаватели: %1$s</string>
+    <string name="teacher">Преподаватель: %1$s</string>
+    <string name="loading">Загрузка</string>
+    <string name="loading_failed">Не удалось загрузить данные</string>
 </resources>

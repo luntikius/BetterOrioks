@@ -8,43 +8,44 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
-import com.example.betterorioks.ui.AcademicPerformance
-import com.example.betterorioks.ui.AcademicPerformanceMore
-import com.example.betterorioks.ui.BetterOrioksViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavHost
+import androidx.navigation.NavHostController
+import com.example.betterorioks.ui.*
+import com.example.betterorioks.ui.components.ErrorScreen
+import com.example.betterorioks.ui.components.LoadingScreen
+import com.example.betterorioks.ui.states.SubjectsUiState
 
-val TAG:String = "BetterOrioksScreen"
+//Screens
 enum class BetterOrioksScreens {
     Scheldue,
     AcademicPerformance,
     AcademicPerformanceMore
 }
 @Composable
-fun BetterOrioksApp(viewModel: BetterOrioksViewModel = viewModel()){
+fun BetterOrioksApp(){
     //declarations
-
+    val viewModel: BetterOrioksViewModel = viewModel(factory = BetterOrioksViewModel.Factory)
     val uiState by viewModel.uiState.collectAsState()
     val navController = rememberNavController()
     val backStackEntry by navController.currentBackStackEntryAsState()
-    Log.d("BetterOrioksApp","${uiState.currentSubject}")
 
     NavHost(navController = navController, startDestination = BetterOrioksScreens.AcademicPerformance.name){
         composable(route = BetterOrioksScreens.Scheldue.name){
 
         }
         composable(route = BetterOrioksScreens.AcademicPerformance.name) {
-            AcademicPerformance(
-                getAcademicPerformance = {viewModel.getAcademicPerformance()},
-                setCurrentSubject = {viewModel.setCurrentSubject(it)},
-                onComponentClicked = {
-                    navController.navigate(BetterOrioksScreens.AcademicPerformanceMore.name)
-                    Log.d(TAG,"onClick Worked! ${uiState.currentSubject}")
-                }
+            if(uiState.subjectsUiState !is SubjectsUiState.Success)viewModel.getAcademicPerformance()
+            AcademicPerformanceScreen(
+                uiState = uiState,
+                navController = navController,
+                viewModel = viewModel
             )
+
         }
         composable(route = BetterOrioksScreens.AcademicPerformanceMore.name){
             AcademicPerformanceMore(
-                getAcademicPerformance = {viewModel.getAcademicPerformance()},
+                subjects = listOf(),
                 uiState = uiState,
                 onButtonClick = {
                     navController.popBackStack(route = BetterOrioksScreens.AcademicPerformance.name, inclusive = false)

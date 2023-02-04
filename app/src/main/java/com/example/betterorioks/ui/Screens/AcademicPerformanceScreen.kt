@@ -16,9 +16,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.navigation.NavHostController
+import com.example.betterorioks.BetterOrioksScreens
 import com.example.betterorioks.R
-import com.example.betterorioks.data.Subject
+import com.example.betterorioks.model.Subject
+import com.example.betterorioks.ui.components.ErrorScreen
+import com.example.betterorioks.ui.components.LoadingScreen
 import com.example.betterorioks.ui.components.RoundedMark
+import com.example.betterorioks.ui.states.SubjectsUiState
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
@@ -39,6 +44,21 @@ fun MyPreview(){
                 AcademicPerformanceElement()
             }
         }
+    }
+}
+
+@Composable
+fun AcademicPerformanceScreen(uiState: AppUiState, navController: NavHostController, viewModel: BetterOrioksViewModel){
+    when(uiState.subjectsUiState){
+        is SubjectsUiState.Success -> AcademicPerformance(
+            subjects = (uiState.subjectsUiState as SubjectsUiState.Success).subjects,
+            setCurrentSubject = {viewModel.setCurrentSubject(it)},
+            onComponentClicked = {
+                navController.navigate(BetterOrioksScreens.AcademicPerformanceMore.name)
+            }
+        )
+        is SubjectsUiState.Loading -> LoadingScreen()
+        is SubjectsUiState.Error -> ErrorScreen()
     }
 }
 
@@ -98,16 +118,16 @@ fun AcademicPerformanceElement(
 fun AcademicPerformance(
     modifier: Modifier = Modifier,
     onComponentClicked: () -> Unit = {},
-    getAcademicPerformance: () -> List<Subject>,
+    subjects:List<Subject> = listOf(),
     setCurrentSubject: (Subject) -> Unit
 ){
     LazyColumn(){
 
-        items(getAcademicPerformance()){
+        items(subjects){
             AcademicPerformanceElement(
                 subjectName = it.name,
                 userPoints = it.current_grade,
-                systemPoints = it.max_grade,
+                systemPoints = it.max_grade.toInt(),
                 onClick = {
                     onComponentClicked()
                     setCurrentSubject(it)

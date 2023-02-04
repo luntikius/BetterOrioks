@@ -23,7 +23,6 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     BetterOrioksApp()
-                    Log.d("BetterOrioksApp","onCreate")
                 }
             }
         }
