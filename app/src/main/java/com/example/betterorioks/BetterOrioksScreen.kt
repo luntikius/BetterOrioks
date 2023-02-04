@@ -1,20 +1,17 @@
 package com.example.betterorioks
 
-import android.util.Log
+import androidx.compose.animation.*
+import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.navigation.compose.NavHost
-import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.navigation.NavHost
-import androidx.navigation.NavHostController
 import com.example.betterorioks.ui.*
-import com.example.betterorioks.ui.components.ErrorScreen
-import com.example.betterorioks.ui.components.LoadingScreen
 import com.example.betterorioks.ui.states.SubjectsUiState
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 
 //Screens
 enum class BetterOrioksScreens {
@@ -22,15 +19,16 @@ enum class BetterOrioksScreens {
     AcademicPerformance,
     AcademicPerformanceMore
 }
+@OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BetterOrioksApp(){
     //declarations
     val viewModel: BetterOrioksViewModel = viewModel(factory = BetterOrioksViewModel.Factory)
     val uiState by viewModel.uiState.collectAsState()
-    val navController = rememberNavController()
-    val backStackEntry by navController.currentBackStackEntryAsState()
+    val navController = rememberAnimatedNavController()
+    //val backStackEntry by navController.currentBackStackEntryAsState()
 
-    NavHost(navController = navController, startDestination = BetterOrioksScreens.AcademicPerformance.name){
+    AnimatedNavHost(navController = navController, startDestination = BetterOrioksScreens.AcademicPerformance.name){
         composable(route = BetterOrioksScreens.Scheldue.name){
 
         }
@@ -43,14 +41,22 @@ fun BetterOrioksApp(){
             )
 
         }
-        composable(route = BetterOrioksScreens.AcademicPerformanceMore.name){
+        composable(
+            route = BetterOrioksScreens.AcademicPerformanceMore.name,
+            enterTransition = {slideIntoContainer(AnimatedContentScope.SlideDirection.Left, animationSpec = tween(700))},
+            exitTransition = {slideOutOfContainer(AnimatedContentScope.SlideDirection.Right, animationSpec = tween(700))}
+        ){
             AcademicPerformanceMore(
                 subjects = listOf(),
                 uiState = uiState,
                 onButtonClick = {
-                    navController.popBackStack(route = BetterOrioksScreens.AcademicPerformance.name, inclusive = false)
+                    navController.popBackStack(
+                        route = BetterOrioksScreens.AcademicPerformance.name,
+                        inclusive = false
+                    )
                 }
             )
+
         }
     }
 }
