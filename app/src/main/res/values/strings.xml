@@ -11,4 +11,8 @@
     <string name="teacher">Преподаватель: %1$s</string>
     <string name="loading">Загрузка</string>
     <string name="loading_failed">Не удалось загрузить данные</string>
+    <string name="academic_performance">Успеваемость</string>
+    <string name="profile">Профиль</string>
+    <string name="disciplines">Контрольные мероприятия</string>
+    <string name="schedule">Расписание</string>
 </resources>

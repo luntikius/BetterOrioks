@@ -2,10 +2,10 @@ package com.example.betterorioks.model
 
 @kotlinx.serialization.Serializable
 data class SubjectMore (
-    val alias: String,
-    val current_grade: Double,
-    val max_grade: Double,
-    val name: String,
-    val type: String,
-    val week: Int
+    val alias: String = "",
+    val current_grade: Double = -2.0,
+    val max_grade: Double = 0.0,
+    val name: String = "",
+    val type: String = "",
+    val week: Int = 0
     )

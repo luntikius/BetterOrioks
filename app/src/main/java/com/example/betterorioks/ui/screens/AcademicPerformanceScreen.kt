@@ -3,27 +3,30 @@ package com.example.betterorioks.ui
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.material.*
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.tooling.preview.Preview
-import com.example.betterorioks.ui.theme.BetterOrioksTheme
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
-import com.example.betterorioks.BetterOrioksScreens
 import com.example.betterorioks.R
+import com.example.betterorioks.model.BetterOrioksScreens
 import com.example.betterorioks.model.Subject
 import com.example.betterorioks.ui.components.ErrorScreen
 import com.example.betterorioks.ui.components.LoadingScreen
 import com.example.betterorioks.ui.components.RoundedMark
 import com.example.betterorioks.ui.states.SubjectsUiState
+import com.example.betterorioks.ui.theme.BetterOrioksTheme
 
 @Preview(showSystemUi = true, showBackground = true)
 @Composable
@@ -50,14 +53,22 @@ fun MyPreview(){
 @Composable
 fun AcademicPerformanceScreen(uiState: AppUiState, navController: NavHostController, viewModel: BetterOrioksViewModel){
     when(uiState.subjectsUiState){
-        is SubjectsUiState.Success -> AcademicPerformance(
-            subjects = (uiState.subjectsUiState as SubjectsUiState.Success).subjects,
-            setCurrentSubject = {viewModel.setCurrentSubject(it)},
-            onComponentClicked = {
-                navController.navigate(BetterOrioksScreens.AcademicPerformanceMore.name)
-            }
-        )
-        is SubjectsUiState.Loading -> LoadingScreen()
+        is SubjectsUiState.Success ->
+            AcademicPerformance(
+                subjects = (uiState.subjectsUiState as SubjectsUiState.Success).subjects,
+                setCurrentSubject = {viewModel.setCurrentSubject(it)},
+                onComponentClicked = {
+                    navController.navigate(BetterOrioksScreens.AcademicPerformanceMore.name)
+                },
+                viewModel = viewModel,
+                uiState = uiState
+            )
+        is SubjectsUiState.Loading ->
+            AcademicPerformance(
+                viewModel = viewModel,
+                uiState = uiState,
+                isLoading = true
+            )
         is SubjectsUiState.Error -> ErrorScreen()
     }
 }
@@ -114,25 +125,44 @@ fun AcademicPerformanceElement(
         }
     }
 
+
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AcademicPerformance(
     modifier: Modifier = Modifier,
     onComponentClicked: () -> Unit = {},
     subjects:List<Subject> = listOf(),
-    setCurrentSubject: (Subject) -> Unit
+    setCurrentSubject: (Subject) -> Unit = {},
+    viewModel: BetterOrioksViewModel,
+    uiState: AppUiState,
+    isLoading: Boolean = false
 ){
-    LazyColumn(){
-
-        items(subjects){
-            AcademicPerformanceElement(
-                subjectName = it.name,
-                userPoints = it.current_grade,
-                systemPoints = it.max_grade.toInt(),
-                onClick = {
-                    onComponentClicked()
-                    setCurrentSubject(it)
+    val pullRefreshState = rememberPullRefreshState(uiState.isAcademicPerformanceRefreshing, { viewModel.getAcademicPerformance() })
+    Box(modifier = modifier.pullRefresh(pullRefreshState)) {
+        if(isLoading) {
+            LoadingScreen()
+        }else {
+            LazyColumn() {
+                item {Spacer(modifier = Modifier.size(16.dp))}
+                items(subjects) {
+                    AcademicPerformanceElement(
+                        subjectName = it.name,
+                        userPoints = it.current_grade,
+                        systemPoints = it.max_grade.toInt(),
+                        onClick = {
+                            onComponentClicked()
+                            setCurrentSubject(it)
+                        }
+                    )
                 }
-            )
+                item {Spacer(modifier = Modifier.size(16.dp))}
+            }
         }
+        PullRefreshIndicator(
+            refreshing = uiState.isAcademicPerformanceRefreshing,
+            state = pullRefreshState, modifier = Modifier.align(Alignment.TopCenter),
+            contentColor = MaterialTheme.colors.secondary
+        )
     }
+
 }
