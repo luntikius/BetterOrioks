@@ -3,7 +3,7 @@
     <string name="of">"из %1$s"</string>
     <string name="blank">blank</string>
     <string name="move_next">кнопка: узнать информацию о контрольных мероприятиях дисциплины</string>
-    <string name="back_button">Back Button</string>
+    <string name="back_button">Кнопка назад</string>
     <string name="ORIOKS">ОРИОКС</string>
     <string name="control_form">Форма контроля: %1$s</string>
     <string name="not_specified">Не назначено</string>
@@ -15,4 +15,12 @@
     <string name="profile">Профиль</string>
     <string name="disciplines">Контрольные мероприятия</string>
     <string name="schedule">Расписание</string>
+    <string name="login">Номер студенческого билета</string>
+    <string name="password">Пароль</string>
+    <string name="visibility">Видимость пароля</string>
+    <string name="text_on_login">Введите номер вашего студенческого билета и пароль от системы ОРИОКС</string>
+    <string name="LogIn">Войти</string>
+    <string name="bad_login_or_password">Неверный логин или пароль</string>
+    <string name="token_limit_reached">На ваш аккаунт получено максимальное кол-во токенов аутентификации</string>
+    <string name="unexpected_error">Непредвиденная ошибка, попробуйте войти позже</string>
 </resources>

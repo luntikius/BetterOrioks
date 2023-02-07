@@ -1,17 +1,21 @@
 package com.example.betterorioks.data
 
-import com.example.betterorioks.model.Subject
-import com.example.betterorioks.network.AcademicPerformanceApiService
+import com.example.betterorioks.model.Token
+import com.example.betterorioks.network.TokenApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import okhttp3.MediaType
 import retrofit2.Retrofit
 
-class NetworkAcademicPerformanceRepository(private val token:String)
+class NetworkTokenRepository
+    (
+    private val loginDetails: String = ""
+)
 {
     private val BASE_URL =
         "https://orioks.miet.ru/api/v1/"
+
 
     @OptIn(ExperimentalSerializationApi::class)
     private val retrofit = Retrofit.Builder()
@@ -19,12 +23,9 @@ class NetworkAcademicPerformanceRepository(private val token:String)
         .baseUrl(BASE_URL)
         .build()
 
-    //RetrofitServices
-    private val academicPerformanceRetrofitService: AcademicPerformanceApiService by lazy {
-        retrofit.create(AcademicPerformanceApiService::class.java)
+    private val tokenRetrofitService: TokenApiService by lazy {
+        retrofit.create(TokenApiService::class.java)
     }
 
-    suspend fun getAcademicPerformance():List<Subject> {
-        return academicPerformanceRetrofitService.getAcademicPerformance(token = "Bearer $token")
-    }
+    suspend fun getToken():Token = tokenRetrofitService.getToken(loginDetails = "Basic $loginDetails")
 }

@@ -98,7 +98,11 @@ fun AboutElement(
 @Composable
 fun TopPerformanceMoreBar(onClick: () -> Unit = {}, uiState: AppUiState){
     val currentSubject = uiState.currentSubject
-    Card(backgroundColor = MaterialTheme.colors.surface, shape = RoundedCornerShape(16.dp), elevation = 8.dp) {
+    Card(
+        backgroundColor = MaterialTheme.colors.surface,
+        shape = RoundedCornerShape(16.dp),
+        elevation = 8.dp
+    ) {
         Column() {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
@@ -122,7 +126,7 @@ fun TopPerformanceMoreBar(onClick: () -> Unit = {}, uiState: AppUiState){
                         .padding(end = 16.dp),
                 )
                 Text(
-                    text = stringResource(id = R.string.of, currentSubject.max_grade.toString()),
+                    text = stringResource(id = R.string.of, currentSubject.max_grade.toInt().toString()),
                     fontSize = 14.sp,
                     color = MaterialTheme.colors.primary,
                     textAlign = TextAlign.End,
@@ -174,9 +178,10 @@ fun AcademicPerformanceMore (
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp),
-        backgroundColor = MaterialTheme.colors.surface
     ) {
-        Scaffold(topBar = { TopPerformanceMoreBar(uiState = uiState, onClick = onButtonClick) }
+        Scaffold(
+            topBar = { TopPerformanceMoreBar(uiState = uiState, onClick = onButtonClick) },
+            backgroundColor = MaterialTheme.colors.surface
         ) { innerPadding ->
             if (!isLoading && !isError) {
                 LazyColumn(

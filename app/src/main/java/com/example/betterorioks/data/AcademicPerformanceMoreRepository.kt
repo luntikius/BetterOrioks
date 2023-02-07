@@ -1,7 +1,6 @@
 package com.example.betterorioks.data
 
 
-import com.example.betterorioks.data.Temp.token
 import com.example.betterorioks.model.SubjectMore
 import com.example.betterorioks.network.AcademicPerformanceMoreApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -13,11 +12,14 @@ import retrofit2.Retrofit
 
 class NetworkAcademicPerformanceMoreRepository
     (
-        private val disciplineId: Int = 0
+        private val disciplineId: Int = 0,
+        private val token: String
     )
 {
     private val BASE_URL =
         "https://orioks.miet.ru/api/v1/"
+
+    private val ver = System.getProperty("jpackage.app-version")
 
     @OptIn(ExperimentalSerializationApi::class)
     private val retrofit = Retrofit.Builder()
@@ -29,5 +31,9 @@ class NetworkAcademicPerformanceMoreRepository
         retrofit.create(AcademicPerformanceMoreApiService::class.java)
     }
 
-    suspend fun getAcademicPerformanceMore():List<SubjectMore> = academicPerformanceMoreRetrofitService.getAcademicPerformanceMore(token = "Bearer $token", disciplineId = disciplineId.toString())
+    suspend fun getAcademicPerformanceMore():List<SubjectMore> =
+        academicPerformanceMoreRetrofitService.getAcademicPerformanceMore(
+            token = "Bearer $token",
+            disciplineId = disciplineId.toString()
+        )
 }

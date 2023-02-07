@@ -5,29 +5,61 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavController
 import com.example.betterorioks.BetterOrioksApplication
-import com.example.betterorioks.data.AcademicPerformanceRepository
-import com.example.betterorioks.data.NetworkAcademicPerformanceMoreRepository
+import com.example.betterorioks.data.*
+import com.example.betterorioks.model.BetterOrioksScreens
 import com.example.betterorioks.model.Subject
+import com.example.betterorioks.model.Token
+import com.example.betterorioks.ui.states.AuthState
 import com.example.betterorioks.ui.states.SubjectsMoreUiState
 import com.example.betterorioks.ui.states.SubjectsUiState
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import java.util.*
+
 class BetterOrioksViewModel(
-    private val academicPerformanceRepository: AcademicPerformanceRepository,
+   // private val academicPerformanceRepository: AcademicPerformanceRepository,
+    private val userPreferencesRepository: UserPreferencesRepository
 ): ViewModel() {
 
-    private val _uiState = MutableStateFlow(AppUiState())
-    val uiState: StateFlow<AppUiState> = _uiState.asStateFlow()
 
+    private val _uiState = MutableStateFlow(AppUiState())
+    val uiState = _uiState.asStateFlow()
+    fun retrieveToken(){
+        viewModelScope.launch {
+            _uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.Loading) }
+            val token = userPreferencesRepository.token.first()
+            _uiState.update { currentUiState -> currentUiState.copy(token = token) }
+            if(uiState.value.token != "") {_uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.LoggedIn) }}
+            else(_uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.NotLoggedIn) })
+        }
+    }
+
+    fun exit(){
+        viewModelScope.launch {
+            _uiState.update { currentState -> currentState.copy(authState = AuthState.Loading) }
+            val exitRepository = NetworkExitRepository(uiState.value.token)
+            try{
+                exitRepository.removeToken()
+                userPreferencesRepository.setToken("")
+                _uiState.update { currentState -> currentState.copy(authState = AuthState.NotLoggedIn) }
+            }catch(e:HttpException) {
+                if (e.code() == 400){
+                    userPreferencesRepository.setToken("")
+                    _uiState.update { currentState -> currentState.copy(authState = AuthState.NotLoggedIn) }
+                }
+            }
+        }
+    }
 
     fun getAcademicPerformance(){
         viewModelScope.launch {
-            _uiState.update { currentState -> currentState.copy(subjectsUiState = SubjectsUiState.Loading,isAcademicPerformanceRefreshing = true) }
+            _uiState.update { currentState -> currentState.copy(subjectsUiState = SubjectsUiState.Loading, isAcademicPerformanceRefreshing = true, loadingState = false) }
+            delay(500)
+            val academicPerformanceRepository = NetworkAcademicPerformanceRepository(token = uiState.value.token)
             val subjectsUiState = try{
                 val subjects = academicPerformanceRepository.getAcademicPerformance()
                 SubjectsUiState.Success(subjects)
@@ -36,7 +68,7 @@ class BetterOrioksViewModel(
             }catch (e:HttpException){
                 SubjectsUiState.Error
             }
-            _uiState.update { currentState -> currentState.copy(subjectsUiState = subjectsUiState)}
+            _uiState.update { currentState -> currentState.copy(subjectsUiState = subjectsUiState, isAcademicPerformanceRefreshing = false)}
             if(uiState.value.subjectsUiState is SubjectsUiState.Success) {
                 (uiState.value.subjectsUiState as SubjectsUiState.Success).subjects.forEach{subject ->
                     getAcademicPerformanceMore(subject.id)
@@ -46,7 +78,7 @@ class BetterOrioksViewModel(
     }
 
     private fun getAcademicPerformanceMore(disciplineId: Int){
-        val academicPerformanceMoreRepository = NetworkAcademicPerformanceMoreRepository(disciplineId)
+        val academicPerformanceMoreRepository = NetworkAcademicPerformanceMoreRepository(disciplineId, token = uiState.value.token)
         viewModelScope.launch {
             _uiState.update { currentState -> currentState.copy(currentSubjectDisciplines = _uiState.value.currentSubjectDisciplines + Pair(disciplineId,SubjectsMoreUiState.Loading))}
             val subjectsUiState = try{
@@ -57,9 +89,8 @@ class BetterOrioksViewModel(
             }catch (e:HttpException){
                 SubjectsMoreUiState.Error
             }
-            _uiState.update { currentState -> currentState.copy(currentSubjectDisciplines = _uiState.value.currentSubjectDisciplines + Pair(disciplineId,subjectsUiState),isAcademicPerformanceRefreshing = false)}
+            _uiState.update { currentState -> currentState.copy(currentSubjectDisciplines = _uiState.value.currentSubjectDisciplines + Pair(disciplineId,subjectsUiState))}
         }
-
     }
 
     fun setCurrentSubject(subject: Subject){
@@ -70,8 +101,36 @@ class BetterOrioksViewModel(
         val Factory: ViewModelProvider.Factory = viewModelFactory {
             initializer {
                 val application = (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as BetterOrioksApplication)
-                val academicPerformanceRepository = application.container.academicPerformanceRepository
-                BetterOrioksViewModel(academicPerformanceRepository = academicPerformanceRepository)
+                //val academicPerformanceRepository =
+                BetterOrioksViewModel(
+                    //academicPerformanceRepository = academicPerformanceRepository,
+                    userPreferencesRepository = application.userPreferencesRepository
+                )
+            }
+        }
+    }
+
+    fun getToken(loginDetails: String){
+        val encodedLoginDetails = Base64.getEncoder().encodeToString(loginDetails.toByteArray())
+        val tokenRepository = NetworkTokenRepository(encodedLoginDetails)
+        viewModelScope.launch {
+            val token:Token = try{
+                tokenRepository.getToken()
+            }
+            catch
+                (e:HttpException)
+            {
+                val error = when(e.code()){
+                    401 -> AuthState.TokenLimitReached
+                    403 -> AuthState.BadLoginOrPassword
+                    else -> AuthState.UnexpectedError
+                }
+                _uiState.update { currentState -> currentState.copy(authState = error) }
+                Token()
+            }
+            if (token.token != "") {
+                userPreferencesRepository.setToken(token = token.token)
+                _uiState.update { currentState -> currentState.copy(token = token.token) }
             }
         }
     }

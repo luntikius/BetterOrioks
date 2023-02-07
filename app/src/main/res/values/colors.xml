@@ -6,4 +6,6 @@
     <color name="bright_blue">#FF0088FF</color>
     <color name="gray100">#FFEDEEF0</color>
     <color name="gray800">#FF141414</color>
+    <color name="bar_day">#FFEFF7FF</color>
+    <color name="bar_night">#FF222222</color>
 </resources>

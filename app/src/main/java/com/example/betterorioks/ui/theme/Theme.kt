@@ -18,7 +18,6 @@ private val LightColorPalette = lightColors(
     onPrimary = black
 )
 
-@SuppressLint("ConflictingOnColor")
 private val DarkColorPalette = darkColors(
     primary = gray300,
     primaryVariant = gray600,

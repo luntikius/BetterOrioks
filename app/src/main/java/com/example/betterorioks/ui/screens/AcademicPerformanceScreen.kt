@@ -69,7 +69,12 @@ fun AcademicPerformanceScreen(uiState: AppUiState, navController: NavHostControl
                 uiState = uiState,
                 isLoading = true
             )
-        is SubjectsUiState.Error -> ErrorScreen()
+        is SubjectsUiState.Error ->
+            AcademicPerformance(
+                viewModel = viewModel,
+                uiState = uiState,
+                isError = true
+            )
     }
 }
 
@@ -135,12 +140,15 @@ fun AcademicPerformance(
     setCurrentSubject: (Subject) -> Unit = {},
     viewModel: BetterOrioksViewModel,
     uiState: AppUiState,
-    isLoading: Boolean = false
+    isLoading: Boolean = false,
+    isError: Boolean = false
 ){
     val pullRefreshState = rememberPullRefreshState(uiState.isAcademicPerformanceRefreshing, { viewModel.getAcademicPerformance() })
     Box(modifier = modifier.pullRefresh(pullRefreshState)) {
         if(isLoading) {
-            LoadingScreen()
+            LoadingScreen()}
+        else if(isError){
+            ErrorScreen()
         }else {
             LazyColumn() {
                 item {Spacer(modifier = Modifier.size(16.dp))}
