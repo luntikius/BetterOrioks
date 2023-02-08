@@ -201,9 +201,9 @@ fun AcademicPerformanceMore (
                     item { AboutElement(uiState = uiState) }
                 }
             }else if(isLoading){
-                LoadingScreen()
+                LoadingScreen(modifier = Modifier.fillMaxSize())
             }else{
-                ErrorScreen()
+                ErrorScreen(modifier = Modifier.fillMaxSize())
             }
         }
     }

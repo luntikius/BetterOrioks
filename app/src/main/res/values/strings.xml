@@ -24,4 +24,5 @@
     <string name="token_limit_reached">На ваш аккаунт получено максимальное кол-во токенов аутентификации</string>
     <string name="unexpected_error">Непредвиденная ошибка, попробуйте войти позже</string>
     <string name="exit">Выйти из аккаунта</string>
+    <string name="Debts">Долги</string>
 </resources>

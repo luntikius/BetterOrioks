@@ -1,7 +1,9 @@
 package com.example.betterorioks.data
 
+import com.example.betterorioks.model.AcademicDebt
 import com.example.betterorioks.model.Subject
 import com.example.betterorioks.model.UserInfo
+import com.example.betterorioks.network.AcademicDebtApiService
 import com.example.betterorioks.network.AcademicPerformanceApiService
 import com.example.betterorioks.network.UserInfoApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
@@ -28,8 +30,12 @@ class NetworkMainRepository(token:String)
         retrofit.create(AcademicPerformanceApiService::class.java)
     }
 
-    private val userInfoRetrofitService: UserInfoApiService by lazy{
+    private val userInfoRetrofitService: UserInfoApiService by lazy {
         retrofit.create(UserInfoApiService::class.java)
+    }
+
+    private val academicDebtRetrofitService: AcademicDebtApiService by lazy {
+        retrofit.create(AcademicDebtApiService::class.java)
     }
 
     //get functions
@@ -39,5 +45,9 @@ class NetworkMainRepository(token:String)
 
     suspend fun getUserInfo():UserInfo{
         return userInfoRetrofitService.getUserInfo(token = finalToken)
+    }
+
+    suspend fun getAcademicDebt():List<AcademicDebt>{
+        return academicDebtRetrofitService.getAcademicDebt(token = finalToken)
     }
 }

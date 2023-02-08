@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.sp
 import com.example.betterorioks.R
 import com.example.betterorioks.model.UserInfo
 import com.example.betterorioks.ui.AppUiState
+import com.example.betterorioks.ui.components.AnyButton
 import com.example.betterorioks.ui.components.ErrorScreen
 import com.example.betterorioks.ui.components.LoadingScreen
 import com.example.betterorioks.ui.states.UserInfoUiState
@@ -104,7 +105,7 @@ fun ExitButton(onExitClick: () -> Unit){
                 text = stringResource(R.string.exit),
                 modifier = Modifier.padding(16.dp),
                 fontWeight = FontWeight.Bold,
-                fontSize = 20.sp
+                fontSize = 18.sp
             )
             Spacer(modifier = Modifier.weight(1f))
             Icon(
@@ -118,15 +119,17 @@ fun ExitButton(onExitClick: () -> Unit){
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ProfileScreen(
     onExitClick: () -> Unit = {},
+    onDebtClick: () -> Unit = {},
     uiState: AppUiState = AppUiState()
 ){
     Column() {
         Spacer(modifier = Modifier.size(16.dp))
         ProfileCard(uiState = uiState)
+        Spacer(modifier = Modifier.size(8.dp))
+        AnyButton(onClick = onDebtClick, text = R.string.Debts, icon = R.drawable.debt)
         Spacer(modifier = Modifier.weight(1f))
         ExitButton (onExitClick = onExitClick)
         Spacer(modifier = Modifier.size(16.dp))

@@ -1,5 +1,6 @@
 package com.example.betterorioks.ui.components
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -12,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -58,7 +60,7 @@ fun RoundedMark(userPoints: Double, systemPoints: Int,modifier: Modifier = Modif
 fun LoadingScreen(modifier: Modifier = Modifier) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.wrapContentSize(Alignment.Center)
     ) {
         LoadingAnimation(circleColor = MaterialTheme.colors.secondary)
     }
@@ -67,9 +69,9 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
 fun ErrorScreen(modifier: Modifier = Modifier) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.fillMaxSize()
+        modifier = modifier.wrapContentSize(Alignment.Center)
     ) {
-        Text(stringResource(R.string.loading_failed))
+        Text(stringResource(R.string.loading_failed), modifier = Modifier.padding(16.dp))
     }
 }
 
@@ -120,28 +122,45 @@ fun BottomNavigationBar(navController: NavHostController) {
     }
 }
 
-//@Composable
-//fun TopBar(onClick: () -> Unit = {}, screenName: String, showRefreshButton:Boolean){
-//    Surface(modifier = Modifier.wrapContentSize(), color = MaterialTheme.colors.primaryVariant) {
-//        Row(
-//            verticalAlignment = Alignment.CenterVertically,
-//            modifier = Modifier
-//                .wrapContentSize()
-//                .padding(horizontal = 16.dp, vertical = 8.dp)
-//        ) {
-//            Icon(painter = painterResource(id = R.drawable.ic_launcher_foreground), contentDescription = null, modifier = Modifier.size(30.dp).padding(16.dp))
-//            Text(text = screenName, fontSize = 20.sp, color = MaterialTheme.colors.secondary)
-//            Spacer(modifier = Modifier.weight(1f))
-//            if(showRefreshButton) {
-//                IconButton(onClick = onClick) {
-//                    Icon(
-//                        painter = painterResource(R.drawable.refresh),
-//                        contentDescription = stringResource(R.string.back_button),
-//                        tint = MaterialTheme.colors.secondary,
-//                        modifier = Modifier.size(30.dp)
-//                    )
-//                }
-//            }
-//        }
-//    }
-//}
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun AnyButton (
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+    @StringRes text: Int,
+    icon: Int
+){
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        backgroundColor = MaterialTheme.colors.surface,
+        elevation = 10.dp,
+        onClick = onClick,
+        modifier = modifier
+            .wrapContentHeight()
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 3.dp)
+            .defaultMinSize(minHeight = 72.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Spacer(modifier = Modifier.size(16.dp))
+            Icon(painter = painterResource(icon),
+                contentDescription = null,
+                tint = MaterialTheme.colors.secondary,
+                modifier = Modifier.size(32.dp)
+            )
+            Text(
+                text = stringResource(text),
+                modifier = Modifier.padding(16.dp),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(painter = painterResource(id = R.drawable.arrow_forward),
+                contentDescription = null,
+                tint = MaterialTheme.colors.primary,
+                modifier = Modifier.size(20.dp)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+        }
+    }
+}

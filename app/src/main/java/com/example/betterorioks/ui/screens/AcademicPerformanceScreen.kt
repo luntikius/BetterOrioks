@@ -146,10 +146,14 @@ fun AcademicPerformance(
     val pullRefreshState = rememberPullRefreshState(uiState.isAcademicPerformanceRefreshing, { viewModel.getAcademicPerformance() })
     Box(modifier = modifier.pullRefresh(pullRefreshState)) {
         if(isLoading) {
-            LoadingScreen()}
-        else if(isError){
-            ErrorScreen()
-        }else {
+            LazyColumn(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxSize()) {
+                item{LoadingScreen(modifier = Modifier.fillMaxSize())}
+            }
+        } else if(isError){
+            LazyColumn(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxSize()) {
+                item{ErrorScreen(modifier = Modifier.fillMaxSize())}
+            }
+        } else {
             LazyColumn() {
                 item {Spacer(modifier = Modifier.size(16.dp))}
                 items(subjects) {

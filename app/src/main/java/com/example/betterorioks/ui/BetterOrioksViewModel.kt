@@ -17,6 +17,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
+import java.io.IOException
 import java.util.*
 
 class BetterOrioksViewModel(
@@ -50,6 +51,8 @@ class BetterOrioksViewModel(
                     userPreferencesRepository.setToken("")
                     _uiState.update { currentState -> currentState.copy(authState = AuthState.NotLoggedIn) }
                 }
+            }catch(e: IOException){
+                _uiState.update { currentState -> currentState.copy(authState = AuthState.LoggedIn) }
             }
         }
     }

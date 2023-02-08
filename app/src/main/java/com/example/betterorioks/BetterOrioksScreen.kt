@@ -2,6 +2,7 @@ package com.example.betterorioks
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
@@ -13,10 +14,7 @@ import com.example.betterorioks.ui.*
 import com.example.betterorioks.ui.components.BottomNavigationBar
 import com.example.betterorioks.model.BetterOrioksScreens
 import com.example.betterorioks.ui.components.LoadingScreen
-import com.example.betterorioks.ui.screens.AcademicPerformanceMoreScreen
-import com.example.betterorioks.ui.screens.AuthorizationScreen
-import com.example.betterorioks.ui.screens.ProfileScreen
-import com.example.betterorioks.ui.screens.ScheduleScreen
+import com.example.betterorioks.ui.screens.*
 import com.example.betterorioks.ui.states.AuthState
 import com.example.betterorioks.ui.states.UserInfoUiState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
@@ -99,12 +97,36 @@ fun BetterOrioksApp(){
                     popExitTransition = { fadeOut() }
                 ) {
                     if(uiState.userInfoUiState == UserInfoUiState.NotStarted)viewModel.getUserInfo()
-                    ProfileScreen(onExitClick = { viewModel.exit() }, uiState = uiState)
+                    ProfileScreen(
+                        onExitClick = { viewModel.exit() },
+                        uiState = uiState,
+                        onDebtClick = {navController.navigate(BetterOrioksScreens.Debts.name)}
+                    )
+                }
+                composable(
+                    route = BetterOrioksScreens.Debts.name,
+                    enterTransition = {
+                        slideIntoContainer(
+                            AnimatedContentScope.SlideDirection.Left,
+                            animationSpec = tween(700)
+                        )
+                    },
+                    exitTransition = {
+                        slideOutOfContainer(
+                            AnimatedContentScope.SlideDirection.Right,
+                            animationSpec = tween(700)
+                        )
+                    }
+                ){
+                    AcademicDebtScreen(onClick = {navController.popBackStack(
+                        route = BetterOrioksScreens.Profile.name,
+                        inclusive = false)
+                    })
                 }
             }
         }
     }else if(uiState.authState == AuthState.Loading){
-        LoadingScreen()
+        LoadingScreen(modifier = Modifier.fillMaxSize())
     }else{
         AuthorizationScreen(onLogin = {viewModel.getToken(it)}, uiState = uiState)
     }
