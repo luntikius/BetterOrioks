@@ -5,15 +5,14 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.NavController
 import com.example.betterorioks.BetterOrioksApplication
 import com.example.betterorioks.data.*
-import com.example.betterorioks.model.BetterOrioksScreens
 import com.example.betterorioks.model.Subject
 import com.example.betterorioks.model.Token
 import com.example.betterorioks.ui.states.AuthState
 import com.example.betterorioks.ui.states.SubjectsMoreUiState
 import com.example.betterorioks.ui.states.SubjectsUiState
+import com.example.betterorioks.ui.states.UserInfoUiState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -59,7 +58,7 @@ class BetterOrioksViewModel(
         viewModelScope.launch {
             _uiState.update { currentState -> currentState.copy(subjectsUiState = SubjectsUiState.Loading, isAcademicPerformanceRefreshing = true, loadingState = false) }
             delay(500)
-            val academicPerformanceRepository = NetworkAcademicPerformanceRepository(token = uiState.value.token)
+            val academicPerformanceRepository = NetworkMainRepository(token = uiState.value.token)
             val subjectsUiState = try{
                 val subjects = academicPerformanceRepository.getAcademicPerformance()
                 SubjectsUiState.Success(subjects)
@@ -131,6 +130,25 @@ class BetterOrioksViewModel(
             if (token.token != "") {
                 userPreferencesRepository.setToken(token = token.token)
                 _uiState.update { currentState -> currentState.copy(token = token.token) }
+            }
+        }
+    }
+
+    fun getUserInfo(){
+        val mainRepository = NetworkMainRepository(uiState.value.token)
+        viewModelScope.launch {
+            _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Loading) }
+            try {
+                val userInfo = mainRepository.getUserInfo()
+                if(userInfo.full_name != "") {
+                    _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Success(userInfo)) }
+                }else{
+                    _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Error) }
+                }
+            }catch(e: HttpException){
+                _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Error) }
+            }catch(e: java.lang.Exception){
+                _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Error) }
             }
         }
     }

@@ -18,6 +18,7 @@ import com.example.betterorioks.ui.screens.AuthorizationScreen
 import com.example.betterorioks.ui.screens.ProfileScreen
 import com.example.betterorioks.ui.screens.ScheduleScreen
 import com.example.betterorioks.ui.states.AuthState
+import com.example.betterorioks.ui.states.UserInfoUiState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -97,7 +98,8 @@ fun BetterOrioksApp(){
                     popEnterTransition = { fadeIn() },
                     popExitTransition = { fadeOut() }
                 ) {
-                    ProfileScreen(onClick = { viewModel.exit() })
+                    if(uiState.userInfoUiState == UserInfoUiState.NotStarted)viewModel.getUserInfo()
+                    ProfileScreen(onExitClick = { viewModel.exit() }, uiState = uiState)
                 }
             }
         }
