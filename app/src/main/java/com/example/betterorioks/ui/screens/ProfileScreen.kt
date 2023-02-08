@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.betterorioks.R
@@ -20,11 +21,44 @@ import com.example.betterorioks.ui.states.UserInfoUiState
 
 @Composable
 fun ProfileCardContent(userInfo: UserInfo){
-    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(16.dp)){
-        Column() {
-            Text(text = userInfo.group)
-            Text(text = userInfo.full_name)
-            Text(text = userInfo.study_direction)
+    Row(modifier = Modifier.padding(16.dp)){
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            Text(
+                text = userInfo.full_name,
+                fontWeight = FontWeight.Bold,
+                fontSize = 20.sp,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Divider()
+            Row(verticalAlignment = Alignment.CenterVertically){
+                Text(text = "Номер студенческого билета: ")
+                Spacer(modifier = Modifier.width(32.dp))
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = userInfo.record_book_id.toString(), textAlign = TextAlign.End)
+            }
+            Divider()
+            Row(verticalAlignment = Alignment.CenterVertically){
+                Text(text = "Группа: ")
+                Spacer(modifier = Modifier.width(32.dp))
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = userInfo.group, textAlign = TextAlign.End)
+            }
+            Divider()
+            Row(verticalAlignment = Alignment.CenterVertically){
+                Text(text = "Направление: ")
+                Spacer(modifier = Modifier.width(32.dp))
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = userInfo.study_direction, textAlign = TextAlign.End)
+            }
+            Divider()
+            Row(verticalAlignment = Alignment.CenterVertically){
+                Text(text = "Институт: ")
+                Spacer(modifier = Modifier.width(32.dp))
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = userInfo.department, textAlign = TextAlign.End)
+            }
+
         }
     }
 }
@@ -39,7 +73,6 @@ fun ProfileCard(uiState: AppUiState){
             .wrapContentHeight()
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 3.dp)
-            .defaultMinSize(minHeight = 213.dp)
     ) {
         when (uiState.userInfoUiState) {
             is UserInfoUiState.Success ->
