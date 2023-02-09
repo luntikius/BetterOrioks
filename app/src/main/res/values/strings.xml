@@ -28,4 +28,8 @@
     <string name="before">До: %1$s</string>
     <string name="consultations">Консультации: %1$s</string>
     <string name="no_debts">Долги отсутствуют!</string>
+    <string name="weeks_left">Недель до: %1$s</string>
+    <string name="event_passed">Прошло</string>
+    <string name="date_is_not_specified">Не назначено</string>
+    <string name="event_this_week">На этой неделе</string>
 </resources>

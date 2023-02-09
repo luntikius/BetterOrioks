@@ -12,5 +12,6 @@ data class AppUiState (
     var authState: AuthState = AuthState.NotLoggedIn,
     var loadingState: Boolean = true,
     var userInfoUiState: UserInfoUiState = UserInfoUiState.NotStarted,
-    var academicDebtsUiState: DebtsUiState = DebtsUiState.NotStarted
+    var academicDebtsUiState: DebtsUiState = DebtsUiState.NotStarted,
+    var importantDatesUiState: ImportantDatesUiState = ImportantDatesUiState.NotStarted
     )

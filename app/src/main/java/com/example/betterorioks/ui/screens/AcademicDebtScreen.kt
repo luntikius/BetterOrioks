@@ -81,7 +81,7 @@ fun AcademicDebtElement(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            .padding(all = 16.dp)
+            .padding(horizontal = 8.dp, vertical = 16.dp)
             .fillMaxWidth()
     ) {
         Column(modifier = Modifier

@@ -19,7 +19,10 @@ import com.example.betterorioks.ui.AppUiState
 import com.example.betterorioks.ui.components.ErrorScreen
 import com.example.betterorioks.ui.components.LoadingScreen
 import com.example.betterorioks.ui.components.RoundedMark
+import com.example.betterorioks.ui.states.ImportantDatesUiState
 import com.example.betterorioks.ui.states.SubjectsMoreUiState
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 
 @Preview
@@ -27,6 +30,20 @@ import com.example.betterorioks.ui.states.SubjectsMoreUiState
 fun ElementPreview(){
     AcademicPerformanceMoreElement()
 }
+
+private fun calculateWeeks(week:Int, uiState: AppUiState):Int{
+    if (uiState.importantDatesUiState is ImportantDatesUiState.Success) {
+        val dates = (uiState.importantDatesUiState as ImportantDatesUiState.Success).dates
+        val start = dates.semester_start
+        val today = LocalDate.now()
+        val startDate = LocalDate.parse(start)
+        val weeks = week - (ChronoUnit.DAYS.between(startDate,today)/7).toInt() - 1
+        if (weeks < 0) return -1
+        return weeks
+    }else
+        return -2
+}
+
 @Composable
 fun AcademicPerformanceMoreElement(
     modifier: Modifier = Modifier,
@@ -35,18 +52,37 @@ fun AcademicPerformanceMoreElement(
     subjectFullName:String = "",
     userPoints: Double = 0.0,
     systemPoints: Int = 10,
+    weeks: Int = 0
 ){
     val finalSubjectShort = if(subjectShort != ""){" ($subjectShort)"}else{""}
+    val weeksLeft = when(weeks) {
+        -2 -> stringResource(R.string.date_is_not_specified)
+        -1 -> stringResource(R.string.event_passed)
+        0 -> stringResource(R.string.event_this_week)
+        else -> stringResource(id = R.string.weeks_left, weeks)
+    }
+    
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
-            .padding(all = 16.dp)
+            .padding(horizontal = 8.dp, vertical = 16.dp)
             .fillMaxWidth()
+            .height(IntrinsicSize.Min)
     ) {
+        Text(
+            text = weeksLeft,
+            fontSize = 14.sp,
+            color = MaterialTheme.colors.primary,
+            modifier = Modifier
+                .wrapContentSize()
+                .padding(end = 2.dp)
+                .width(56.dp)
+        )
+        Divider(Modifier.fillMaxHeight().width(2.dp), color = MaterialTheme.colors.primary)
         Column(modifier = Modifier
             .weight(1f)
             .fillMaxWidth()
-            .padding(end = 16.dp)) {
+            .padding(start = 4.dp,end = 16.dp)) {
             if (subjectFullName != "") {
                 Text(
                     text = subjectFullName,
@@ -54,11 +90,12 @@ fun AcademicPerformanceMoreElement(
                     color = MaterialTheme.colors.primary,
                     modifier = Modifier
                         .wrapContentSize()
-                        .padding(end = 8.dp)
+                        .padding(start = 4.dp, end = 8.dp)
                 )
             }
             Text(
-                text = "$subjectName$finalSubjectShort"
+                text = "$subjectName$finalSubjectShort",
+                modifier = modifier.padding(start = 4.dp)
             )
         }
         Text(
@@ -195,7 +232,8 @@ fun AcademicPerformanceMore (
                             userPoints = it.current_grade,
                             systemPoints = it.max_grade.toInt(),
                             subjectFullName = it.name,
-                            subjectShort = it.alias
+                            subjectShort = it.alias,
+                            weeks = calculateWeeks(it.week, uiState)
                         )
                     }
                     item { AboutElement(uiState = uiState) }

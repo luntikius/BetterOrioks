@@ -1,10 +1,12 @@
 package com.example.betterorioks.data
 
 import com.example.betterorioks.model.AcademicDebt
+import com.example.betterorioks.model.ImportantDates
 import com.example.betterorioks.model.Subject
 import com.example.betterorioks.model.UserInfo
 import com.example.betterorioks.network.AcademicDebtApiService
 import com.example.betterorioks.network.AcademicPerformanceApiService
+import com.example.betterorioks.network.ImportantDatesApiService
 import com.example.betterorioks.network.UserInfoApiService
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import kotlinx.serialization.ExperimentalSerializationApi
@@ -38,6 +40,10 @@ class NetworkMainRepository(token:String)
         retrofit.create(AcademicDebtApiService::class.java)
     }
 
+    private val importantDatesRetrofitService: ImportantDatesApiService by lazy{
+        retrofit.create(ImportantDatesApiService::class.java)
+    }
+
     //get functions
     suspend fun getAcademicPerformance():List<Subject> {
         return academicPerformanceRetrofitService.getAcademicPerformance(token = finalToken)
@@ -49,5 +55,9 @@ class NetworkMainRepository(token:String)
 
     suspend fun getAcademicDebt():List<AcademicDebt>{
         return academicDebtRetrofitService.getAcademicDebt(token = finalToken)
+    }
+
+    suspend fun getImportantDates():ImportantDates{
+        return importantDatesRetrofitService.getImportantDates(token = finalToken)
     }
 }

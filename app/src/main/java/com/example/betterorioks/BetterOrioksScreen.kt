@@ -17,6 +17,7 @@ import com.example.betterorioks.ui.components.LoadingScreen
 import com.example.betterorioks.ui.screens.*
 import com.example.betterorioks.ui.states.AuthState
 import com.example.betterorioks.ui.states.DebtsUiState
+import com.example.betterorioks.ui.states.ImportantDatesUiState
 import com.example.betterorioks.ui.states.UserInfoUiState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
@@ -32,7 +33,13 @@ fun BetterOrioksApp(){
     val viewModel: BetterOrioksViewModel = viewModel(factory = BetterOrioksViewModel.Factory)
     val uiState by viewModel.uiState.collectAsState()
     val navController = rememberAnimatedNavController()
-    if (uiState.authState == AuthState.NotLoggedIn)viewModel.retrieveToken()
+
+    if (uiState.authState == AuthState.NotLoggedIn)
+        viewModel.retrieveToken()
+
+    if (uiState.importantDatesUiState == ImportantDatesUiState.NotStarted)
+        viewModel.getImportantDates()
+
     if (uiState.authState == AuthState.LoggedIn) {
         Scaffold(
             bottomBar = {
@@ -120,7 +127,7 @@ fun BetterOrioksApp(){
                         )
                     }
                 ){
-                    if(uiState.academicDebtsUiState == DebtsUiState.NotStarted ){viewModel.getAcademicDebts()}
+                    if(uiState.academicDebtsUiState == DebtsUiState.NotStarted){viewModel.getAcademicDebts()}
                     AcademicDebtScreen(
                         onClick = {navController.popBackStack(
                         route = BetterOrioksScreens.Profile.name,

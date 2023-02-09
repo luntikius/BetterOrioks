@@ -1,5 +1,6 @@
 package com.example.betterorioks.ui
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -80,6 +81,7 @@ class BetterOrioksViewModel(
                     getAcademicPerformanceMore(subject.id)
                 }
             }
+            getImportantDates()
         }
     }
 
@@ -159,6 +161,23 @@ class BetterOrioksViewModel(
                 _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Error) }
             }catch(e: java.lang.Exception){
                 _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Error) }
+            }
+        }
+    }
+
+    fun getImportantDates(){
+        println("GET_IMPORTANT_DATES")
+        val mainRepository = NetworkMainRepository(uiState.value.token)
+        viewModelScope.launch {
+            _uiState.update { currentState -> currentState.copy(importantDatesUiState = ImportantDatesUiState.Loading) }
+            try {
+                val importantDates = mainRepository.getImportantDates()
+                _uiState.update { currentState -> currentState.copy(importantDatesUiState = ImportantDatesUiState.Success(importantDates)) }
+            }catch(e: HttpException){
+                Log.d("GET_IMPORTANT_DATES", e.toString())
+                _uiState.update { currentState -> currentState.copy(importantDatesUiState = ImportantDatesUiState.Error) }
+            }catch(e: java.lang.Exception){
+                _uiState.update { currentState -> currentState.copy(importantDatesUiState = ImportantDatesUiState.Error) }
             }
         }
     }

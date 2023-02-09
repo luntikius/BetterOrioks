@@ -143,7 +143,10 @@ fun AcademicPerformance(
     isLoading: Boolean = false,
     isError: Boolean = false
 ){
-    val pullRefreshState = rememberPullRefreshState(uiState.isAcademicPerformanceRefreshing, { viewModel.getAcademicPerformance() })
+    val pullRefreshState =
+        rememberPullRefreshState(uiState.isAcademicPerformanceRefreshing, {
+            viewModel.getAcademicPerformance()
+        })
     Box(modifier = modifier.pullRefresh(pullRefreshState)) {
         if(isLoading) {
             LazyColumn(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxSize()) {
