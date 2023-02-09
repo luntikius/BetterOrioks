@@ -2,6 +2,7 @@ package com.example.betterorioks.ui.components
 
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -60,7 +61,9 @@ fun RoundedMark(userPoints: Double, systemPoints: Int,modifier: Modifier = Modif
 fun LoadingScreen(modifier: Modifier = Modifier) {
     Box(
         contentAlignment = Alignment.Center,
-        modifier = modifier.wrapContentSize(Alignment.Center)
+        modifier = modifier
+            .wrapContentSize(Alignment.Center)
+            .padding(32.dp)
     ) {
         LoadingAnimation(circleColor = MaterialTheme.colors.secondary)
     }
@@ -71,7 +74,16 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center,
         modifier = modifier.wrapContentSize(Alignment.Center)
     ) {
-        Text(stringResource(R.string.loading_failed), modifier = Modifier.padding(16.dp))
+        Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Image(
+                painter = painterResource(id = R.drawable.error_img),
+                contentDescription = null,
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                stringResource(R.string.loading_failed),
+            )
+        }
     }
 }
 

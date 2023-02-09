@@ -25,4 +25,7 @@
     <string name="unexpected_error">Непредвиденная ошибка, попробуйте войти позже</string>
     <string name="exit">Выйти из аккаунта</string>
     <string name="Debts">Долги</string>
+    <string name="before">До: %1$s</string>
+    <string name="consultations">Консультации: %1$s</string>
+    <string name="no_debts">Долги отсутствуют!</string>
 </resources>

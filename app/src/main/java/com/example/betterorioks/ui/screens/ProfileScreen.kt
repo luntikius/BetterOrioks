@@ -1,8 +1,12 @@
 package com.example.betterorioks.ui.screens
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -15,6 +19,7 @@ import androidx.compose.ui.unit.sp
 import com.example.betterorioks.R
 import com.example.betterorioks.model.UserInfo
 import com.example.betterorioks.ui.AppUiState
+import com.example.betterorioks.ui.BetterOrioksViewModel
 import com.example.betterorioks.ui.components.AnyButton
 import com.example.betterorioks.ui.components.ErrorScreen
 import com.example.betterorioks.ui.components.LoadingScreen
@@ -119,19 +124,34 @@ fun ExitButton(onExitClick: () -> Unit){
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ProfileScreen(
     onExitClick: () -> Unit = {},
     onDebtClick: () -> Unit = {},
-    uiState: AppUiState = AppUiState()
+    uiState: AppUiState = AppUiState(),
+    viewModel: BetterOrioksViewModel
 ){
-    Column() {
-        Spacer(modifier = Modifier.size(16.dp))
-        ProfileCard(uiState = uiState)
-        Spacer(modifier = Modifier.size(8.dp))
-        AnyButton(onClick = onDebtClick, text = R.string.Debts, icon = R.drawable.debt)
-        Spacer(modifier = Modifier.weight(1f))
-        ExitButton (onExitClick = onExitClick)
-        Spacer(modifier = Modifier.size(16.dp))
+    val pullRefreshState = rememberPullRefreshState((uiState.userInfoUiState == UserInfoUiState.Loading), { viewModel.getUserInfo() })
+    Box (modifier = Modifier.pullRefresh(pullRefreshState).fillMaxSize()) {
+        LazyColumn() {
+            items(1) {
+                Spacer(modifier = Modifier.size(16.dp))
+                ProfileCard(uiState = uiState)
+                Spacer(modifier = Modifier.size(8.dp))
+                AnyButton(onClick = onDebtClick, text = R.string.Debts, icon = R.drawable.debt)
+
+            }
+        }
+        Column(modifier = Modifier.align(Alignment.BottomCenter)) {
+            ExitButton(onExitClick = onExitClick)
+            Spacer(modifier = Modifier.size(16.dp))
+        }
+        PullRefreshIndicator(
+            refreshing = uiState.isAcademicPerformanceRefreshing,
+            state = pullRefreshState, modifier = Modifier.align(Alignment.TopCenter),
+            contentColor = MaterialTheme.colors.secondary
+        )
     }
+
 }

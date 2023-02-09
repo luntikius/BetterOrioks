@@ -1,5 +1,6 @@
 package com.example.betterorioks.model
 
+@kotlinx.serialization.Serializable
 data class AcademicDebt(
     val consultation_schedule: String = "",
     val control_form: String = "",

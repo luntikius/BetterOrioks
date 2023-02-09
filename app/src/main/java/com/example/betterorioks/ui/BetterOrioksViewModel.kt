@@ -5,14 +5,13 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavController
 import com.example.betterorioks.BetterOrioksApplication
 import com.example.betterorioks.data.*
+import com.example.betterorioks.model.BetterOrioksScreens
 import com.example.betterorioks.model.Subject
 import com.example.betterorioks.model.Token
-import com.example.betterorioks.ui.states.AuthState
-import com.example.betterorioks.ui.states.SubjectsMoreUiState
-import com.example.betterorioks.ui.states.SubjectsUiState
-import com.example.betterorioks.ui.states.UserInfoUiState
+import com.example.betterorioks.ui.states.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -38,14 +37,18 @@ class BetterOrioksViewModel(
         }
     }
 
-    fun exit(){
+    fun exit(navController: NavController){
         viewModelScope.launch {
             _uiState.update { currentState -> currentState.copy(authState = AuthState.Loading) }
             val exitRepository = NetworkExitRepository(uiState.value.token)
             try{
                 exitRepository.removeToken()
                 userPreferencesRepository.setToken("")
-                _uiState.update { currentState -> currentState.copy(authState = AuthState.NotLoggedIn) }
+                _uiState.update { AppUiState() }
+                navController.popBackStack(
+                    route = BetterOrioksScreens.Schedule.name,
+                    inclusive = false
+                )
             }catch(e:HttpException) {
                 if (e.code() == 400){
                     userPreferencesRepository.setToken("")
@@ -58,6 +61,7 @@ class BetterOrioksViewModel(
     }
 
     fun getAcademicPerformance(){
+        println("GET_ACADEMIC_PERFORMANCE")
         viewModelScope.launch {
             _uiState.update { currentState -> currentState.copy(subjectsUiState = SubjectsUiState.Loading, isAcademicPerformanceRefreshing = true, loadingState = false) }
             delay(500)
@@ -80,6 +84,7 @@ class BetterOrioksViewModel(
     }
 
     private fun getAcademicPerformanceMore(disciplineId: Int){
+        println("GET_ACADEMIC_PERFORMANCE_MORE")
         val academicPerformanceMoreRepository = NetworkAcademicPerformanceMoreRepository(disciplineId, token = uiState.value.token)
         viewModelScope.launch {
             _uiState.update { currentState -> currentState.copy(currentSubjectDisciplines = _uiState.value.currentSubjectDisciplines + Pair(disciplineId,SubjectsMoreUiState.Loading))}
@@ -113,6 +118,7 @@ class BetterOrioksViewModel(
     }
 
     fun getToken(loginDetails: String){
+        println("GET_TOKEN")
         val encodedLoginDetails = Base64.getEncoder().encodeToString(loginDetails.toByteArray())
         val tokenRepository = NetworkTokenRepository(encodedLoginDetails)
         viewModelScope.launch {
@@ -138,6 +144,7 @@ class BetterOrioksViewModel(
     }
 
     fun getUserInfo(){
+        println("GET_USER_INFO")
         val mainRepository = NetworkMainRepository(uiState.value.token)
         viewModelScope.launch {
             _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Loading) }
@@ -152,6 +159,22 @@ class BetterOrioksViewModel(
                 _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Error) }
             }catch(e: java.lang.Exception){
                 _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Error) }
+            }
+        }
+    }
+
+    fun getAcademicDebts(){
+        println("GET_ACADEMIC_DEBTS")
+        val mainRepository = NetworkMainRepository(uiState.value.token)
+        viewModelScope.launch {
+            _uiState.update { currentState -> currentState.copy(academicDebtsUiState = DebtsUiState.Loading) }
+            try {
+                val academicDebts = mainRepository.getAcademicDebt()
+                _uiState.update { currentState -> currentState.copy(academicDebtsUiState = DebtsUiState.Success(academicDebts))}
+            }catch(e: HttpException){
+                _uiState.update { currentState -> currentState.copy(academicDebtsUiState = DebtsUiState.Error) }
+            }catch(e: java.lang.Exception){
+                _uiState.update { currentState -> currentState.copy(academicDebtsUiState = DebtsUiState.Error) }
             }
         }
     }

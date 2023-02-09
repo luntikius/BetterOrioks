@@ -16,6 +16,7 @@ import com.example.betterorioks.model.BetterOrioksScreens
 import com.example.betterorioks.ui.components.LoadingScreen
 import com.example.betterorioks.ui.screens.*
 import com.example.betterorioks.ui.states.AuthState
+import com.example.betterorioks.ui.states.DebtsUiState
 import com.example.betterorioks.ui.states.UserInfoUiState
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
@@ -98,9 +99,10 @@ fun BetterOrioksApp(){
                 ) {
                     if(uiState.userInfoUiState == UserInfoUiState.NotStarted)viewModel.getUserInfo()
                     ProfileScreen(
-                        onExitClick = { viewModel.exit() },
+                        onExitClick = { viewModel.exit(navController)},
                         uiState = uiState,
-                        onDebtClick = {navController.navigate(BetterOrioksScreens.Debts.name)}
+                        onDebtClick = {navController.navigate(BetterOrioksScreens.Debts.name)},
+                        viewModel = viewModel
                     )
                 }
                 composable(
@@ -118,10 +120,14 @@ fun BetterOrioksApp(){
                         )
                     }
                 ){
-                    AcademicDebtScreen(onClick = {navController.popBackStack(
+                    if(uiState.academicDebtsUiState == DebtsUiState.NotStarted ){viewModel.getAcademicDebts()}
+                    AcademicDebtScreen(
+                        onClick = {navController.popBackStack(
                         route = BetterOrioksScreens.Profile.name,
-                        inclusive = false)
-                    })
+                        inclusive = false,)},
+                        uiState = uiState,
+                        viewModel = viewModel
+                    )
                 }
             }
         }

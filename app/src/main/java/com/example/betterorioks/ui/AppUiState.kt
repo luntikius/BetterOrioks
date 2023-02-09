@@ -1,10 +1,7 @@
 package com.example.betterorioks.ui
 
 import com.example.betterorioks.model.Subject
-import com.example.betterorioks.ui.states.AuthState
-import com.example.betterorioks.ui.states.SubjectsMoreUiState
-import com.example.betterorioks.ui.states.SubjectsUiState
-import com.example.betterorioks.ui.states.UserInfoUiState
+import com.example.betterorioks.ui.states.*
 
 data class AppUiState (
     var currentSubject: Subject = Subject(),
@@ -14,5 +11,6 @@ data class AppUiState (
     var token: String = "",
     var authState: AuthState = AuthState.NotLoggedIn,
     var loadingState: Boolean = true,
-    var userInfoUiState: UserInfoUiState = UserInfoUiState.NotStarted
+    var userInfoUiState: UserInfoUiState = UserInfoUiState.NotStarted,
+    var academicDebtsUiState: DebtsUiState = DebtsUiState.NotStarted
     )
