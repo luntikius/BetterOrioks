@@ -197,4 +197,22 @@ class BetterOrioksViewModel(
             }
         }
     }
+
+    fun getTimeTable(){
+        println("GET_TIME_TABLE")
+        val mainRepository = NetworkMainRepository(uiState.value.token)
+        viewModelScope.launch {
+            _uiState.update { currentState -> currentState.copy(timeTableUiState = TimeTableUiState.Loading) }
+            try {
+                val timeTable = mainRepository.getTimeTable()
+                _uiState.update { currentState -> currentState.copy(timeTableUiState = TimeTableUiState.Success(timeTable))}
+            }catch(e: HttpException){
+                Log.d("GET_TIME_TABLE", e.toString())
+                _uiState.update { currentState -> currentState.copy(timeTableUiState = TimeTableUiState.Error) }
+            }catch(e: java.lang.Exception){
+                Log.d("GET_TIME_TABLE", e.toString())
+                _uiState.update { currentState -> currentState.copy(timeTableUiState = TimeTableUiState.Error) }
+            }
+        }
+    }
 }

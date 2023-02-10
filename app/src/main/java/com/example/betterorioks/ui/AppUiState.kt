@@ -13,5 +13,6 @@ data class AppUiState (
     var loadingState: Boolean = true,
     var userInfoUiState: UserInfoUiState = UserInfoUiState.NotStarted,
     var academicDebtsUiState: DebtsUiState = DebtsUiState.NotStarted,
-    var importantDatesUiState: ImportantDatesUiState = ImportantDatesUiState.NotStarted
+    var importantDatesUiState: ImportantDatesUiState = ImportantDatesUiState.NotStarted,
+    var timeTableUiState: TimeTableUiState = TimeTableUiState.NotStarted
     )

@@ -15,10 +15,7 @@ import com.example.betterorioks.ui.components.BottomNavigationBar
 import com.example.betterorioks.model.BetterOrioksScreens
 import com.example.betterorioks.ui.components.LoadingScreen
 import com.example.betterorioks.ui.screens.*
-import com.example.betterorioks.ui.states.AuthState
-import com.example.betterorioks.ui.states.DebtsUiState
-import com.example.betterorioks.ui.states.ImportantDatesUiState
-import com.example.betterorioks.ui.states.UserInfoUiState
+import com.example.betterorioks.ui.states.*
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
@@ -57,7 +54,9 @@ fun BetterOrioksApp(){
                     popEnterTransition = { fadeIn() },
                     popExitTransition = { fadeOut() }
                 ) {
-                    ScheduleScreen()
+                    if(uiState.userInfoUiState == UserInfoUiState.NotStarted) viewModel.getUserInfo()
+                    if(uiState.timeTableUiState == TimeTableUiState.NotStarted) viewModel.getTimeTable()
+                    ScheduleScreen(uiState)
                 }
                 composable(
                     route = BetterOrioksScreens.AcademicPerformance.name,
