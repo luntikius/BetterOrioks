@@ -51,7 +51,7 @@ class BetterOrioksViewModel(
                     inclusive = false
                 )
             }catch(e:HttpException) {
-                if (e.code() == 400){
+                if (e.code() == 401){
                     userPreferencesRepository.setToken("")
                     _uiState.update { currentState -> currentState.copy(authState = AuthState.NotLoggedIn) }
                 }
@@ -140,7 +140,12 @@ class BetterOrioksViewModel(
             }
             if (token.token != "") {
                 userPreferencesRepository.setToken(token = token.token)
-                _uiState.update { currentState -> currentState.copy(token = token.token) }
+                _uiState.update { currentState -> currentState.copy(
+                    token = token.token,
+                    userInfoUiState = UserInfoUiState.NotStarted,
+                    academicDebtsUiState = DebtsUiState.NotStarted,
+                    subjectsUiState = SubjectsUiState.Loading,
+                ) }
             }
         }
     }
