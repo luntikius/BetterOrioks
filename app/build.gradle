@@ -5,11 +5,11 @@ plugins {
 }
 
 android {
-    namespace 'com.example.betterorioks'
+    namespace 'com.studentapp.betterorioks'
     compileSdk 33
 
     defaultConfig {
-        applicationId "com.example.betterorioks"
+        applicationId "com.studentapp.betterorioks"
         minSdk 26
         targetSdk 33
         versionCode 1
@@ -49,7 +49,7 @@ android {
 
 dependencies {
     implementation "androidx.datastore:datastore-preferences:1.0.0"
-    implementation("com.google.accompanist:accompanist-navigation-animation:0.21.1-beta")
+    implementation "com.google.accompanist:accompanist-navigation-animation:0.21.1-beta"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-json:1.4.0"
     implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
