@@ -91,7 +91,7 @@ fun AcademicPerformanceElement(
 
     Card(
         shape = RoundedCornerShape(16.dp),
-        elevation = 10.dp,
+        elevation = 5.dp,
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()

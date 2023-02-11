@@ -9,12 +9,7 @@
     <string name="not_specified">Не назначено</string>
     <string name="teachers">Преподаватели: %1$s</string>
     <string name="teacher">Преподаватель: %1$s</string>
-    <string name="loading">Загрузка</string>
     <string name="loading_failed">Не удалось загрузить данные</string>
-    <string name="academic_performance">Успеваемость</string>
-    <string name="profile">Профиль</string>
-    <string name="disciplines">Контрольные мероприятия</string>
-    <string name="schedule">Расписание</string>
     <string name="login">Номер студенческого билета</string>
     <string name="password">Пароль</string>
     <string name="visibility">Видимость пароля</string>
@@ -56,4 +51,7 @@
     <string name="group">Группа: </string>
     <string name="direction">Направление: </string>
     <string name="institute">Институт: "</string>
+    <string name="window">Окно</string>
+    <string name="room_number">Аудитория: %1$s</string>
+    <string name="free_day">В этот день пар нет!</string>
 </resources>

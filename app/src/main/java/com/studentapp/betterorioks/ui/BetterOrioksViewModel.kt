@@ -1,5 +1,6 @@
 package com.studentapp.betterorioks.ui
 
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -8,6 +9,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import com.studentapp.betterorioks.BetterOrioksApplication
+import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.model.BetterOrioksScreens
 import com.studentapp.betterorioks.model.Subject
 import com.studentapp.betterorioks.model.Token
@@ -235,7 +237,7 @@ class BetterOrioksViewModel(
         }
     }
 
-    fun getSchedule(){
+    private fun getSchedule(){
         println("GET_SCHEDULE")
         val scheduleRepository = NetworkScheduleRepository(token = uiState.value.token, id = uiState.value.groupId)
         viewModelScope.launch {
@@ -258,13 +260,44 @@ class BetterOrioksViewModel(
         val currentWeek = (period/7).toInt()
         return kotlin.math.abs(currentWeek % 4)
     }
-    fun getScheduleList(): List<Schedule> {
+    fun getScheduleList(context:Context): List<Schedule> {
         val date = uiState.value.currentSelectedDate
         val weekType = calculateWeekType(date)
         val list = if (uiState.value.scheduleUiState is ScheduleUiState.Success)
               (uiState.value.scheduleUiState as ScheduleUiState.Success).schedule
         else listOf()
         val filteredList = list.filter{(it.week == weekType && it.day == date.dayOfWeek.value-1) }
-        return filteredList.sortedBy { it -> it.clas }
+        val sortedList = filteredList.sortedBy { it -> it.clas }
+
+        val finalList = mutableListOf<Schedule>()
+        sortedList.forEach{it ->
+            if (it.name.contains("(")){
+                val start = it.name.indexOf("(")
+                val end = it.name.indexOf(")")
+                val slice = it.name.slice(start..end)
+                val count = slice.filter {char -> char.isDigit() }.toInt()
+                for(i in 1..if(count<6) count else 5) {
+                    finalList.add(
+                        Schedule(
+                            name = it.name.slice(0 until start),
+                            type = if(it.type.isBlank()) it.type else ("Пара"),
+                            day = it.day,
+                            clas = it.clas + i - 1,
+                            week = it.week,
+                            location = it.location,
+                            teacher = it.teacher
+                        )
+                    )
+                }
+            }else{
+                finalList.add(it)
+            }
+        }
+        for(i in 0 until finalList.size-1){
+            if(finalList[i+1].clas - finalList[i].clas > 1){
+                finalList.add(Schedule(name = context.getString(R.string.window), type = (1.5 * (finalList[i+1].clas - finalList[i].clas-1)).toString(), clas = finalList[i].clas+1))
+            }
+        }
+        return finalList.sortedBy { it.clas }
     }
 }

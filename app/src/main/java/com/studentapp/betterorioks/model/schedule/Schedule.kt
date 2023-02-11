@@ -4,8 +4,8 @@ import kotlinx.serialization.SerialName
 
 @kotlinx.serialization.Serializable
 data class Schedule(
-    val name: String, //Название
-    val type: String, //Тип пары
+    val name: String = "", //Название
+    val type: String = "Пара", //Тип пары
     val day: Int = -1, //Номер на неделе
     @SerialName("class")
     val clas: Int = -1, //Номер пары в дне

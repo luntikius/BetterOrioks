@@ -138,7 +138,7 @@ fun TopPerformanceMoreBar(onClick: () -> Unit = {}, uiState: AppUiState){
     Card(
         backgroundColor = MaterialTheme.colors.surface,
         shape = RoundedCornerShape(16.dp),
-        elevation = 8.dp
+        elevation = 5.dp
     ) {
         Column() {
             Row(
@@ -211,7 +211,7 @@ fun AcademicPerformanceMore (
 ){
     Card(
         shape = RoundedCornerShape(16.dp),
-        elevation = 10.dp,
+        elevation = 5.dp,
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp),

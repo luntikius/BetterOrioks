@@ -2,24 +2,32 @@ package com.studentapp.betterorioks.ui.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Card
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
+import androidx.compose.material.*
+import androidx.compose.material.pullrefresh.PullRefreshIndicator
+import androidx.compose.material.pullrefresh.pullRefresh
+import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.studentapp.betterorioks.R
+import com.studentapp.betterorioks.model.schedule.Schedule
 import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.BetterOrioksViewModel
 import com.studentapp.betterorioks.ui.components.ErrorScreen
@@ -164,17 +172,196 @@ fun DatePicker(
 }
 
 @Composable
+fun ScheduleItem(it: Schedule, times: List<List<String>>){
+    if (it.name != "Окно")
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            elevation = 5.dp,
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(horizontal = 16.dp, vertical = 3.dp)
+                .defaultMinSize(minHeight = 72.dp)
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp, vertical = 8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.padding(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Surface(
+                        shape = CircleShape,
+                        color = MaterialTheme.colors.primaryVariant,
+                        modifier = Modifier.size(26.dp)
+                    ) {
+                        Text(
+                            text = it.clas.toString(),
+                            fontSize = 14.sp,
+                            modifier = Modifier
+                                .padding(4.dp)
+                                .wrapContentSize(Alignment.Center)
+                        )
+                    }
+                    Spacer(modifier = Modifier.size(4.dp))
+                    Text(
+                        text = it.type,
+                        fontSize = 14.sp,
+                        modifier = Modifier
+                            .padding(4.dp)
+                            .wrapContentSize(Alignment.Center)
+                    )
+                    Spacer(modifier = Modifier.weight(1f))
+                    val time = times[it.clas - 1]
+                    Text(text = "${time[0]} - ${time[1]}")
+                }
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    text = it.name,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+                Text(
+                    text = it.teacher,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colors.primary,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+                Spacer(modifier = Modifier.size(10.dp))
+                Text(
+                    text = stringResource(id = R.string.room_number, it.location),
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colors.primary,
+                    modifier = Modifier.padding(horizontal = 8.dp)
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+            }
+        } else
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            elevation = 0.dp,
+            backgroundColor = MaterialTheme.colors.background,
+            modifier = Modifier
+                .fillMaxWidth()
+                .wrapContentHeight()
+                .padding(horizontal = 16.dp, vertical = 3.dp)
+                .defaultMinSize(minHeight = 72.dp)
+        )
+        {
+            Row(
+                modifier = Modifier.wrapContentSize(Alignment.Center),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(
+                        id = R.drawable.window
+                    ),
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.secondary,
+                    modifier = Modifier.size(32.dp)
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                Text(
+                    "Окно ${it.type} часа",
+                )
+            }
+        }
+}
+
+@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun Schedule(
+    viewModel: BetterOrioksViewModel,
+    modifier: Modifier = Modifier,
+    uiState: AppUiState
+) {
+    val context = LocalContext.current
+    val pullRefreshState = rememberPullRefreshState(
+        (uiState.timeTableUiState == TimeTableUiState.Loading),
+        { viewModel.getTimeTableAndGroup() })
+    Box(
+        modifier = modifier
+            .pullRefresh(pullRefreshState)
+            .fillMaxSize()
+    ) {
+        when (uiState.timeTableUiState) {
+            is TimeTableUiState.Success -> {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    item { DatePicker(uiState = uiState, viewModel = viewModel) }
+                    if (viewModel.getScheduleList(context = context).isNotEmpty()) {
+                        items(viewModel.getScheduleList(context = context)) {
+                            ScheduleItem(
+                                it = it,
+                                times = (uiState.timeTableUiState as TimeTableUiState.Success).timeTable.times
+                            )
+                        }
+
+                    } else {
+                        item {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Spacer(modifier = Modifier.size(16.dp))
+                                Image(
+                                    painter = painterResource(id = R.drawable.happy_flame),
+                                    contentDescription = null
+                                )
+                                Spacer(modifier = Modifier.size(8.dp))
+                                Text(text = stringResource(R.string.free_day))
+                            }
+                        }
+                    }
+                }
+            }
+            is TimeTableUiState.Loading -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    item {
+                        LoadingScreen(
+                            modifier = Modifier
+                                .wrapContentSize(Alignment.Center)
+                                .fillMaxSize()
+                        )
+                    }
+                }
+            }
+            else -> {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    item {
+                        ErrorScreen(
+                            modifier = Modifier
+                                .wrapContentSize(Alignment.Center)
+                                .fillMaxSize()
+                        )
+                    }
+                }
+            }
+        }
+        PullRefreshIndicator(
+            refreshing = uiState.isAcademicPerformanceRefreshing,
+            state = pullRefreshState, modifier = Modifier.align(Alignment.TopCenter),
+            contentColor = MaterialTheme.colors.secondary
+        )
+    }
+}
+
+
+@Composable
 fun ScheduleScreen(
     viewModel: BetterOrioksViewModel,
     uiState: AppUiState
 ){
-    Column {
-        DatePicker(uiState = uiState, viewModel = viewModel)
-        when(uiState.timeTableUiState){
-            is TimeTableUiState.Loading -> LoadingScreen(modifier = Modifier.wrapContentSize(Alignment.Center).fillMaxSize())
-            is TimeTableUiState.Success -> Text(viewModel.getScheduleList().toString())
-            else -> ErrorScreen(modifier = Modifier.wrapContentSize(Alignment.Center).fillMaxSize())
-        }
-
+    Column(modifier = Modifier.fillMaxSize()) {
+        Schedule(
+            viewModel = viewModel,
+            uiState = uiState
+        )
     }
 }

@@ -205,6 +205,9 @@ fun AcademicDebtScreen(
                                 }
                             } else {
                                 item {
+                                    Spacer(modifier = Modifier.size(16.dp))
+                                }
+                                item {
                                     Image(
                                         painterResource(id = R.drawable.done_img),
                                         contentDescription = null,

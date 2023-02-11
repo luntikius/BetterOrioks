@@ -62,10 +62,9 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
     Box(
         contentAlignment = Alignment.Center,
         modifier = modifier
-            .wrapContentSize(Alignment.Center)
-            .padding(32.dp)
+            .padding(64.dp)
     ) {
-        LoadingAnimation(circleColor = MaterialTheme.colors.secondary)
+        LoadingAnimation(circleColor = MaterialTheme.colors.secondary, modifier = Modifier.align(Alignment.Center))
     }
 }
 @Composable
@@ -170,7 +169,7 @@ fun AnyButton (
     Card(
         shape = RoundedCornerShape(16.dp),
         backgroundColor = MaterialTheme.colors.surface,
-        elevation = 10.dp,
+        elevation = 5.dp,
         onClick = onClick,
         modifier = modifier
             .wrapContentHeight()

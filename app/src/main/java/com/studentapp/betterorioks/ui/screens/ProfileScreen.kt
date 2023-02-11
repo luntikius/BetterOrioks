@@ -74,7 +74,7 @@ fun ProfileCard(uiState: AppUiState){
     Card(
         shape = RoundedCornerShape(16.dp),
         backgroundColor = MaterialTheme.colors.surface,
-        elevation = 10.dp,
+        elevation = 5.dp,
         modifier = Modifier
             .wrapContentHeight()
             .fillMaxWidth()
@@ -97,7 +97,7 @@ fun ExitButton(onExitClick: () -> Unit){
         shape = RoundedCornerShape(16.dp),
         backgroundColor = MaterialTheme.colors.surface,
         contentColor = MaterialTheme.colors.error,
-        elevation = 10.dp,
+        elevation = 5.dp,
         onClick = onExitClick,
         modifier = Modifier
             .wrapContentHeight()
