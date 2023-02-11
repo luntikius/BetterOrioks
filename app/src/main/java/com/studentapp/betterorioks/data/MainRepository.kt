@@ -2,6 +2,8 @@ package com.studentapp.betterorioks.data
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.studentapp.betterorioks.model.*
+import com.studentapp.betterorioks.model.schedule.GroupElement
+import com.studentapp.betterorioks.model.schedule.TimeTableElement
 import com.studentapp.betterorioks.network.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json

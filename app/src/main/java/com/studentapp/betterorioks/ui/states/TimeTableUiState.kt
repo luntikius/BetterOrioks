@@ -1,6 +1,6 @@
 package com.studentapp.betterorioks.ui.states
 
-import com.studentapp.betterorioks.model.TimeTableElement
+import com.studentapp.betterorioks.model.schedule.TimeTableElement
 
 
 sealed interface TimeTableUiState{

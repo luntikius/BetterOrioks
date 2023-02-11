@@ -38,28 +38,28 @@ fun ProfileCardContent(userInfo: UserInfo){
             )
             Divider()
             Row(verticalAlignment = Alignment.CenterVertically){
-                Text(text = "Номер студенческого билета: ")
+                Text(text = stringResource(R.string.student_number))
                 Spacer(modifier = Modifier.width(32.dp))
                 Spacer(modifier = Modifier.weight(1f))
                 Text(text = userInfo.record_book_id.toString(), textAlign = TextAlign.End)
             }
             Divider()
             Row(verticalAlignment = Alignment.CenterVertically){
-                Text(text = "Группа: ")
+                Text(text = stringResource(R.string.group))
                 Spacer(modifier = Modifier.width(32.dp))
                 Spacer(modifier = Modifier.weight(1f))
                 Text(text = userInfo.group, textAlign = TextAlign.End)
             }
             Divider()
             Row(verticalAlignment = Alignment.CenterVertically){
-                Text(text = "Направление: ")
+                Text(text = stringResource(R.string.direction))
                 Spacer(modifier = Modifier.width(32.dp))
                 Spacer(modifier = Modifier.weight(1f))
                 Text(text = userInfo.study_direction, textAlign = TextAlign.End)
             }
             Divider()
             Row(verticalAlignment = Alignment.CenterVertically){
-                Text(text = "Институт: ")
+                Text(text = stringResource(R.string.institute))
                 Spacer(modifier = Modifier.width(32.dp))
                 Spacer(modifier = Modifier.weight(1f))
                 Text(text = userInfo.department, textAlign = TextAlign.End)
@@ -134,7 +134,7 @@ fun ProfileScreen(
 ){
     val pullRefreshState = rememberPullRefreshState((uiState.userInfoUiState == UserInfoUiState.Loading), { viewModel.getUserInfo() })
     Box (modifier = Modifier.pullRefresh(pullRefreshState).fillMaxSize()) {
-        LazyColumn() {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(1) {
                 Spacer(modifier = Modifier.size(16.dp))
                 ProfileCard(uiState = uiState)

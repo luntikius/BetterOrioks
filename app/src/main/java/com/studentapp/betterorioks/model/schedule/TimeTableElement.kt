@@ -1,4 +1,4 @@
-package com.studentapp.betterorioks.model
+package com.studentapp.betterorioks.model.schedule
 
 import kotlinx.serialization.SerialName
 

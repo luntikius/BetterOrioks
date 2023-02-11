@@ -17,5 +17,6 @@ data class AppUiState (
     var importantDatesUiState: ImportantDatesUiState = ImportantDatesUiState.NotStarted,
     var timeTableUiState: TimeTableUiState = TimeTableUiState.NotStarted,
     var groupId: Int = 0,
-    var currentSelectedDate: LocalDate = LocalDate.now()
+    var currentSelectedDate: LocalDate = LocalDate.now(),
+    var scheduleUiState: ScheduleUiState = ScheduleUiState.NotStarted
     )

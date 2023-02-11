@@ -159,7 +159,7 @@ fun AcademicPerformance(
                 item{ ErrorScreen(modifier = Modifier.fillMaxSize()) }
             }
         } else {
-            LazyColumn() {
+            LazyColumn(modifier = Modifier.pullRefresh(pullRefreshState).fillMaxSize()) {
                 item {Spacer(modifier = Modifier.size(16.dp))}
                 items(subjects) {
                     AcademicPerformanceElement(

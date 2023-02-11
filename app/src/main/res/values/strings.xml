@@ -52,4 +52,8 @@
     <string name="october">Октябрь</string>
     <string name="november">Ноябрь</string>
     <string name="december">Декабрь</string>
+    <string name="student_number">Номер студенческого билета: </string>
+    <string name="group">Группа: </string>
+    <string name="direction">Направление: </string>
+    <string name="institute">Институт: "</string>
 </resources>

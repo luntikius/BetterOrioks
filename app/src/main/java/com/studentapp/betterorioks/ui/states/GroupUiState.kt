@@ -1,6 +1,6 @@
 package com.studentapp.betterorioks.ui.states
 
-import com.studentapp.betterorioks.model.GroupElement
+import com.studentapp.betterorioks.model.schedule.GroupElement
 
 sealed interface GroupUiState{
     object Loading: GroupUiState

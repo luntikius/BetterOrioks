@@ -22,6 +22,9 @@ import androidx.compose.ui.unit.sp
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.BetterOrioksViewModel
+import com.studentapp.betterorioks.ui.components.ErrorScreen
+import com.studentapp.betterorioks.ui.components.LoadingScreen
+import com.studentapp.betterorioks.ui.states.TimeTableUiState
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit.DAYS
@@ -99,7 +102,9 @@ fun DatePickerElement(
             Text(
                 date.dayOfMonth.toString(),
                 textAlign = TextAlign.Center,
-                modifier = Modifier.padding(4.dp).wrapContentSize(Alignment.Center)
+                modifier = Modifier
+                    .padding(4.dp)
+                    .wrapContentSize(Alignment.Center)
             )
         }
     }
@@ -163,8 +168,13 @@ fun ScheduleScreen(
     viewModel: BetterOrioksViewModel,
     uiState: AppUiState
 ){
-    Column() {
+    Column {
         DatePicker(uiState = uiState, viewModel = viewModel)
-        Text(text = "${uiState.groupId}")
+        when(uiState.timeTableUiState){
+            is TimeTableUiState.Loading -> LoadingScreen(modifier = Modifier.wrapContentSize(Alignment.Center).fillMaxSize())
+            is TimeTableUiState.Success -> Text(viewModel.getScheduleList().toString())
+            else -> ErrorScreen(modifier = Modifier.wrapContentSize(Alignment.Center).fillMaxSize())
+        }
+
     }
 }

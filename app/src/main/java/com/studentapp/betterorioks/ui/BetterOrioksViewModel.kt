@@ -12,6 +12,8 @@ import com.studentapp.betterorioks.model.BetterOrioksScreens
 import com.studentapp.betterorioks.model.Subject
 import com.studentapp.betterorioks.model.Token
 import com.studentapp.betterorioks.data.*
+import com.studentapp.betterorioks.model.schedule.Schedule
+import java.time.temporal.ChronoUnit.DAYS
 import com.studentapp.betterorioks.ui.states.*
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
@@ -221,6 +223,7 @@ class BetterOrioksViewModel(
                     if((uiState.value.userInfoUiState as UserInfoUiState.Success).userInfo.group in element.name)
                         _uiState.update { currentState -> currentState.copy(groupId = element.id) }
                 }
+                getSchedule()
                 _uiState.update { currentState -> currentState.copy(timeTableUiState = TimeTableUiState.Success(timeTable))}
             }catch(e: HttpException){
                 Log.d("GET_TIME_TABLE", e.toString())
@@ -230,5 +233,38 @@ class BetterOrioksViewModel(
                 _uiState.update { currentState -> currentState.copy(timeTableUiState = TimeTableUiState.Error) }
             }
         }
+    }
+
+    fun getSchedule(){
+        println("GET_SCHEDULE")
+        val scheduleRepository = NetworkScheduleRepository(token = uiState.value.token, id = uiState.value.groupId)
+        viewModelScope.launch {
+            _uiState.update { currentState -> currentState.copy(scheduleUiState = ScheduleUiState.Loading) }
+            try {
+                val schedule = scheduleRepository.getSchedule()
+                _uiState.update { currentState -> currentState.copy(scheduleUiState = ScheduleUiState.Success(schedule)) }
+            }catch(e: HttpException){
+                Log.d("GET_SCHEDULE", e.toString())
+                _uiState.update { currentState -> currentState.copy(scheduleUiState = ScheduleUiState.Error) }
+            }catch(e: java.lang.Exception){
+                Log.d("GET_SCHEDULE", e.toString())
+                _uiState.update { currentState -> currentState.copy(scheduleUiState = ScheduleUiState.Error) }
+            }
+        }
+    }
+
+    private fun calculateWeekType(date: LocalDate):Int{
+        val period = DAYS.between(date,LocalDate.parse((uiState.value.importantDatesUiState as ImportantDatesUiState.Success).dates.semester_start))
+        val currentWeek = (period/7).toInt()
+        return kotlin.math.abs(currentWeek % 4)
+    }
+    fun getScheduleList(): List<Schedule> {
+        val date = uiState.value.currentSelectedDate
+        val weekType = calculateWeekType(date)
+        val list = if (uiState.value.scheduleUiState is ScheduleUiState.Success)
+              (uiState.value.scheduleUiState as ScheduleUiState.Success).schedule
+        else listOf()
+        val filteredList = list.filter{(it.week == weekType && it.day == date.dayOfWeek.value-1) }
+        return filteredList.sortedBy { it -> it.clas }
     }
 }

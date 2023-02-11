@@ -1,7 +1,7 @@
 package com.studentapp.betterorioks.network
 
 import com.studentapp.betterorioks.data.AppDetails
-import com.studentapp.betterorioks.model.GroupElement
+import com.studentapp.betterorioks.model.schedule.GroupElement
 import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.Headers
