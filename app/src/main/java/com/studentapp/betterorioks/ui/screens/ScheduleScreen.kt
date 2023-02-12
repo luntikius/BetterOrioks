@@ -3,6 +3,7 @@ package com.studentapp.betterorioks.ui.screens
 import android.annotation.SuppressLint
 import android.content.Context
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -123,7 +124,8 @@ fun DatePickerElement(
 @Composable
 fun DatePicker(
     uiState: AppUiState,
-    viewModel: BetterOrioksViewModel
+    viewModel: BetterOrioksViewModel,
+    modifier: Modifier = Modifier
 ){
     val lazyRowState = rememberLazyListState()
     val coroutineScope = rememberCoroutineScope()
@@ -131,7 +133,7 @@ fun DatePicker(
     var isInitialComposition by remember{ mutableStateOf(false) }
     val initialIndex = DAYS.between(startDate,uiState.currentSelectedDate)
     val visibleIndex = lazyRowState.firstVisibleItemIndex
-    Column() {
+    Column(modifier = modifier.background(color = MaterialTheme.colors.background)) {
         Card(shape = RoundedCornerShape(0), backgroundColor = MaterialTheme.colors.primaryVariant) {
             Text(
                 text = monthToString(startDate.plusDays(visibleIndex.toLong()), context = LocalContext.current),
@@ -280,66 +282,80 @@ fun Schedule(
     val pullRefreshState = rememberPullRefreshState(
         (uiState.timeTableUiState == TimeTableUiState.Loading),
         { viewModel.getTimeTableAndGroup() })
+
     Box(
         modifier = modifier
             .pullRefresh(pullRefreshState)
             .fillMaxSize()
     ) {
-        when (uiState.timeTableUiState) {
-            is TimeTableUiState.Success -> {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    item { DatePicker(uiState = uiState, viewModel = viewModel) }
-                    if (viewModel.getScheduleList(context = context).isNotEmpty()) {
-                        items(viewModel.getScheduleList(context = context)) {
-                            ScheduleItem(
-                                it = it,
-                                times = (uiState.timeTableUiState as TimeTableUiState.Success).timeTable.times
-                            )
-                        }
-
-                    } else {
-                        item {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                Spacer(modifier = Modifier.size(16.dp))
-                                Image(
-                                    painter = painterResource(id = R.drawable.happy_flame),
-                                    contentDescription = null
+        Column() {
+            DatePicker(
+                uiState = uiState,
+                viewModel = viewModel,
+            )
+            when (uiState.timeTableUiState) {
+                is TimeTableUiState.Success -> {
+                    LazyColumn(modifier = Modifier.fillMaxSize()) {
+                        if (viewModel.getScheduleList(context = context).isNotEmpty()) {
+                            items(viewModel.getScheduleList(context = context)) {
+                                ScheduleItem(
+                                    it = it,
+                                    times = (uiState.timeTableUiState as TimeTableUiState.Success).timeTable.times
                                 )
-                                Spacer(modifier = Modifier.size(8.dp))
-                                Text(text = stringResource(R.string.free_day))
+                            }
+
+                        } else {
+                            item {
+                                Column(
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    modifier = Modifier.fillMaxSize()
+                                ) {
+                                    Spacer(modifier = Modifier.size(16.dp))
+                                    Image(
+                                        painter = painterResource(id = R.drawable.happy_flame),
+                                        contentDescription = null
+                                    )
+                                    Spacer(modifier = Modifier.size(8.dp))
+                                    Text(
+                                        text = stringResource(R.string.free_day),
+                                        fontSize = 18.sp,
+                                        textAlign = TextAlign.Center,
+                                        modifier = Modifier
+                                            .fillMaxSize()
+                                            .padding(horizontal = 64.dp),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
                             }
                         }
                     }
                 }
-            }
-            is TimeTableUiState.Loading -> {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    item {
-                        LoadingScreen(
-                            modifier = Modifier
-                                .wrapContentSize(Alignment.Center)
-                                .fillMaxSize()
-                        )
+                is TimeTableUiState.Loading -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        item {
+                            LoadingScreen(
+                                modifier = Modifier
+                                    .wrapContentSize(Alignment.Center)
+                                    .fillMaxSize()
+                            )
+                        }
                     }
                 }
-            }
-            else -> {
-                LazyColumn(
-                    modifier = Modifier.fillMaxSize(),
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    item {
-                        ErrorScreen(
-                            modifier = Modifier
-                                .wrapContentSize(Alignment.Center)
-                                .fillMaxSize()
-                        )
+                else -> {
+                    LazyColumn(
+                        modifier = Modifier.fillMaxSize(),
+                        verticalArrangement = Arrangement.Center
+                    ) {
+                        item {
+                            ErrorScreen(
+                                modifier = Modifier
+                                    .wrapContentSize(Alignment.Center)
+                                    .fillMaxSize()
+                            )
+                        }
                     }
                 }
             }

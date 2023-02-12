@@ -53,5 +53,5 @@
     <string name="institute">Институт: "</string>
     <string name="window">Окно</string>
     <string name="room_number">Аудитория: %1$s</string>
-    <string name="free_day">В этот день пар нет!</string>
+    <string name="free_day">В этот день пар нет, отличный повод провести время с друзьями и отдохнуть на свежем воздухе!</string>
 </resources>
