@@ -219,6 +219,8 @@ class BetterOrioksViewModel(
         viewModelScope.launch {
             _uiState.update { currentState -> currentState.copy(timeTableUiState = TimeTableUiState.Loading) }
             try {
+                if(uiState.value.importantDatesUiState == ImportantDatesUiState.NotStarted || uiState.value.importantDatesUiState == ImportantDatesUiState.Error) getImportantDates()
+                if(uiState.value.userInfoUiState == UserInfoUiState.NotStarted || uiState.value.userInfoUiState == UserInfoUiState.Loading) getUserInfo()
                 val timeTable = mainRepository.getTimeTable()
                 val groups = mainRepository.getGroup()
                 groups.forEach{ element ->
@@ -261,43 +263,54 @@ class BetterOrioksViewModel(
         return kotlin.math.abs(currentWeek % 4)
     }
     fun getScheduleList(context:Context): List<Schedule> {
-        val date = uiState.value.currentSelectedDate
-        val weekType = calculateWeekType(date)
-        val list = if (uiState.value.scheduleUiState is ScheduleUiState.Success)
-              (uiState.value.scheduleUiState as ScheduleUiState.Success).schedule
-        else listOf()
-        val filteredList = list.filter{(it.week == weekType && it.day == date.dayOfWeek.value-1) }
-        val sortedList = filteredList.sortedBy { it -> it.clas }
+        if(uiState.value.importantDatesUiState is ImportantDatesUiState.Success) {
+            val date = uiState.value.currentSelectedDate
+            val weekType = calculateWeekType(date)
+            val list = if (uiState.value.scheduleUiState is ScheduleUiState.Success)
+                (uiState.value.scheduleUiState as ScheduleUiState.Success).schedule
+            else listOf()
+            //ВНИМАНИЕ: КОСТЫЛЬ!!!
+            val filteredList =
+                list.filter { ((it.week == weekType || it.name.contains("20")) && it.day == date.dayOfWeek.value - 1) }
+            val sortedList = filteredList.sortedBy { it -> it.clas }
 
-        val finalList = mutableListOf<Schedule>()
-        sortedList.forEach{it ->
-            if (it.name.contains("(")){
-                val start = it.name.indexOf("(")
-                val end = it.name.indexOf(")")
-                val slice = it.name.slice(start..end)
-                val count = slice.filter {char -> char.isDigit() }.toInt()
-                for(i in 1..if(count<6) count else 5) {
+            val finalList = mutableListOf<Schedule>()
+            sortedList.forEach { it ->
+                if (it.name.contains("(")) {
+                    val start = it.name.indexOf("(")
+                    val end = it.name.indexOf(")")
+                    val slice = it.name.slice(start..end)
+                    val count = slice.filter { char -> char.isDigit() }.toInt()
+                    for (i in 1..if (count < 6) count else 5) {
+                        finalList.add(
+                            Schedule(
+                                name = it.name.slice(0 until start),
+                                type = it.type.ifBlank { ("Пара") },
+                                day = it.day,
+                                clas = it.clas + i - 1,
+                                week = it.week,
+                                location = it.location,
+                                teacher = it.teacher
+                            )
+                        )
+                    }
+                } else {
+                    finalList.add(it)
+                }
+            }
+            for (i in 0 until finalList.size - 1) {
+                if (finalList[i + 1].clas - finalList[i].clas > 1) {
                     finalList.add(
                         Schedule(
-                            name = it.name.slice(0 until start),
-                            type = if(it.type.isBlank()) it.type else ("Пара"),
-                            day = it.day,
-                            clas = it.clas + i - 1,
-                            week = it.week,
-                            location = it.location,
-                            teacher = it.teacher
+                            name = context.getString(R.string.window),
+                            type = (1.5 * (finalList[i + 1].clas - finalList[i].clas - 1)).toString(),
+                            clas = finalList[i].clas + 1
                         )
                     )
                 }
-            }else{
-                finalList.add(it)
             }
-        }
-        for(i in 0 until finalList.size-1){
-            if(finalList[i+1].clas - finalList[i].clas > 1){
-                finalList.add(Schedule(name = context.getString(R.string.window), type = (1.5 * (finalList[i+1].clas - finalList[i].clas-1)).toString(), clas = finalList[i].clas+1))
-            }
-        }
-        return finalList.sortedBy { it.clas }
+            return finalList.sortedBy { it.clas }
+        }else
+            return listOf()
     }
 }

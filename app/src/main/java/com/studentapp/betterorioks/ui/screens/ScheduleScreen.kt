@@ -33,7 +33,10 @@ import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.BetterOrioksViewModel
 import com.studentapp.betterorioks.ui.components.ErrorScreen
 import com.studentapp.betterorioks.ui.components.LoadingScreen
+import com.studentapp.betterorioks.ui.states.ImportantDatesUiState
+import com.studentapp.betterorioks.ui.states.ScheduleUiState
 import com.studentapp.betterorioks.ui.states.TimeTableUiState
+import com.studentapp.betterorioks.ui.states.UserInfoUiState
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit.DAYS
@@ -293,69 +296,71 @@ fun Schedule(
                 uiState = uiState,
                 viewModel = viewModel,
             )
-            when (uiState.timeTableUiState) {
-                is TimeTableUiState.Success -> {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        if (viewModel.getScheduleList(context = context).isNotEmpty()) {
-                            items(viewModel.getScheduleList(context = context)) {
-                                ScheduleItem(
-                                    it = it,
-                                    times = (uiState.timeTableUiState as TimeTableUiState.Success).timeTable.times
+            if (uiState.timeTableUiState is TimeTableUiState.Success && uiState.scheduleUiState is ScheduleUiState.Success && uiState.importantDatesUiState is ImportantDatesUiState.Success) {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    if (viewModel.getScheduleList(context = context).isNotEmpty()) {
+                        items(viewModel.getScheduleList(context = context)) {
+                            ScheduleItem(
+                                it = it,
+                                times = (uiState.timeTableUiState as TimeTableUiState.Success).timeTable.times
+                            )
+                        }
+
+                    } else {
+                        item {
+                            Column(
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                                modifier = Modifier.fillMaxSize()
+                            ) {
+                                Spacer(modifier = Modifier.size(16.dp))
+                                Image(
+                                    painter = painterResource(id = R.drawable.happy_flame),
+                                    contentDescription = null
+                                )
+                                Spacer(modifier = Modifier.size(8.dp))
+                                Text(
+                                    text = stringResource(R.string.free_day),
+                                    fontSize = 18.sp,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier
+                                        .fillMaxSize()
+                                        .padding(horizontal = 64.dp),
+                                    fontWeight = FontWeight.Bold
                                 )
                             }
-
-                        } else {
-                            item {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier.fillMaxSize()
-                                ) {
-                                    Spacer(modifier = Modifier.size(16.dp))
-                                    Image(
-                                        painter = painterResource(id = R.drawable.happy_flame),
-                                        contentDescription = null
-                                    )
-                                    Spacer(modifier = Modifier.size(8.dp))
-                                    Text(
-                                        text = stringResource(R.string.free_day),
-                                        fontSize = 18.sp,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .padding(horizontal = 64.dp),
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
                         }
                     }
                 }
-                is TimeTableUiState.Loading -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        item {
-                            LoadingScreen(
-                                modifier = Modifier
-                                    .wrapContentSize(Alignment.Center)
-                                    .fillMaxSize()
-                            )
-                        }
+            } else if (
+                uiState.timeTableUiState is TimeTableUiState.Loading || uiState.timeTableUiState == TimeTableUiState.NotStarted ||
+                uiState.scheduleUiState is ScheduleUiState.Loading ||
+                uiState.importantDatesUiState is ImportantDatesUiState.Loading||
+                uiState.timeTableUiState is TimeTableUiState.Loading||
+                uiState.userInfoUiState is UserInfoUiState.Loading
+            ) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    item {
+                        LoadingScreen(
+                            modifier = Modifier
+                                .wrapContentSize(Alignment.Center)
+                                .fillMaxSize()
+                        )
                     }
                 }
-                else -> {
-                    LazyColumn(
-                        modifier = Modifier.fillMaxSize(),
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        item {
-                            ErrorScreen(
-                                modifier = Modifier
-                                    .wrapContentSize(Alignment.Center)
-                                    .fillMaxSize()
-                            )
-                        }
+            } else {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    item {
+                        ErrorScreen(
+                            modifier = Modifier
+                                .wrapContentSize(Alignment.Center)
+                                .fillMaxSize()
+                        )
                     }
                 }
             }
@@ -367,6 +372,7 @@ fun Schedule(
         )
     }
 }
+
 
 
 @Composable

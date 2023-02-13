@@ -35,9 +35,6 @@ fun BetterOrioksApp(){
     if (uiState.authState == AuthState.NotLoggedIn)
         viewModel.retrieveToken()
 
-    if (uiState.importantDatesUiState == ImportantDatesUiState.NotStarted)
-        viewModel.getImportantDates()
-
     if (uiState.authState == AuthState.LoggedIn) {
         Scaffold(
             bottomBar = {
@@ -48,15 +45,14 @@ fun BetterOrioksApp(){
         ) { padding ->
             AnimatedNavHost(
                 navController = navController,
-                startDestination = BetterOrioksScreens.AcademicPerformance.name,
+                startDestination = BetterOrioksScreens.Schedule.name,
                 modifier = Modifier.padding(padding)
             ) {
                 composable(route = BetterOrioksScreens.Schedule.name,
                     popEnterTransition = { fadeIn() },
                     popExitTransition = { fadeOut() }
                 ) {
-                    if(uiState.userInfoUiState == UserInfoUiState.NotStarted) viewModel.getUserInfo()
-                    if(uiState.timeTableUiState == TimeTableUiState.NotStarted && uiState.userInfoUiState is UserInfoUiState.Success)
+                    if(uiState.timeTableUiState == TimeTableUiState.NotStarted)
                         viewModel.getTimeTableAndGroup()
                     ScheduleScreen(uiState = uiState, viewModel = viewModel)
                 }

@@ -10,7 +10,7 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/ORIOKS"
-        android:supportsRtl="true"
+        android:supportsRtl="false"
         android:theme="@style/Theme.BetterOrioks"
         tools:targetApi="31">
         <activity
