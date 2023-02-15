@@ -2,17 +2,11 @@ package com.studentapp.betterorioks.ui.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
-import android.widget.HorizontalScrollView
-import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -24,16 +18,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.google.accompanist.pager.ExperimentalPagerApi
-import com.google.accompanist.pager.HorizontalPager
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.model.schedule.Schedule
 import com.studentapp.betterorioks.ui.AppUiState
@@ -41,11 +31,13 @@ import com.studentapp.betterorioks.ui.BetterOrioksViewModel
 import com.studentapp.betterorioks.ui.components.ErrorScreen
 import com.studentapp.betterorioks.ui.components.LoadingScreen
 import com.studentapp.betterorioks.ui.states.*
+import dev.chrisbanes.snapper.ExperimentalSnapperApi
+import dev.chrisbanes.snapper.rememberSnapperFlingBehavior
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit.DAYS
-import kotlin.math.roundToInt
+import kotlin.math.abs
 
 const val BACK_ITEMS = 28
 private fun dayOfWeekToString(day: LocalDate, context: Context):String{
@@ -100,6 +92,7 @@ fun DatePickerElement(
 ){
     val screenWidth = LocalConfiguration.current.screenWidthDp
     val elementWidth = screenWidth/7
+
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = Modifier
@@ -133,15 +126,16 @@ fun DatePickerElement(
 @Composable
 fun DatePicker(
     uiState: AppUiState,
-    viewModel: BetterOrioksViewModel,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    lazyListState: LazyListState,
+    coroutineScope: CoroutineScope
 ){
     val lazyRowState = rememberLazyListState()
-    val coroutineScope = rememberCoroutineScope()
     val startDate = LocalDate.now().minusDays(BACK_ITEMS.toLong())
     var isInitialComposition by remember{ mutableStateOf(false) }
     val initialIndex = DAYS.between(startDate,uiState.currentSelectedDate)
     val visibleIndex = lazyRowState.firstVisibleItemIndex
+
     Column(modifier = modifier.background(color = MaterialTheme.colors.background)) {
         Card(shape = RoundedCornerShape(0), backgroundColor = MaterialTheme.colors.primaryVariant) {
             Text(
@@ -151,8 +145,10 @@ fun DatePicker(
                     .padding(16.dp)
                     .clickable {
                         coroutineScope.launch {
-                            viewModel.setCurrentDate(LocalDate.now())
-                            lazyRowState.animateScrollToItem(BACK_ITEMS - dayOfWeekToInt(LocalDate.now()))
+                            lazyListState.scrollToItem(abs(DAYS.between(startDate,LocalDate.now())).toInt())
+                        }
+                        coroutineScope.launch {
+                            lazyRowState.scrollToItem(BACK_ITEMS - dayOfWeekToInt(LocalDate.now()))
                         }
                     }
                 ,
@@ -165,6 +161,7 @@ fun DatePicker(
             if (!isInitialComposition) {
                 coroutineScope.launch {
                     lazyRowState.scrollToItem(initialIndex.toInt() - dayOfWeekToInt(LocalDate.now()))
+                    lazyListState.scrollToItem(abs(DAYS.between(startDate,LocalDate.now())).toInt())
                     isInitialComposition = true
                 }
             }
@@ -174,7 +171,7 @@ fun DatePicker(
                     date = date,
                     isSelected = (uiState.currentSelectedDate == date),
                     onClick = {
-                        viewModel.setCurrentDate(date)
+                        coroutineScope.launch { lazyListState.scrollToItem(abs(DAYS.between(startDate,date)).toInt()) }
                     }
                 )
             }
@@ -281,10 +278,10 @@ fun ScheduleItem(it: Schedule, times: List<List<String>>){
 }
 
 @Composable
-fun ScheduleList(viewModel: BetterOrioksViewModel, uiState: AppUiState, modifier: Modifier = Modifier, offset: Int = 0, ){
+fun ScheduleList(viewModel: BetterOrioksViewModel, uiState: AppUiState, modifier: Modifier = Modifier, date: LocalDate ){
     LazyColumn(modifier = modifier.fillMaxSize()) {
-        if (viewModel.getTodaysSchedule(offset = offset).isNotEmpty()) {
-            items(viewModel.getTodaysSchedule(offset = offset)) {
+        if (viewModel.getTodaysSchedule(date).isNotEmpty()) {
+            items(viewModel.getTodaysSchedule(date)) {
                 ScheduleItem(
                     it = it,
                     times = (uiState.timeTableUiState as TimeTableUiState.Success).timeTable.times
@@ -317,7 +314,8 @@ fun ScheduleList(viewModel: BetterOrioksViewModel, uiState: AppUiState, modifier
     }
 }
 
-@OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
+@SuppressLint("FrequentlyChangedStateReadInComposition")
+@OptIn(ExperimentalMaterialApi::class, ExperimentalSnapperApi::class)
 @Composable
 fun Schedule(
     viewModel: BetterOrioksViewModel,
@@ -328,52 +326,40 @@ fun Schedule(
     val pullRefreshState = rememberPullRefreshState(
         (uiState.timeTableUiState == TimeTableUiState.Loading),
         { viewModel.getTimeTableAndGroup() })
+    val startDate = LocalDate.now().minusDays(BACK_ITEMS.toLong())
+
 
     BoxWithConstraints(
         modifier = modifier
             .pullRefresh(pullRefreshState)
             .fillMaxSize()
     ) {
-        val constraintsScope = this
-        val maxWidth = with(LocalDensity.current){
-            constraintsScope.maxWidth.toPx()
-        }
+        val screenWidth = LocalConfiguration.current.screenWidthDp
+        val lazyListState: LazyListState = rememberLazyListState()
         Column() {
             DatePicker(
                 uiState = uiState,
-                viewModel = viewModel,
+                lazyListState = lazyListState,
+                coroutineScope = coroutineScope
+
             )
             if (uiState.timeTableUiState is TimeTableUiState.Success && uiState.scheduleUiState is ScheduleUiState.Success && uiState.importantDatesUiState is ImportantDatesUiState.Success) {
-                val swipeableState = rememberSwipeableState(initialValue = SwipableUiState.CENTER)
-                viewModel.reactToSwipe(coroutineScope = coroutineScope, swipeableState = swipeableState)
-                Box(
-                    modifier = Modifier
-                        .swipeable(
-                            state = swipeableState,
-                            orientation = Orientation.Horizontal,
-                            anchors = mapOf(
-                                0f to SwipableUiState.CENTER,
-                                (maxWidth * -1).toFloat() to SwipableUiState.LEFT,
-                                (maxWidth * 1).toFloat() to SwipableUiState.RIGHT,
-                            )
-                        )
-                        .offset { IntOffset(x = swipeableState.offset.value.roundToInt(), y = 0) }
+                viewModel.setCurrentDate(date = startDate.plusDays(lazyListState.firstVisibleItemIndex.toLong()))
+                LazyRow(
+                    modifier = Modifier.fillMaxSize(),
+                    state = lazyListState,
+                    flingBehavior = rememberSnapperFlingBehavior(lazyListState, snapIndex = { _, startIndex, targetIndex -> targetIndex.coerceIn(startIndex-1,startIndex+1)}),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    ScheduleList(
-                        viewModel = viewModel,
-                        uiState = uiState,
-                        modifier = Modifier.offset { IntOffset(x = 0, y = 0) },
-                        offset = 0)
-                    ScheduleList(
-                        viewModel = viewModel,
-                        uiState = uiState,
-                        modifier = Modifier.offset { IntOffset(x = maxWidth.roundToInt(), y = 0) },
-                        offset = 1)
-                    ScheduleList(
-                        viewModel = viewModel,
-                        uiState = uiState,
-                        modifier = Modifier.offset { IntOffset(x = -maxWidth.roundToInt(), y = 0) },
-                        offset = -1)
+                    items(300) {
+                        val date = startDate.plusDays(it.toLong())
+                        ScheduleList(
+                            viewModel = viewModel,
+                            uiState = uiState,
+                            date = date,
+                            modifier = Modifier.width(screenWidth.dp)
+                        )
+                    }
                 }
             } else if (
                 uiState.timeTableUiState is TimeTableUiState.Loading || uiState.timeTableUiState == TimeTableUiState.NotStarted ||

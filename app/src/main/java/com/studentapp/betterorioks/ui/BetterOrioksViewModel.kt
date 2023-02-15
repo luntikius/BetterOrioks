@@ -1,8 +1,6 @@
 package com.studentapp.betterorioks.ui
 
 import android.util.Log
-import androidx.compose.material.ExperimentalMaterialApi
-import androidx.compose.material.SwipeableState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -17,7 +15,6 @@ import com.studentapp.betterorioks.data.*
 import com.studentapp.betterorioks.model.schedule.Schedule
 import java.time.temporal.ChronoUnit.DAYS
 import com.studentapp.betterorioks.ui.states.*
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -42,26 +39,6 @@ class BetterOrioksViewModel(
             if (uiState.value.token != "") {
                 _uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.LoggedIn) }
             } else (_uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.NotLoggedIn) })
-        }
-    }
-
-    private fun leftSwipeOnSchedule() {
-        _uiState.update { currentState ->
-            currentState.copy(
-                currentSelectedDate = _uiState.value.currentSelectedDate.plusDays(
-                    1
-                )
-            )
-        }
-    }
-
-    private fun rightSwipeOnSchedule() {
-        _uiState.update { currentState ->
-            currentState.copy(
-                currentSelectedDate = _uiState.value.currentSelectedDate.minusDays(
-                    1
-                )
-            )
         }
     }
 
@@ -367,13 +344,13 @@ class BetterOrioksViewModel(
                         val end = it.name.indexOf(")")
                         val slice = it.name.slice(start..end)
                         val count = slice.filter { char -> char.isDigit() }.toInt()
-                        for (i in 1..if (count < 6) count else 5) {
+                        for (j in 1..if (count < 6) count else 5) {
                             finalList.add(
                                 Schedule(
                                     name = it.name.slice(0 until start),
                                     type = it.type.ifBlank { ("Пара") },
                                     day = it.day,
-                                    clas = it.clas + i - 1,
+                                    clas = it.clas + j - 1,
                                     week = it.week,
                                     location = it.location,
                                     teacher = it.teacher
@@ -384,13 +361,13 @@ class BetterOrioksViewModel(
                         finalList.add(it)
                     }
                 }
-                for (i in 0 until finalList.size - 1) {
-                    if (finalList[i + 1].clas - finalList[i].clas > 1) {
+                for (j in 0 until finalList.size - 1) {
+                    if (finalList[j + 1].clas - finalList[j].clas > 1) {
                         finalList.add(
                             Schedule(
                                 name = "Окно",
-                                type = (1.5 * (finalList[i + 1].clas - finalList[i].clas - 1)).toString(),
-                                clas = finalList[i].clas + 1
+                                type = (1.5 * (finalList[j + 1].clas - finalList[j].clas - 1)).toString(),
+                                clas = finalList[j].clas + 1
                             )
                         )
                     }
@@ -400,30 +377,12 @@ class BetterOrioksViewModel(
         }
     }
 
-    fun getTodaysSchedule(offset:Int = 0):List<Schedule>{
+    fun getTodaysSchedule(date: LocalDate):List<Schedule>{
         return if (uiState.value.importantDatesUiState is ImportantDatesUiState.Success) {
             val start =
                 LocalDate.parse((uiState.value.importantDatesUiState as ImportantDatesUiState.Success).dates.semester_start)
-            val diff = (DAYS.between(start, uiState.value.currentSelectedDate.plusDays(offset.toLong()))).toInt()
+            val diff = (DAYS.between(start, date).toInt())
             uiState.value.scheduleList[kotlin.math.abs(diff % 28)]
         }else listOf()
-    }
-    @OptIn(ExperimentalMaterialApi::class)
-    fun reactToSwipe(
-        swipeableState: SwipeableState<SwipableUiState>,
-        coroutineScope: CoroutineScope
-    ){
-        if (swipeableState.currentValue == SwipableUiState.LEFT && !swipeableState.isAnimationRunning) {
-            coroutineScope.launch {
-                swipeableState.snapTo(SwipableUiState.CENTER)
-                leftSwipeOnSchedule()
-            }
-        }
-        if (swipeableState.currentValue == SwipableUiState.RIGHT && !swipeableState.isAnimationRunning) {
-            coroutineScope.launch {
-                swipeableState.snapTo(SwipableUiState.CENTER)
-                rightSwipeOnSchedule()
-            }
-        }
     }
 }
