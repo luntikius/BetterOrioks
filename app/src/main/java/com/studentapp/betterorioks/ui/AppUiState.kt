@@ -1,6 +1,7 @@
 package com.studentapp.betterorioks.ui
 
 import com.studentapp.betterorioks.model.Subject
+import com.studentapp.betterorioks.model.schedule.Schedule
 import com.studentapp.betterorioks.ui.states.*
 import java.time.LocalDate
 
@@ -18,5 +19,6 @@ data class AppUiState (
     var timeTableUiState: TimeTableUiState = TimeTableUiState.NotStarted,
     var groupId: Int = 0,
     var currentSelectedDate: LocalDate = LocalDate.now(),
-    var scheduleUiState: ScheduleUiState = ScheduleUiState.NotStarted
+    var scheduleUiState: ScheduleUiState = ScheduleUiState.NotStarted,
+    var scheduleList: MutableList<List<Schedule>> = mutableListOf()
     )

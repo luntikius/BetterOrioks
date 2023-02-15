@@ -2,9 +2,12 @@ package com.studentapp.betterorioks.ui.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.widget.HorizontalScrollView
+import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
@@ -21,25 +24,28 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.google.accompanist.pager.ExperimentalPagerApi
+import com.google.accompanist.pager.HorizontalPager
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.model.schedule.Schedule
 import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.BetterOrioksViewModel
 import com.studentapp.betterorioks.ui.components.ErrorScreen
 import com.studentapp.betterorioks.ui.components.LoadingScreen
-import com.studentapp.betterorioks.ui.states.ImportantDatesUiState
-import com.studentapp.betterorioks.ui.states.ScheduleUiState
-import com.studentapp.betterorioks.ui.states.TimeTableUiState
-import com.studentapp.betterorioks.ui.states.UserInfoUiState
+import com.studentapp.betterorioks.ui.states.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit.DAYS
+import kotlin.math.roundToInt
 
 const val BACK_ITEMS = 28
 private fun dayOfWeekToString(day: LocalDate, context: Context):String{
@@ -178,6 +184,7 @@ fun DatePicker(
 
 @Composable
 fun ScheduleItem(it: Schedule, times: List<List<String>>){
+    val time = times[it.clas - 1]
     if (it.name != "Окно")
         Card(
             shape = RoundedCornerShape(16.dp),
@@ -219,7 +226,6 @@ fun ScheduleItem(it: Schedule, times: List<List<String>>){
                             .wrapContentSize(Alignment.Center)
                     )
                     Spacer(modifier = Modifier.weight(1f))
-                    val time = times[it.clas - 1]
                     Text(text = "${time[0]} - ${time[1]}")
                 }
                 Spacer(modifier = Modifier.size(8.dp))
@@ -274,62 +280,100 @@ fun ScheduleItem(it: Schedule, times: List<List<String>>){
         }
 }
 
-@OptIn(ExperimentalMaterialApi::class)
+@Composable
+fun ScheduleList(viewModel: BetterOrioksViewModel, uiState: AppUiState, modifier: Modifier = Modifier, offset: Int = 0, ){
+    LazyColumn(modifier = modifier.fillMaxSize()) {
+        if (viewModel.getTodaysSchedule(offset = offset).isNotEmpty()) {
+            items(viewModel.getTodaysSchedule(offset = offset)) {
+                ScheduleItem(
+                    it = it,
+                    times = (uiState.timeTableUiState as TimeTableUiState.Success).timeTable.times
+                )
+            }
+        } else {
+            item {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    Spacer(modifier = Modifier.size(16.dp))
+                    Image(
+                        painter = painterResource(id = R.drawable.happy_flame),
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
+                    Text(
+                        text = stringResource(R.string.free_day),
+                        fontSize = 18.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 64.dp),
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
 fun Schedule(
     viewModel: BetterOrioksViewModel,
     modifier: Modifier = Modifier,
     uiState: AppUiState
 ) {
-    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val pullRefreshState = rememberPullRefreshState(
         (uiState.timeTableUiState == TimeTableUiState.Loading),
         { viewModel.getTimeTableAndGroup() })
 
-    Box(
+    BoxWithConstraints(
         modifier = modifier
             .pullRefresh(pullRefreshState)
             .fillMaxSize()
     ) {
+        val constraintsScope = this
+        val maxWidth = with(LocalDensity.current){
+            constraintsScope.maxWidth.toPx()
+        }
         Column() {
             DatePicker(
                 uiState = uiState,
                 viewModel = viewModel,
             )
             if (uiState.timeTableUiState is TimeTableUiState.Success && uiState.scheduleUiState is ScheduleUiState.Success && uiState.importantDatesUiState is ImportantDatesUiState.Success) {
-                LazyColumn(modifier = Modifier.fillMaxSize()) {
-                    if (viewModel.getScheduleList(context = context).isNotEmpty()) {
-                        items(viewModel.getScheduleList(context = context)) {
-                            ScheduleItem(
-                                it = it,
-                                times = (uiState.timeTableUiState as TimeTableUiState.Success).timeTable.times
+                val swipeableState = rememberSwipeableState(initialValue = SwipableUiState.CENTER)
+                viewModel.reactToSwipe(coroutineScope = coroutineScope, swipeableState = swipeableState)
+                Box(
+                    modifier = Modifier
+                        .swipeable(
+                            state = swipeableState,
+                            orientation = Orientation.Horizontal,
+                            anchors = mapOf(
+                                0f to SwipableUiState.CENTER,
+                                (maxWidth * -1).toFloat() to SwipableUiState.LEFT,
+                                (maxWidth * 1).toFloat() to SwipableUiState.RIGHT,
                             )
-                        }
-
-                    } else {
-                        item {
-                            Column(
-                                horizontalAlignment = Alignment.CenterHorizontally,
-                                modifier = Modifier.fillMaxSize()
-                            ) {
-                                Spacer(modifier = Modifier.size(16.dp))
-                                Image(
-                                    painter = painterResource(id = R.drawable.happy_flame),
-                                    contentDescription = null
-                                )
-                                Spacer(modifier = Modifier.size(8.dp))
-                                Text(
-                                    text = stringResource(R.string.free_day),
-                                    fontSize = 18.sp,
-                                    textAlign = TextAlign.Center,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .padding(horizontal = 64.dp),
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
+                        )
+                        .offset { IntOffset(x = swipeableState.offset.value.roundToInt(), y = 0) }
+                ) {
+                    ScheduleList(
+                        viewModel = viewModel,
+                        uiState = uiState,
+                        modifier = Modifier.offset { IntOffset(x = 0, y = 0) },
+                        offset = 0)
+                    ScheduleList(
+                        viewModel = viewModel,
+                        uiState = uiState,
+                        modifier = Modifier.offset { IntOffset(x = maxWidth.roundToInt(), y = 0) },
+                        offset = 1)
+                    ScheduleList(
+                        viewModel = viewModel,
+                        uiState = uiState,
+                        modifier = Modifier.offset { IntOffset(x = -maxWidth.roundToInt(), y = 0) },
+                        offset = -1)
                 }
             } else if (
                 uiState.timeTableUiState is TimeTableUiState.Loading || uiState.timeTableUiState == TimeTableUiState.NotStarted ||
