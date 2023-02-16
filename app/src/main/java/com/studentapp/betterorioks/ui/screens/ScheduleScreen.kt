@@ -71,7 +71,7 @@ private fun monthToString(day: LocalDate, context: Context):String{
     }
 }
 
-private fun dayOfWeekToInt(day: LocalDate):Int{
+fun dayOfWeekToInt(day: LocalDate):Int{
     return when(day.dayOfWeek.toString()){
         "MONDAY" -> 0
         "TUESDAY" -> 1
@@ -128,9 +128,9 @@ fun DatePicker(
     uiState: AppUiState,
     modifier: Modifier = Modifier,
     lazyListState: LazyListState,
-    coroutineScope: CoroutineScope
+    coroutineScope: CoroutineScope,
+    lazyRowState: LazyListState
 ){
-    val lazyRowState = rememberLazyListState()
     val startDate = LocalDate.now().minusDays(BACK_ITEMS.toLong())
     var isInitialComposition by remember{ mutableStateOf(false) }
     val initialIndex = DAYS.between(startDate,uiState.currentSelectedDate)
@@ -327,7 +327,7 @@ fun Schedule(
         (uiState.timeTableUiState == TimeTableUiState.Loading),
         { viewModel.getTimeTableAndGroup() })
     val startDate = LocalDate.now().minusDays(BACK_ITEMS.toLong())
-
+    val lazyRowState = rememberLazyListState()
 
     BoxWithConstraints(
         modifier = modifier
@@ -340,15 +340,23 @@ fun Schedule(
             DatePicker(
                 uiState = uiState,
                 lazyListState = lazyListState,
-                coroutineScope = coroutineScope
+                coroutineScope = coroutineScope,
+                lazyRowState = lazyRowState
 
             )
             if (uiState.timeTableUiState is TimeTableUiState.Success && uiState.scheduleUiState is ScheduleUiState.Success && uiState.importantDatesUiState is ImportantDatesUiState.Success) {
-                viewModel.setCurrentDate(date = startDate.plusDays(lazyListState.firstVisibleItemIndex.toLong()))
+                viewModel.setCurrentDateWithMovingTopBar(
+                    date = startDate.plusDays(lazyListState.firstVisibleItemIndex.toLong()),
+                    lazyRowState = lazyRowState,
+                    coroutineScope = coroutineScope,
+                    startDate = startDate)
                 LazyRow(
                     modifier = Modifier.fillMaxSize(),
                     state = lazyListState,
-                    flingBehavior = rememberSnapperFlingBehavior(lazyListState, snapIndex = { _, startIndex, targetIndex -> targetIndex.coerceIn(startIndex-1,startIndex+1)}),
+                    flingBehavior = rememberSnapperFlingBehavior(
+                        lazyListState = lazyListState,
+                        snapIndex = { _, startIndex, targetIndex -> targetIndex.coerceIn(startIndex-1,startIndex+1) }
+                    ),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     items(300) {

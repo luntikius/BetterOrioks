@@ -1,6 +1,7 @@
 package com.studentapp.betterorioks.ui
 
 import android.util.Log
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
@@ -13,8 +14,10 @@ import com.studentapp.betterorioks.model.Subject
 import com.studentapp.betterorioks.model.Token
 import com.studentapp.betterorioks.data.*
 import com.studentapp.betterorioks.model.schedule.Schedule
+import com.studentapp.betterorioks.ui.screens.dayOfWeekToInt
 import java.time.temporal.ChronoUnit.DAYS
 import com.studentapp.betterorioks.ui.states.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
@@ -22,6 +25,7 @@ import retrofit2.HttpException
 import java.io.IOException
 import java.time.LocalDate
 import java.util.*
+import kotlin.math.abs
 
 class BetterOrioksViewModel(
    // private val academicPerformanceRepository: AcademicPerformanceRepository,
@@ -136,8 +140,11 @@ class BetterOrioksViewModel(
         _uiState.update { currentState -> currentState.copy(currentSubject = subject) }
     }
 
-    fun setCurrentDate(date: LocalDate) {
+    fun setCurrentDateWithMovingTopBar(date: LocalDate, lazyRowState: LazyListState, coroutineScope: CoroutineScope, startDate: LocalDate) {
         _uiState.update { currentState -> currentState.copy(currentSelectedDate = date) }
+        coroutineScope.launch {
+            lazyRowState.animateScrollToItem(abs(DAYS.between(startDate,date).toInt() - dayOfWeekToInt(date)))
+        }
     }
 
     companion object {
@@ -319,7 +326,7 @@ class BetterOrioksViewModel(
             LocalDate.parse((uiState.value.importantDatesUiState as ImportantDatesUiState.Success).dates.semester_start)
         )
         val currentWeek = (period / 7).toInt()
-        return kotlin.math.abs(currentWeek % 4)
+        return abs(currentWeek % 4)
     }
 
     private fun parseSchedule() {
@@ -382,7 +389,7 @@ class BetterOrioksViewModel(
             val start =
                 LocalDate.parse((uiState.value.importantDatesUiState as ImportantDatesUiState.Success).dates.semester_start)
             val diff = (DAYS.between(start, date).toInt())
-            uiState.value.scheduleList[kotlin.math.abs(diff % 28)]
+            uiState.value.scheduleList[abs(diff % 28)]
         }else listOf()
     }
 }

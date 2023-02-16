@@ -1,5 +1,6 @@
 package com.studentapp.betterorioks.ui.screens
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -10,8 +11,10 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -133,14 +136,40 @@ fun ProfileScreen(
     viewModel: BetterOrioksViewModel
 ){
     val pullRefreshState = rememberPullRefreshState((uiState.userInfoUiState == UserInfoUiState.Loading), { viewModel.getUserInfo() })
-    Box (modifier = Modifier.pullRefresh(pullRefreshState).fillMaxSize()) {
+    Box (modifier = Modifier
+        .pullRefresh(pullRefreshState)
+        .fillMaxSize()) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(1) {
+            item {
                 Spacer(modifier = Modifier.size(16.dp))
                 ProfileCard(uiState = uiState)
                 Spacer(modifier = Modifier.size(8.dp))
                 AnyButton(onClick = onDebtClick, text = R.string.Debts, icon = R.drawable.debt)
-
+            }
+            //temp
+            item{
+                val clipboardManager = LocalClipboardManager.current
+                Spacer(modifier = Modifier.size(8.dp))
+                Card(
+                    shape = RoundedCornerShape(16.dp),
+                    backgroundColor = MaterialTheme.colors.surface,
+                    elevation = 5.dp,
+                    modifier = Modifier
+                        .wrapContentHeight()
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp, vertical = 3.dp)
+                        .clickable {
+                            clipboardManager.setText(AnnotatedString("BetterOrioksApp@yandex.ru"))
+                        }
+                ) {
+                    Text(
+                        text = "Это тестовая версия приложения, если вы нашли баг, пожалуйста сообщите о нем. \nНаша почта: BetterOrioksApp@yandex.ru \n(нажмите чтобы скопировать)",
+                        color = MaterialTheme.colors.primary,
+                        fontSize = 14.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
             }
         }
         Column(modifier = Modifier.align(Alignment.BottomCenter)) {
