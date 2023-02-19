@@ -32,6 +32,7 @@ import com.studentapp.betterorioks.ui.components.ErrorScreen
 import com.studentapp.betterorioks.ui.components.LoadingScreen
 import com.studentapp.betterorioks.ui.states.*
 import dev.chrisbanes.snapper.ExperimentalSnapperApi
+import dev.chrisbanes.snapper.SnapOffsets
 import dev.chrisbanes.snapper.rememberSnapperFlingBehavior
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -145,7 +146,14 @@ fun DatePicker(
                     .padding(16.dp)
                     .clickable {
                         coroutineScope.launch {
-                            lazyListState.scrollToItem(abs(DAYS.between(startDate,LocalDate.now())).toInt())
+                            lazyListState.scrollToItem(
+                                abs(
+                                    DAYS.between(
+                                        startDate,
+                                        LocalDate.now()
+                                    )
+                                ).toInt()
+                            )
                         }
                         coroutineScope.launch {
                             lazyRowState.scrollToItem(BACK_ITEMS - dayOfWeekToInt(LocalDate.now()))
@@ -355,8 +363,8 @@ fun Schedule(
                     state = lazyListState,
                     flingBehavior = rememberSnapperFlingBehavior(
                         lazyListState = lazyListState,
-                        snapIndex = { _, startIndex, targetIndex -> targetIndex.coerceIn(startIndex-1,startIndex+1) }
-                    ),
+                        snapIndex = { _, startIndex, targetIndex -> targetIndex.coerceIn(startIndex-1,startIndex+1) },
+                    snapOffsetForItem = SnapOffsets.Start),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     items(300) {
