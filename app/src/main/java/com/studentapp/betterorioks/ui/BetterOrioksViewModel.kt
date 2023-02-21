@@ -269,7 +269,7 @@ class BetterOrioksViewModel(
             _uiState.update { currentState -> currentState.copy(timeTableUiState = TimeTableUiState.Loading) }
             try {
                 if (uiState.value.importantDatesUiState == ImportantDatesUiState.NotStarted || uiState.value.importantDatesUiState == ImportantDatesUiState.Error) getImportantDates()
-                if (uiState.value.userInfoUiState == UserInfoUiState.NotStarted || uiState.value.userInfoUiState == UserInfoUiState.Loading) getUserInfo()
+                if (uiState.value.userInfoUiState == UserInfoUiState.NotStarted || uiState.value.userInfoUiState == UserInfoUiState.Error) getUserInfo()
                 val timeTable = mainRepository.getTimeTable()
                 val groups = mainRepository.getGroup()
                 groups.forEach { element ->
