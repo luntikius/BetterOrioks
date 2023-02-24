@@ -14,6 +14,8 @@ import com.studentapp.betterorioks.model.Subject
 import com.studentapp.betterorioks.model.Token
 import com.studentapp.betterorioks.data.*
 import com.studentapp.betterorioks.model.schedule.Schedule
+import com.studentapp.betterorioks.model.scheduleFromSite.FullSchedule
+import com.studentapp.betterorioks.model.scheduleFromSite.SimpleScheduleElement
 import com.studentapp.betterorioks.ui.screens.dayOfWeekToInt
 import java.time.temporal.ChronoUnit.DAYS
 import com.studentapp.betterorioks.ui.states.*
@@ -29,12 +31,60 @@ import kotlin.math.abs
 
 class BetterOrioksViewModel(
    // private val academicPerformanceRepository: AcademicPerformanceRepository,
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val networkScheduleFromSiteRepository: NetworkScheduleFromSiteRepository
 ): ViewModel() {
 
 
     private val _uiState = MutableStateFlow(AppUiState())
     val uiState = _uiState.asStateFlow()
+
+    private fun parseFromFullSchedule(fullSchedule: FullSchedule): List<List<SimpleScheduleElement>>{
+        val data = fullSchedule.schedule
+        val result = mutableListOf<List<SimpleScheduleElement>>()
+        for(i in 1..28){
+            val resultElement = mutableListOf<SimpleScheduleElement>()
+            val day = i%7
+            val week = i/7
+            val tempData = data.filter { it.day == day && it.dayNumber == week }.sortedBy { it.time.dayOrder }
+            for(element in tempData){
+                resultElement.add(
+                    SimpleScheduleElement(
+                        day = week*7 + day,
+                        number = element.time.dayOrder,
+                        times = element.time.timeString,
+                        type = element.subject.formFromString,
+                        name = element.subject.nameFromString,
+                        teacher = element.subject.teacherFull,
+                        room = element.room.name
+                    )
+                )
+            }
+            for(j in 0..tempData.size-2){
+                if(tempData[j+1].time.dayOrder - tempData[j].time.dayOrder > 1){
+                    resultElement.add(
+                        SimpleScheduleElement(
+                            day = week*7 + day,
+                            number = tempData[j].time.dayOrder+1,
+                            isWindow = true,
+                            windowDuration = ((tempData[j+1].time.dayOrder - tempData[j].time.dayOrder-1)*1.5).toString()
+                        )
+                    )
+                }
+            }
+            result.add(resultElement)
+        }
+        return result
+    }
+    fun test(){
+        var fullSchedule = FullSchedule()
+
+        viewModelScope.launch {
+            networkScheduleFromSiteRepository.getSchedule("ПИН-26") { it -> fullSchedule = it }
+            Log.i("TEST",parseFromFullSchedule(fullSchedule)[6].toString())
+        }
+
+    }
     fun retrieveToken() {
         viewModelScope.launch {
             _uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.Loading) }
@@ -153,7 +203,8 @@ class BetterOrioksViewModel(
                 val application =
                     (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as BetterOrioksApplication)
                 BetterOrioksViewModel(
-                    userPreferencesRepository = application.userPreferencesRepository
+                    userPreferencesRepository = application.userPreferencesRepository,
+                    networkScheduleFromSiteRepository = application.networkScheduleFromSiteRepository
                 )
             }
         }
