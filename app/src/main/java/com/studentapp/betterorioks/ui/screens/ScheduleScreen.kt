@@ -375,16 +375,15 @@ fun Schedule(
                     }
                 }
             } else if (
-                uiState.fullScheduleUiState is FullScheduleUiState.Loading||
-                uiState.importantDatesUiState is ImportantDatesUiState.Loading||
-                uiState.userInfoUiState is UserInfoUiState.Loading
+                uiState.fullScheduleUiState is FullScheduleUiState.Error||
+                uiState.importantDatesUiState is ImportantDatesUiState.Error
             ) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),
                     verticalArrangement = Arrangement.Center
                 ) {
                     item {
-                        LoadingScreen(
+                        ErrorScreen(
                             modifier = Modifier
                                 .wrapContentSize(Alignment.Center)
                                 .fillMaxSize()
@@ -397,7 +396,7 @@ fun Schedule(
                     verticalArrangement = Arrangement.Center
                 ) {
                     item {
-                        ErrorScreen(
+                        LoadingScreen(
                             modifier = Modifier
                                 .wrapContentSize(Alignment.Center)
                                 .fillMaxSize()

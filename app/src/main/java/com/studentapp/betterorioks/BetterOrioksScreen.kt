@@ -52,7 +52,8 @@ fun BetterOrioksApp(){
                     popEnterTransition = { fadeIn() },
                     popExitTransition = { fadeOut() }
                 ) {
-                    if(uiState.fullScheduleUiState is FullScheduleUiState.NotStarted) viewModel.getFullSchedule()
+                    if(uiState.userInfoUiState is UserInfoUiState.NotStarted) viewModel.getUserInfo()
+                    if(uiState.fullScheduleUiState is FullScheduleUiState.NotStarted && uiState.userInfoUiState !is UserInfoUiState.Loading) viewModel.getFullSchedule()
                     ScheduleScreen(uiState = uiState, viewModel = viewModel)
                 }
                 composable(

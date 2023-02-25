@@ -339,6 +339,7 @@ class BetterOrioksViewModel(
         return result
     }
     fun getFullSchedule(refresh: Boolean = false){
+        println("GET_FULL_SCHEDULE")
         val previousState = uiState.value.fullScheduleUiState
         viewModelScope.launch {
             _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Loading) }
@@ -346,13 +347,12 @@ class BetterOrioksViewModel(
                 val res = mutableListOf<List<SimpleScheduleElement>>()
                 getImportantDates(refresh)
                 if(scheduleOfflineRepository.count() == 0 || refresh) {
-                    if (uiState.value.userInfoUiState !is UserInfoUiState.Success) getUserInfo()
                     if(refresh) scheduleOfflineRepository.dump()
                     var fullSchedule = FullSchedule()
+                    Log.d("TEST", uiState.value.userInfoUiState.toString())
                     networkScheduleFromSiteRepository.getSchedule((uiState.value.userInfoUiState as UserInfoUiState.Success).userInfo.group) { it ->
                         fullSchedule = it
                     }
-                    println(fullSchedule)
                     res.addAll(parseFromFullSchedule(fullSchedule))
                     for(list in res) {
                         for (item in list)
