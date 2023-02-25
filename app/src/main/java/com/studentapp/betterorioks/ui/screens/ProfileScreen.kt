@@ -146,7 +146,7 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.size(8.dp))
                 AnyButton(onClick = onDebtClick, text = R.string.Debts, icon = R.drawable.debt)
                 Spacer(modifier = Modifier.size(8.dp))
-                AnyButton(text = R.string.app_name, icon = R.drawable.visibility_on, onClick = {viewModel.test()})
+                AnyButton(text = R.string.app_name, icon = R.drawable.visibility_on, onClick = {viewModel.getFullSchedule()})
             }
             //temp
             item{

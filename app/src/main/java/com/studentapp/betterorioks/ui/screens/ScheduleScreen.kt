@@ -25,7 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.studentapp.betterorioks.R
-import com.studentapp.betterorioks.model.schedule.Schedule
+import com.studentapp.betterorioks.model.scheduleFromSite.SimpleScheduleElement
 import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.BetterOrioksViewModel
 import com.studentapp.betterorioks.ui.components.ErrorScreen
@@ -188,9 +188,8 @@ fun DatePicker(
 }
 
 @Composable
-fun ScheduleItem(it: Schedule, times: List<List<String>>){
-    val time = times[it.clas - 1]
-    if (it.name != "Окно")
+fun ScheduleItem(it: SimpleScheduleElement){
+    if (!it.isWindow)
         Card(
             shape = RoundedCornerShape(16.dp),
             elevation = 5.dp,
@@ -215,7 +214,7 @@ fun ScheduleItem(it: Schedule, times: List<List<String>>){
                         modifier = Modifier.size(26.dp)
                     ) {
                         Text(
-                            text = it.clas.toString(),
+                            text = it.number.toString(),
                             fontSize = 14.sp,
                             modifier = Modifier
                                 .padding(4.dp)
@@ -231,7 +230,7 @@ fun ScheduleItem(it: Schedule, times: List<List<String>>){
                             .wrapContentSize(Alignment.Center)
                     )
                     Spacer(modifier = Modifier.weight(1f))
-                    Text(text = "${time[0]} - ${time[1]}")
+                    Text(text = it.times)
                 }
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
@@ -246,7 +245,7 @@ fun ScheduleItem(it: Schedule, times: List<List<String>>){
                 )
                 Spacer(modifier = Modifier.size(10.dp))
                 Text(
-                    text = stringResource(id = R.string.room_number, it.location),
+                    text = stringResource(id = R.string.room_number, it.room),
                     fontSize = 14.sp,
                     color = MaterialTheme.colors.primary,
                     modifier = Modifier.padding(horizontal = 8.dp)
@@ -279,20 +278,19 @@ fun ScheduleItem(it: Schedule, times: List<List<String>>){
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
-                    "Окно ${it.type} часа",
+                    "Окно ${it.windowDuration} часа",
                 )
             }
         }
 }
 
 @Composable
-fun ScheduleList(viewModel: BetterOrioksViewModel, uiState: AppUiState, modifier: Modifier = Modifier, date: LocalDate ){
+fun ScheduleList(viewModel: BetterOrioksViewModel, modifier: Modifier = Modifier, date: LocalDate ){
     LazyColumn(modifier = modifier.fillMaxSize()) {
         if (viewModel.getTodaysSchedule(date).isNotEmpty()) {
             items(viewModel.getTodaysSchedule(date)) {
                 ScheduleItem(
                     it = it,
-                    times = (uiState.timeTableUiState as TimeTableUiState.Success).timeTable.times
                 )
             }
         } else {
@@ -332,8 +330,8 @@ fun Schedule(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val pullRefreshState = rememberPullRefreshState(
-        (uiState.timeTableUiState == TimeTableUiState.Loading),
-        { viewModel.getTimeTableAndGroup() })
+        (uiState.fullScheduleUiState == FullScheduleUiState.Loading),
+        { viewModel.getFullSchedule(true) })
     val startDate = LocalDate.now().minusDays(BACK_ITEMS.toLong())
     val lazyRowState = rememberLazyListState()
 
@@ -352,7 +350,7 @@ fun Schedule(
                 lazyRowState = lazyRowState
 
             )
-            if (uiState.timeTableUiState is TimeTableUiState.Success && uiState.scheduleUiState is ScheduleUiState.Success && uiState.importantDatesUiState is ImportantDatesUiState.Success) {
+            if (uiState.fullScheduleUiState is FullScheduleUiState.Success && uiState.importantDatesUiState is ImportantDatesUiState.Success) {
                 viewModel.setCurrentDateWithMovingTopBar(
                     date = startDate.plusDays(lazyListState.firstVisibleItemIndex.toLong()),
                     lazyRowState = lazyRowState,
@@ -371,17 +369,14 @@ fun Schedule(
                         val date = startDate.plusDays(it.toLong())
                         ScheduleList(
                             viewModel = viewModel,
-                            uiState = uiState,
                             date = date,
                             modifier = Modifier.width(screenWidth.dp)
                         )
                     }
                 }
             } else if (
-                uiState.timeTableUiState is TimeTableUiState.Loading || uiState.timeTableUiState == TimeTableUiState.NotStarted ||
-                uiState.scheduleUiState is ScheduleUiState.Loading ||
+                uiState.fullScheduleUiState is FullScheduleUiState.Loading||
                 uiState.importantDatesUiState is ImportantDatesUiState.Loading||
-                uiState.timeTableUiState is TimeTableUiState.Loading||
                 uiState.userInfoUiState is UserInfoUiState.Loading
             ) {
                 LazyColumn(

@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStore
 import com.studentapp.betterorioks.data.AppContainer
 import com.studentapp.betterorioks.data.DefaultAppContainer
-import com.studentapp.betterorioks.data.NetworkScheduleFromSiteRepository
+import com.studentapp.betterorioks.data.schedule.NetworkScheduleFromSiteRepository
 import com.studentapp.betterorioks.data.UserPreferencesRepository
 
 private const val LAYOUT_PREFERENCE_NAME = "layout_preferences"
@@ -22,6 +22,6 @@ class BetterOrioksApplication:Application() {
         super.onCreate()
         userPreferencesRepository = UserPreferencesRepository(dataStore)
         networkScheduleFromSiteRepository = NetworkScheduleFromSiteRepository()
-        container = DefaultAppContainer()
+        container = DefaultAppContainer(this)
     }
 }

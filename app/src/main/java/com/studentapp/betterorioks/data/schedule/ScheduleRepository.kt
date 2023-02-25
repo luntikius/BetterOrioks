@@ -1,7 +1,7 @@
-package com.studentapp.betterorioks.data
+package com.studentapp.betterorioks.data.schedule
 
 import com.studentapp.betterorioks.model.scheduleFromSite.FullSchedule
-import com.studentapp.betterorioks.network.ScheduleFromSiteApiService
+import com.studentapp.betterorioks.network.ScheduleApiService
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.decodeFromString
 import retrofit2.Retrofit
@@ -15,8 +15,8 @@ class NetworkScheduleFromSiteRepository
         .baseUrl(BASE_URL)
         .build()
 
-    private val scheduleFromSiteRetrofitService: ScheduleFromSiteApiService by lazy {
-        retrofitString.create(ScheduleFromSiteApiService::class.java)
+    private val scheduleFromSiteRetrofitService: ScheduleApiService by lazy {
+        retrofitString.create(ScheduleApiService::class.java)
     }
     suspend fun getSchedule(
         group: String,
