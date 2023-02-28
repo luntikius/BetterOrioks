@@ -135,7 +135,7 @@ fun ProfileScreen(
     uiState: AppUiState = AppUiState(),
     viewModel: BetterOrioksViewModel
 ){
-    val pullRefreshState = rememberPullRefreshState((uiState.userInfoUiState == UserInfoUiState.Loading), { viewModel.getUserInfo() })
+    val pullRefreshState = rememberPullRefreshState((uiState.userInfoUiState == UserInfoUiState.Loading), { viewModel.getUserInfo(refresh = true) })
     Box (modifier = Modifier
         .pullRefresh(pullRefreshState)
         .fillMaxSize()) {
@@ -145,8 +145,8 @@ fun ProfileScreen(
                 ProfileCard(uiState = uiState)
                 Spacer(modifier = Modifier.size(8.dp))
                 AnyButton(onClick = onDebtClick, text = R.string.Debts, icon = R.drawable.debt)
-                Spacer(modifier = Modifier.size(8.dp))
-                AnyButton(text = R.string.app_name, icon = R.drawable.visibility_on, onClick = {viewModel.getFullSchedule()})
+                //Spacer(modifier = Modifier.size(8.dp))
+                //AnyButton(text = R.string.app_name, icon = R.drawable.visibility_on, onClick = {viewModel.getFullSchedule()})
             }
             //temp
             item{

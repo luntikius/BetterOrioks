@@ -293,6 +293,7 @@ fun ScheduleList(viewModel: BetterOrioksViewModel, modifier: Modifier = Modifier
                     it = it,
                 )
             }
+            item{ Spacer(modifier = Modifier.size(8.dp))}
         } else {
             item {
                 Column(
@@ -350,33 +351,53 @@ fun Schedule(
                 lazyRowState = lazyRowState
 
             )
-            if (uiState.fullScheduleUiState is FullScheduleUiState.Success && uiState.importantDatesUiState is ImportantDatesUiState.Success) {
+            if (uiState.fullScheduleUiState is FullScheduleUiState.Success
+                && uiState.importantDatesUiState is ImportantDatesUiState.Success
+                && uiState.userInfoUiState is UserInfoUiState.Success
+            ) {
                 viewModel.setCurrentDateWithMovingTopBar(
                     date = startDate.plusDays(lazyListState.firstVisibleItemIndex.toLong()),
                     lazyRowState = lazyRowState,
                     coroutineScope = coroutineScope,
                     startDate = startDate)
-                LazyRow(
-                    modifier = Modifier.fillMaxSize(),
-                    state = lazyListState,
-                    flingBehavior = rememberSnapperFlingBehavior(
-                        lazyListState = lazyListState,
-                        snapIndex = { _, startIndex, targetIndex -> targetIndex.coerceIn(startIndex-1,startIndex+1) },
-                    snapOffsetForItem = SnapOffsets.Start),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    items(300) {
-                        val date = startDate.plusDays(it.toLong())
-                        ScheduleList(
-                            viewModel = viewModel,
-                            date = date,
-                            modifier = Modifier.width(screenWidth.dp)
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    if(!uiState.scheduleInitUiState) {
+                        LoadingScreen(
+                            modifier = Modifier
+                                .wrapContentSize(Alignment.Center)
+                                .fillMaxSize()
                         )
+                    }
+                    val mod = if(!uiState.scheduleInitUiState) Modifier.size(0.dp) else Modifier
+                    LazyRow(
+                        modifier = mod.fillMaxSize(),
+                        state = lazyListState,
+                        flingBehavior = rememberSnapperFlingBehavior(
+                            lazyListState = lazyListState,
+                            snapIndex = { _, startIndex, targetIndex ->
+                                targetIndex.coerceIn(
+                                    startIndex - 1,
+                                    startIndex + 1
+                                )
+                            },
+                            snapOffsetForItem = SnapOffsets.Start
+                        ),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        items(300) {
+                            val date = startDate.plusDays(it.toLong())
+                            ScheduleList(
+                                viewModel = viewModel,
+                                date = date,
+                                modifier = Modifier.width(screenWidth.dp)
+                            )
+                        }
                     }
                 }
             } else if (
                 uiState.fullScheduleUiState is FullScheduleUiState.Error||
-                uiState.importantDatesUiState is ImportantDatesUiState.Error
+                uiState.importantDatesUiState is ImportantDatesUiState.Error||
+                uiState.userInfoUiState is UserInfoUiState.Error
             ) {
                 LazyColumn(
                     modifier = Modifier.fillMaxSize(),

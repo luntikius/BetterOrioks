@@ -17,4 +17,5 @@ data class AppUiState (
     var importantDatesUiState: ImportantDatesUiState = ImportantDatesUiState.NotStarted,
     var currentSelectedDate: LocalDate = LocalDate.now(),
     var fullScheduleUiState: FullScheduleUiState = FullScheduleUiState.NotStarted,
+    var scheduleInitUiState: Boolean = false,
     )
