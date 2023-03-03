@@ -9,6 +9,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.betterorioks.ui.AcademicPerformanceScreen
 import com.studentapp.betterorioks.ui.components.BottomNavigationBar
@@ -53,7 +54,7 @@ fun BetterOrioksApp(){
                         popEnterTransition = { fadeIn() },
                         popExitTransition = { fadeOut() }
                     ) {
-                        if(uiState.fullScheduleUiState is FullScheduleUiState.NotStarted) viewModel.getFullSchedule()
+                        if(uiState.fullScheduleUiState is FullScheduleUiState.NotStarted) viewModel.getFullSchedule(context = LocalContext.current)
                         ScheduleScreen(uiState = uiState, viewModel = viewModel)
                     }
                     composable(

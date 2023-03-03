@@ -329,10 +329,12 @@ fun Schedule(
     modifier: Modifier = Modifier,
     uiState: AppUiState
 ) {
+    val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val pullRefreshState = rememberPullRefreshState(
         (uiState.fullScheduleUiState == FullScheduleUiState.Loading),
-        { viewModel.getFullSchedule(true) })
+        { viewModel.getFullSchedule(refresh = true, context = context) }
+    )
     val startDate = LocalDate.now().minusDays(BACK_ITEMS.toLong())
     val lazyRowState = rememberLazyListState()
 

@@ -1,5 +1,7 @@
 package com.studentapp.betterorioks.ui.screens
 
+import android.content.Intent
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -9,12 +11,12 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -135,6 +137,8 @@ fun ProfileScreen(
     uiState: AppUiState = AppUiState(),
     viewModel: BetterOrioksViewModel
 ){
+    val context = LocalContext.current
+    val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/+YQD5-csbrqk4ZjEy")) }
     val pullRefreshState = rememberPullRefreshState((uiState.userInfoUiState == UserInfoUiState.Loading), { viewModel.getUserInfo(refresh = true) })
     Box (modifier = Modifier
         .pullRefresh(pullRefreshState)
@@ -150,7 +154,6 @@ fun ProfileScreen(
             }
             //temp
             item{
-                val clipboardManager = LocalClipboardManager.current
                 Spacer(modifier = Modifier.size(8.dp))
                 Card(
                     shape = RoundedCornerShape(16.dp),
@@ -161,11 +164,11 @@ fun ProfileScreen(
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 3.dp)
                         .clickable {
-                            clipboardManager.setText(AnnotatedString("BetterOrioksApp@yandex.ru"))
+                            context.startActivity(intent)
                         }
                 ) {
                     Text(
-                        text = "Это тестовая версия приложения, если вы нашли баг, пожалуйста сообщите о нем. \nНаша почта: BetterOrioksApp@yandex.ru \n(нажмите чтобы скопировать)",
+                        text = "Это тестовая версия приложения, если вы нашли баг, пожалуйста сообщите о нем. \n(Нажмите для перехода в Telegram канал разработчика)",
                         color = MaterialTheme.colors.primary,
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center,

@@ -1,6 +1,8 @@
 package com.studentapp.betterorioks.ui
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
@@ -9,6 +11,7 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import com.studentapp.betterorioks.BetterOrioksApplication
+import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.data.*
 import com.studentapp.betterorioks.data.schedule.NetworkScheduleFromSiteRepository
 import com.studentapp.betterorioks.data.schedule.ScheduleOfflineRepository
@@ -374,7 +377,12 @@ class BetterOrioksViewModel(
         }
         return result
     }
-    fun getFullSchedule(refresh: Boolean = false){
+
+    private fun errorToast(context: Context){
+        Toast.makeText(context, context.getString(R.string.error_while_loading_data), Toast.LENGTH_SHORT).show()
+    }
+
+    fun getFullSchedule(refresh: Boolean = false, context: Context){
         println("GET_FULL_SCHEDULE")
         val previousState = uiState.value.fullScheduleUiState
         viewModelScope.launch {
@@ -404,11 +412,19 @@ class BetterOrioksViewModel(
                 }
                 Log.d("TEST", "getFullSchedule ended")
             }catch (e: HttpException){
-                if (previousState is FullScheduleUiState.Success) _uiState.update { currentState -> currentState.copy(fullScheduleUiState = previousState) }
-                else _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Error) }
+                if (previousState is FullScheduleUiState.Success) {
+                    _uiState.update { currentState -> currentState.copy(fullScheduleUiState = previousState) }
+                    errorToast(context = context)
+                }
+                else
+                    _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Error) }
             }catch (e: java.lang.Exception){
-                if (previousState is FullScheduleUiState.Success) _uiState.update { currentState -> currentState.copy(fullScheduleUiState = previousState) }
-                else _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Error) }
+                if (previousState is FullScheduleUiState.Success) {
+                    _uiState.update { currentState -> currentState.copy(fullScheduleUiState = previousState) }
+                    errorToast(context = context)
+                }
+                else
+                    _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Error) }
             }
         }
     }
