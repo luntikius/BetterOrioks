@@ -1,9 +1,17 @@
 package com.studentapp.betterorioks.model
 
+import androidx.annotation.Keep
+import kotlinx.serialization.SerialName
+
+@Keep
 @kotlinx.serialization.Serializable
 data class ImportantDates(
-    val semester_start: String ="",
-    val session_start: String = "",
-    val session_end: String = "",
-    val next_semester_start: String = ""
+    @SerialName("semester_start")
+    val semesterStart: String ="",
+    @SerialName("session_start")
+    val sessionStart: String = "",
+    @SerialName("session_end")
+    val sessionEnd: String = "",
+    @SerialName("next_semester_start")
+    val nextSemesterStart: String = ""
 )

@@ -1,18 +1,14 @@
 package com.studentapp.betterorioks.network
 
-import com.studentapp.betterorioks.data.AppDetails
-import com.studentapp.betterorioks.model.schedule.Schedule
-import retrofit2.http.GET
-import retrofit2.http.Header
-import retrofit2.http.Headers
-import retrofit2.http.Path
+import okhttp3.ResponseBody
+import retrofit2.http.*
 
-interface ScheduleApiService
-{
+interface ScheduleApiService {
     @Headers(
-        "Accept: application/json",
-        "User-Agent: ${AppDetails.appName}/${AppDetails.version} Android"
+        "accept: */*",
+        "content-type: application/x-www-form-urlencoded; charset=UTF-8",
     )
-    @GET("schedule/groups/{id}")
-    suspend fun getSchedule(@Header("Authorization") token: String, @Path("id")id: String ): List<Schedule>
+    @FormUrlEncoded
+    @POST("schedule/data")
+    suspend fun getSchedule(@Header("cookie")cookie: String, @Field("group")group: String): ResponseBody
 }

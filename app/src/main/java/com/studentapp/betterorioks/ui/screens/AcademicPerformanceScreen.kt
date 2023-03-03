@@ -164,8 +164,8 @@ fun AcademicPerformance(
                 items(subjects) {
                     AcademicPerformanceElement(
                         subjectName = it.name,
-                        userPoints = it.current_grade,
-                        systemPoints = it.max_grade.toInt(),
+                        userPoints = it.currentGrade,
+                        systemPoints = it.maxGrade.toInt(),
                         onClick = {
                             onComponentClicked()
                             setCurrentSubject(it)

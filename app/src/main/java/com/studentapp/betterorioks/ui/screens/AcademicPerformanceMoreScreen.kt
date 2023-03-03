@@ -34,7 +34,7 @@ fun ElementPreview(){
 private fun calculateWeeks(week:Int, uiState: AppUiState):Int{
     if (uiState.importantDatesUiState is ImportantDatesUiState.Success) {
         val dates = (uiState.importantDatesUiState as ImportantDatesUiState.Success).dates
-        val start = dates.semester_start
+        val start = dates.semesterStart
         val today = LocalDate.now()
         val startDate = LocalDate.parse(start)
         val weeks = week - (ChronoUnit.DAYS.between(startDate,today)/7).toInt() - 1
@@ -115,7 +115,7 @@ fun AcademicPerformanceMoreElement(
 fun AboutElement(
     uiState: AppUiState
 ){
-    val controlForm = if(uiState.currentSubject.control_form == ""){ stringResource(R.string.not_specified) } else {uiState.currentSubject.control_form}
+    val controlForm = if(uiState.currentSubject.controlForm == ""){ stringResource(R.string.not_specified) } else {uiState.currentSubject.controlForm}
     Text(text = stringResource(id = R.string.control_form,controlForm),
         modifier = Modifier.padding(top = 16.dp,start = 16.dp,end = 16.dp, bottom = 4.dp),
         color = MaterialTheme.colors.primary,
@@ -163,7 +163,7 @@ fun TopPerformanceMoreBar(onClick: () -> Unit = {}, uiState: AppUiState){
                         .padding(end = 16.dp),
                 )
                 Text(
-                    text = stringResource(id = R.string.of, currentSubject.max_grade.toInt().toString()),
+                    text = stringResource(id = R.string.of, currentSubject.maxGrade.toInt().toString()),
                     fontSize = 14.sp,
                     color = MaterialTheme.colors.primary,
                     textAlign = TextAlign.End,
@@ -172,8 +172,8 @@ fun TopPerformanceMoreBar(onClick: () -> Unit = {}, uiState: AppUiState){
                         .padding(end = 8.dp)
                 )
                 RoundedMark(
-                    userPoints = currentSubject.current_grade,
-                    systemPoints = currentSubject.max_grade.toInt()
+                    userPoints = currentSubject.currentGrade,
+                    systemPoints = currentSubject.maxGrade.toInt()
                 )
             }
         }
@@ -229,8 +229,8 @@ fun AcademicPerformanceMore (
                     items(disciplines) {
                         AcademicPerformanceMoreElement(
                             subjectName = it.type,
-                            userPoints = it.current_grade,
-                            systemPoints = it.max_grade.toInt(),
+                            userPoints = it.currentGrade,
+                            systemPoints = it.maxGrade.toInt(),
                             subjectFullName = it.name,
                             subjectShort = it.alias,
                             weeks = calculateWeeks(it.week, uiState)

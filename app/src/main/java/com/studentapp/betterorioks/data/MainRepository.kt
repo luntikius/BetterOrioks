@@ -2,8 +2,6 @@ package com.studentapp.betterorioks.data
 
 import com.jakewharton.retrofit2.converter.kotlinx.serialization.asConverterFactory
 import com.studentapp.betterorioks.model.*
-import com.studentapp.betterorioks.model.schedule.GroupElement
-import com.studentapp.betterorioks.model.schedule.TimeTableElement
 import com.studentapp.betterorioks.network.*
 import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
@@ -40,14 +38,6 @@ class NetworkMainRepository(token:String)
         retrofit.create(ImportantDatesApiService::class.java)
     }
 
-    private val timeTableRetrofitService: TimeTableApiService by lazy{
-        retrofit.create(TimeTableApiService::class.java)
-    }
-
-    private val groupRetrofitService: GroupApiService by lazy{
-        retrofit.create(GroupApiService::class.java)
-    }
-
     //get functions
     suspend fun getAcademicPerformance():List<Subject> {
         return academicPerformanceRetrofitService.getAcademicPerformance(token = finalToken)
@@ -63,13 +53,5 @@ class NetworkMainRepository(token:String)
 
     suspend fun getImportantDates(): ImportantDates {
         return importantDatesRetrofitService.getImportantDates(token = finalToken)
-    }
-
-    suspend fun getTimeTable(): TimeTableElement {
-        return timeTableRetrofitService.getTimeTable(token = finalToken)
-    }
-
-    suspend fun getGroup(): List<GroupElement> {
-        return groupRetrofitService.getGroup(token = finalToken)
     }
 }
