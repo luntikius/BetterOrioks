@@ -1,14 +1,27 @@
 package com.studentapp.betterorioks.model
 
+import androidx.annotation.Keep
+import kotlinx.serialization.SerialName
+
+@Keep
 @kotlinx.serialization.Serializable
 data class UserInfo(
+    @SerialName("course")
     val course: Int = 0,
+    @SerialName("department")
     val department: String = "",
-    val full_name: String = "",
+    @SerialName("full_name")
+    val fullName: String = "",
+    @SerialName("group")
     val group: String = "",
-    val record_book_id: Int = 0,
+    @SerialName("record_book_id")
+    val recordBookId: Int = 0,
+    @SerialName("semester")
     val semester: Int = 0,
-    val study_direction: String = "",
-    val study_profile: String = "",
+    @SerialName("study_direction")
+    val studyDirection: String = "",
+    @SerialName("study_profile")
+    val studyProfile: String = "",
+    @SerialName("year")
     val year: String = ""
 )

@@ -195,11 +195,11 @@ fun AcademicDebtScreen(
                                 items(debts) {
                                     AcademicDebtElement(
                                         subjectName = it.name,
-                                        userPoints = it.current_grade,
-                                        systemPoints = it.max_grade.toInt(),
+                                        userPoints = it.currentGrade,
+                                        systemPoints = it.maxGrade.toInt(),
                                         deadline = it.deadline,
-                                        consultationSchedule = it.consultation_schedule,
-                                        controlForm = it.control_form,
+                                        consultationSchedule = it.consultationSchedule,
+                                        controlForm = it.controlForm,
                                         teachers = it.teachers
                                     )
                                 }

@@ -33,17 +33,17 @@ class UserPreferencesRepository(
 
     suspend fun setImportantDates(dates: ImportantDates){
         dataStore.edit {preferences ->
-            preferences[SEMESTER_START] = dates.semester_start
-            preferences[SESSION_START] = dates.session_start
+            preferences[SEMESTER_START] = dates.semesterStart
+            preferences[SESSION_START] = dates.sessionStart
         }
     }
 
     suspend fun setUserInfo(userInfo: UserInfo){
         dataStore.edit {preferences ->
-            preferences[STUDENT_ID] = userInfo.record_book_id
-            preferences[FULL_NAME] = userInfo.full_name
+            preferences[STUDENT_ID] = userInfo.recordBookId
+            preferences[FULL_NAME] = userInfo.fullName
             preferences[GROUP] = userInfo.group
-            preferences[STUDY_DIRECTION] = userInfo.study_direction
+            preferences[STUDY_DIRECTION] = userInfo.studyDirection
             preferences[DEPARTMENT] = userInfo.department
         }
     }

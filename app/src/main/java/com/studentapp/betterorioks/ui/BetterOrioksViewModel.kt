@@ -238,9 +238,9 @@ class BetterOrioksViewModel(
                             UserInfoUiState.Success(
                                 UserInfo(
                                     group = group,
-                                    study_direction = studyDirection,
-                                    record_book_id = studentId,
-                                    full_name = fullName,
+                                    studyDirection = studyDirection,
+                                    recordBookId = studentId,
+                                    fullName = fullName,
                                     department = department
                                 )
                             )
@@ -281,8 +281,8 @@ class BetterOrioksViewModel(
                     currentState.copy(
                         importantDatesUiState = ImportantDatesUiState.Success(
                             ImportantDates(
-                                semester_start = semesterStart,
-                                session_start = sessionStart
+                                semesterStart = semesterStart,
+                                sessionStart = sessionStart
                             )
                         )
                     )
@@ -331,7 +331,7 @@ class BetterOrioksViewModel(
     fun getTodaysSchedule(date: LocalDate):List<SimpleScheduleElement>{
         return if (uiState.value.importantDatesUiState is ImportantDatesUiState.Success && uiState.value.fullScheduleUiState is FullScheduleUiState.Success) {
             val start =
-                LocalDate.parse((uiState.value.importantDatesUiState as ImportantDatesUiState.Success).dates.semester_start)
+                LocalDate.parse((uiState.value.importantDatesUiState as ImportantDatesUiState.Success).dates.semesterStart)
             val diff = (DAYS.between(start, date).toInt())
             (uiState.value.fullScheduleUiState as FullScheduleUiState.Success).schedule[abs(diff % 28)]
         }else listOf()

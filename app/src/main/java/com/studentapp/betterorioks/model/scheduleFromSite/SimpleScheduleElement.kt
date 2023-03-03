@@ -2,7 +2,6 @@ package com.studentapp.betterorioks.model.scheduleFromSite
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-
 @Entity(tableName = "schedule")
 data class SimpleScheduleElement(
     @PrimaryKey(autoGenerate = true)

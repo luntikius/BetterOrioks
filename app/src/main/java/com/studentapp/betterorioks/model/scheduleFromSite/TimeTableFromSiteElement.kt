@@ -1,7 +1,8 @@
 package com.studentapp.betterorioks.model.scheduleFromSite
 
+import androidx.annotation.Keep
 import kotlinx.serialization.SerialName
-
+@Keep
 @kotlinx.serialization.Serializable
 class TimeTableFromSiteElement(
     @SerialName("Time")
