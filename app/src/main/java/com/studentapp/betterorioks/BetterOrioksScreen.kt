@@ -35,109 +35,112 @@ fun BetterOrioksApp(){
     if (uiState.authState == AuthState.NotLoggedIn)
         viewModel.retrieveToken()
 
-    if (uiState.authState == AuthState.LoggedIn) {
-        Scaffold(
-            bottomBar = {
-                if (uiState.authState == AuthState.LoggedIn) BottomNavigationBar(
-                    navController = navController
-                )
-            }
-        ) { padding ->
-            AnimatedNavHost(
-                navController = navController,
-                startDestination = BetterOrioksScreens.Schedule.name,
-                modifier = Modifier.padding(padding)
-            ) {
-                composable(route = BetterOrioksScreens.Schedule.name,
-                    popEnterTransition = { fadeIn() },
-                    popExitTransition = { fadeOut() }
-                ) {
-                    if(uiState.timeTableUiState == TimeTableUiState.NotStarted)
-                        viewModel.getTimeTableAndGroup()
-                    ScheduleScreen(uiState = uiState, viewModel = viewModel)
-                }
-                composable(
-                    route = BetterOrioksScreens.AcademicPerformance.name,
-                    exitTransition = { fadeOut() },
-                    enterTransition = { fadeIn() },
-                    popEnterTransition = { fadeIn(animationSpec = tween(800)) },
-                    popExitTransition = { fadeOut() },
-                ) {
-                    if (uiState.loadingState) viewModel.getAcademicPerformance()
-                    AcademicPerformanceScreen(
-                        uiState = uiState,
-                        navController = navController,
-                        viewModel = viewModel
+    when (uiState.authState) {
+        AuthState.LoggedIn -> {
+            Scaffold(
+                bottomBar = {
+                    if (uiState.authState == AuthState.LoggedIn) BottomNavigationBar(
+                        navController = navController
                     )
                 }
-                composable(
-                    route = BetterOrioksScreens.AcademicPerformanceMore.name,
-                    enterTransition = {
-                        slideIntoContainer(
-                            AnimatedContentScope.SlideDirection.Left,
-                            animationSpec = tween(700)
-                        )
-                    },
-                    exitTransition = {
-                        slideOutOfContainer(
-                            AnimatedContentScope.SlideDirection.Right,
-                            animationSpec = tween(700)
+            ) { padding ->
+                AnimatedNavHost(
+                    navController = navController,
+                    startDestination = BetterOrioksScreens.Schedule.name,
+                    modifier = Modifier.padding(padding)
+                ) {
+                    composable(route = BetterOrioksScreens.Schedule.name,
+                        popEnterTransition = { fadeIn() },
+                        popExitTransition = { fadeOut() }
+                    ) {
+                        if(uiState.fullScheduleUiState is FullScheduleUiState.NotStarted) viewModel.getFullSchedule()
+                        ScheduleScreen(uiState = uiState, viewModel = viewModel)
+                    }
+                    composable(
+                        route = BetterOrioksScreens.AcademicPerformance.name,
+                        exitTransition = { fadeOut() },
+                        enterTransition = { fadeIn() },
+                        popEnterTransition = { fadeIn(animationSpec = tween(800)) },
+                        popExitTransition = { fadeOut() },
+                    ) {
+                        if (uiState.loadingState) viewModel.getAcademicPerformance()
+                        AcademicPerformanceScreen(
+                            uiState = uiState,
+                            navController = navController,
+                            viewModel = viewModel
                         )
                     }
-                ) {
-                    AcademicPerformanceMoreScreen(
-                        uiState = uiState,
-                        onButtonClick = {
-                            navController.popBackStack(
-                                route = BetterOrioksScreens.AcademicPerformance.name,
-                                inclusive = false
+                    composable(
+                        route = BetterOrioksScreens.AcademicPerformanceMore.name,
+                        enterTransition = {
+                            slideIntoContainer(
+                                AnimatedContentScope.SlideDirection.Left,
+                                animationSpec = tween(700)
                             )
                         },
-                    )
-
-                }
-                composable(
-                    route = BetterOrioksScreens.Profile.name,
-                    popEnterTransition = { fadeIn() },
-                    popExitTransition = { fadeOut() }
-                ) {
-                    if(uiState.userInfoUiState == UserInfoUiState.NotStarted)viewModel.getUserInfo()
-                    ProfileScreen(
-                        onExitClick = { viewModel.exit(navController)},
-                        uiState = uiState,
-                        onDebtClick = {navController.navigate(BetterOrioksScreens.Debts.name)},
-                        viewModel = viewModel
-                    )
-                }
-                composable(
-                    route = BetterOrioksScreens.Debts.name,
-                    enterTransition = {
-                        slideIntoContainer(
-                            AnimatedContentScope.SlideDirection.Left,
-                            animationSpec = tween(700)
+                        exitTransition = {
+                            slideOutOfContainer(
+                                AnimatedContentScope.SlideDirection.Right,
+                                animationSpec = tween(700)
+                            )
+                        }
+                    ) {
+                        AcademicPerformanceMoreScreen(
+                            uiState = uiState,
+                            onButtonClick = {
+                                navController.popBackStack(
+                                    route = BetterOrioksScreens.AcademicPerformance.name,
+                                    inclusive = false
+                                )
+                            },
                         )
-                    },
-                    exitTransition = {
-                        slideOutOfContainer(
-                            AnimatedContentScope.SlideDirection.Right,
-                            animationSpec = tween(700)
+
+                    }
+                    composable(
+                        route = BetterOrioksScreens.Profile.name,
+                        popEnterTransition = { fadeIn() },
+                        popExitTransition = { fadeOut() }
+                    ) {
+                        if(uiState.userInfoUiState == UserInfoUiState.NotStarted)viewModel.getUserInfo()
+                        ProfileScreen(
+                            onExitClick = { viewModel.exit(navController)},
+                            uiState = uiState,
+                            onDebtClick = {navController.navigate(BetterOrioksScreens.Debts.name)},
+                            viewModel = viewModel
                         )
                     }
-                ){
-                    if(uiState.academicDebtsUiState == DebtsUiState.NotStarted){viewModel.getAcademicDebts()}
-                    AcademicDebtScreen(
-                        onClick = {navController.popBackStack(
-                        route = BetterOrioksScreens.Profile.name,
-                        inclusive = false,)},
-                        uiState = uiState,
-                        viewModel = viewModel
-                    )
+                    composable(
+                        route = BetterOrioksScreens.Debts.name,
+                        enterTransition = {
+                            slideIntoContainer(
+                                AnimatedContentScope.SlideDirection.Left,
+                                animationSpec = tween(700)
+                            )
+                        },
+                        exitTransition = {
+                            slideOutOfContainer(
+                                AnimatedContentScope.SlideDirection.Right,
+                                animationSpec = tween(700)
+                            )
+                        }
+                    ){
+                        if(uiState.academicDebtsUiState == DebtsUiState.NotStarted){viewModel.getAcademicDebts()}
+                        AcademicDebtScreen(
+                            onClick = {navController.popBackStack(
+                                route = BetterOrioksScreens.Profile.name,
+                                inclusive = false,)},
+                            uiState = uiState,
+                            viewModel = viewModel
+                        )
+                    }
                 }
             }
         }
-    }else if(uiState.authState == AuthState.Loading){
-        LoadingScreen(modifier = Modifier.fillMaxSize())
-    }else{
-        AuthorizationScreen(onLogin = {viewModel.getToken(it)}, uiState = uiState)
+        AuthState.Loading -> {
+            LoadingScreen(modifier = Modifier.fillMaxSize())
+        }
+        else -> {
+            AuthorizationScreen(onLogin = {viewModel.getToken(it)}, uiState = uiState)
+        }
     }
 }

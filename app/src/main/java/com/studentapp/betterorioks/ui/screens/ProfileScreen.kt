@@ -33,7 +33,7 @@ fun ProfileCardContent(userInfo: UserInfo){
     Row(modifier = Modifier.padding(16.dp)){
         Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             Text(
-                text = userInfo.full_name,
+                text = userInfo.fullName,
                 fontWeight = FontWeight.Bold,
                 fontSize = 20.sp,
                 textAlign = TextAlign.Center,
@@ -44,7 +44,7 @@ fun ProfileCardContent(userInfo: UserInfo){
                 Text(text = stringResource(R.string.student_number))
                 Spacer(modifier = Modifier.width(32.dp))
                 Spacer(modifier = Modifier.weight(1f))
-                Text(text = userInfo.record_book_id.toString(), textAlign = TextAlign.End)
+                Text(text = userInfo.recordBookId.toString(), textAlign = TextAlign.End)
             }
             Divider()
             Row(verticalAlignment = Alignment.CenterVertically){
@@ -58,7 +58,7 @@ fun ProfileCardContent(userInfo: UserInfo){
                 Text(text = stringResource(R.string.direction))
                 Spacer(modifier = Modifier.width(32.dp))
                 Spacer(modifier = Modifier.weight(1f))
-                Text(text = userInfo.study_direction, textAlign = TextAlign.End)
+                Text(text = userInfo.studyDirection, textAlign = TextAlign.End)
             }
             Divider()
             Row(verticalAlignment = Alignment.CenterVertically){
@@ -135,7 +135,7 @@ fun ProfileScreen(
     uiState: AppUiState = AppUiState(),
     viewModel: BetterOrioksViewModel
 ){
-    val pullRefreshState = rememberPullRefreshState((uiState.userInfoUiState == UserInfoUiState.Loading), { viewModel.getUserInfo() })
+    val pullRefreshState = rememberPullRefreshState((uiState.userInfoUiState == UserInfoUiState.Loading), { viewModel.getUserInfo(refresh = true) })
     Box (modifier = Modifier
         .pullRefresh(pullRefreshState)
         .fillMaxSize()) {
@@ -145,6 +145,8 @@ fun ProfileScreen(
                 ProfileCard(uiState = uiState)
                 Spacer(modifier = Modifier.size(8.dp))
                 AnyButton(onClick = onDebtClick, text = R.string.Debts, icon = R.drawable.debt)
+                //Spacer(modifier = Modifier.size(8.dp))
+                //AnyButton(text = R.string.app_name, icon = R.drawable.visibility_on, onClick = {viewModel.getFullSchedule()})
             }
             //temp
             item{
@@ -170,11 +172,11 @@ fun ProfileScreen(
                         modifier = Modifier.padding(16.dp)
                     )
                 }
+                Spacer(modifier = Modifier.size(8.dp))
             }
-        }
-        Column(modifier = Modifier.align(Alignment.BottomCenter)) {
-            ExitButton(onExitClick = onExitClick)
-            Spacer(modifier = Modifier.size(16.dp))
+            item{
+                ExitButton(onExitClick = onExitClick)
+            }
         }
         PullRefreshIndicator(
             refreshing = uiState.isAcademicPerformanceRefreshing,

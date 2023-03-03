@@ -9,11 +9,12 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import com.studentapp.betterorioks.BetterOrioksApplication
-import com.studentapp.betterorioks.model.BetterOrioksScreens
-import com.studentapp.betterorioks.model.Subject
-import com.studentapp.betterorioks.model.Token
 import com.studentapp.betterorioks.data.*
-import com.studentapp.betterorioks.model.schedule.Schedule
+import com.studentapp.betterorioks.data.schedule.NetworkScheduleFromSiteRepository
+import com.studentapp.betterorioks.data.schedule.ScheduleOfflineRepository
+import com.studentapp.betterorioks.model.*
+import com.studentapp.betterorioks.model.scheduleFromSite.FullSchedule
+import com.studentapp.betterorioks.model.scheduleFromSite.SimpleScheduleElement
 import com.studentapp.betterorioks.ui.screens.dayOfWeekToInt
 import java.time.temporal.ChronoUnit.DAYS
 import com.studentapp.betterorioks.ui.states.*
@@ -29,12 +30,15 @@ import kotlin.math.abs
 
 class BetterOrioksViewModel(
    // private val academicPerformanceRepository: AcademicPerformanceRepository,
-    private val userPreferencesRepository: UserPreferencesRepository
+    private val userPreferencesRepository: UserPreferencesRepository,
+    private val networkScheduleFromSiteRepository: NetworkScheduleFromSiteRepository,
+    private val scheduleOfflineRepository: ScheduleOfflineRepository
 ): ViewModel() {
 
 
     private val _uiState = MutableStateFlow(AppUiState())
     val uiState = _uiState.asStateFlow()
+
     fun retrieveToken() {
         viewModelScope.launch {
             _uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.Loading) }
@@ -52,7 +56,8 @@ class BetterOrioksViewModel(
             val exitRepository = NetworkExitRepository(uiState.value.token)
             try {
                 exitRepository.removeToken()
-                userPreferencesRepository.setToken("")
+                userPreferencesRepository.dump()
+                scheduleOfflineRepository.dump()
                 _uiState.update { AppUiState() }
                 navController.popBackStack(
                     route = BetterOrioksScreens.Schedule.name,
@@ -141,9 +146,10 @@ class BetterOrioksViewModel(
     }
 
     fun setCurrentDateWithMovingTopBar(date: LocalDate, lazyRowState: LazyListState, coroutineScope: CoroutineScope, startDate: LocalDate) {
-        _uiState.update { currentState -> currentState.copy(currentSelectedDate = date) }
+        _uiState.update { currentState -> currentState.copy(currentSelectedDate = date,) }
         coroutineScope.launch {
             lazyRowState.animateScrollToItem(abs(DAYS.between(startDate,date).toInt() - dayOfWeekToInt(date)))
+            if (!uiState.value.scheduleInitUiState) _uiState.update { currentState -> currentState.copy(scheduleInitUiState = true) }
         }
     }
 
@@ -153,7 +159,9 @@ class BetterOrioksViewModel(
                 val application =
                     (this[ViewModelProvider.AndroidViewModelFactory.APPLICATION_KEY] as BetterOrioksApplication)
                 BetterOrioksViewModel(
-                    userPreferencesRepository = application.userPreferencesRepository
+                    userPreferencesRepository = application.userPreferencesRepository,
+                    networkScheduleFromSiteRepository = application.networkScheduleFromSiteRepository,
+                    scheduleOfflineRepository = application.container.scheduleRepository
                 )
             }
         }
@@ -191,14 +199,31 @@ class BetterOrioksViewModel(
         }
     }
 
-    fun getUserInfo() {
+    fun getUserInfo(refresh: Boolean = false){
+        viewModelScope.launch {
+            suspendGetUserInfo(refresh = refresh)
+        }
+    }
+
+    private fun getImportantDates(refresh: Boolean = false){
+        viewModelScope.launch {
+            suspendGetImportantDates(refresh = refresh)
+        }
+    }
+    private suspend fun suspendGetUserInfo(refresh: Boolean = false) {
         println("GET_USER_INFO")
         val mainRepository = NetworkMainRepository(uiState.value.token)
-        viewModelScope.launch {
-            _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Loading) }
+        val previousState = uiState.value.userInfoUiState
+        _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Loading) }
             try {
-                val userInfo = mainRepository.getUserInfo()
-                if (userInfo.full_name != "") {
+                Log.d("TEST", "getUserInfo started")
+                val group = userPreferencesRepository.group.first()
+                val studyDirection = userPreferencesRepository.studyDirection.first()
+                val studentId = userPreferencesRepository.studentId.first()
+                val fullName = userPreferencesRepository.fullName.first()
+                val department = userPreferencesRepository.department.first()
+                if (group.isBlank() || refresh){
+                    val userInfo = mainRepository.getUserInfo()
                     _uiState.update { currentState ->
                         currentState.copy(
                             userInfoUiState = UserInfoUiState.Success(
@@ -206,23 +231,41 @@ class BetterOrioksViewModel(
                             )
                         )
                     }
-                } else {
-                    _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Error) }
+                    userPreferencesRepository.setUserInfo(userInfo)
+                }else{
+                    _uiState.update { currentState ->
+                        currentState.copy(userInfoUiState =
+                            UserInfoUiState.Success(
+                                UserInfo(
+                                    group = group,
+                                    studyDirection = studyDirection,
+                                    recordBookId = studentId,
+                                    fullName = fullName,
+                                    department = department
+                                )
+                            )
+                        )
+                    }
                 }
+                Log.d("TEST", "getUserInfo ended")
             } catch (e: HttpException) {
-                _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Error) }
+                if (previousState is UserInfoUiState.Success) _uiState.update { currentState -> currentState.copy(userInfoUiState = previousState) }
+                else _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Error) }
             } catch (e: java.lang.Exception) {
-                _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Error) }
+                if (previousState is UserInfoUiState.Success) _uiState.update { currentState -> currentState.copy(userInfoUiState = previousState) }
+                else _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Error) }
             }
-        }
     }
 
-    fun getImportantDates() {
+    private suspend fun suspendGetImportantDates(refresh: Boolean = false) {
         println("GET_IMPORTANT_DATES")
         val mainRepository = NetworkMainRepository(uiState.value.token)
-        viewModelScope.launch {
-            _uiState.update { currentState -> currentState.copy(importantDatesUiState = ImportantDatesUiState.Loading) }
-            try {
+        val previousState = uiState.value.importantDatesUiState
+        _uiState.update { currentState -> currentState.copy(importantDatesUiState = ImportantDatesUiState.Loading) }
+        try {
+            val semesterStart = userPreferencesRepository.semesterStart.first()
+            val sessionStart = userPreferencesRepository.sessionStart.first()
+            if (semesterStart == "" || refresh) {
                 val importantDates = mainRepository.getImportantDates()
                 _uiState.update { currentState ->
                     currentState.copy(
@@ -231,12 +274,35 @@ class BetterOrioksViewModel(
                         )
                     )
                 }
-            } catch (e: HttpException) {
-                Log.d("GET_IMPORTANT_DATES", e.toString())
-                _uiState.update { currentState -> currentState.copy(importantDatesUiState = ImportantDatesUiState.Error) }
-            } catch (e: java.lang.Exception) {
-                _uiState.update { currentState -> currentState.copy(importantDatesUiState = ImportantDatesUiState.Error) }
+                userPreferencesRepository.setImportantDates((uiState.value.importantDatesUiState as ImportantDatesUiState.Success).dates)
             }
+            else {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        importantDatesUiState = ImportantDatesUiState.Success(
+                            ImportantDates(
+                                semesterStart = semesterStart,
+                                sessionStart = sessionStart
+                            )
+                        )
+                    )
+                }
+            }
+        } catch (e: HttpException) {
+            Log.d("GET_IMPORTANT_DATES", e.toString())
+            if (previousState is ImportantDatesUiState.Success) _uiState.update { currentState ->
+                currentState.copy(
+                    importantDatesUiState = previousState
+                )
+            }
+            else _uiState.update { currentState -> currentState.copy(importantDatesUiState = ImportantDatesUiState.Error) }
+        } catch (e: java.lang.Exception) {
+            if (previousState is ImportantDatesUiState.Success) _uiState.update { currentState ->
+                currentState.copy(
+                    importantDatesUiState = previousState
+                )
+            }
+            else _uiState.update { currentState -> currentState.copy(importantDatesUiState = ImportantDatesUiState.Error) }
         }
     }
 
@@ -262,134 +328,88 @@ class BetterOrioksViewModel(
         }
     }
 
-    fun getTimeTableAndGroup() {
-        println("GET_TIME_TABLE_AND_GROUP")
-        val mainRepository = NetworkMainRepository(uiState.value.token)
-        viewModelScope.launch {
-            _uiState.update { currentState -> currentState.copy(timeTableUiState = TimeTableUiState.Loading) }
-            try {
-                if (uiState.value.importantDatesUiState == ImportantDatesUiState.NotStarted || uiState.value.importantDatesUiState == ImportantDatesUiState.Error) getImportantDates()
-                if (uiState.value.userInfoUiState == UserInfoUiState.NotStarted || uiState.value.userInfoUiState == UserInfoUiState.Error) getUserInfo()
-                val timeTable = mainRepository.getTimeTable()
-                val groups = mainRepository.getGroup()
-                groups.forEach { element ->
-                    if ((uiState.value.userInfoUiState as UserInfoUiState.Success).userInfo.group in element.name)
-                        _uiState.update { currentState -> currentState.copy(groupId = element.id) }
-                }
-                getSchedule()
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        timeTableUiState = TimeTableUiState.Success(
-                            timeTable
-                        )
-                    )
-                }
-            } catch (e: HttpException) {
-                Log.d("GET_TIME_TABLE", e.toString())
-                _uiState.update { currentState -> currentState.copy(timeTableUiState = TimeTableUiState.Error) }
-            } catch (e: java.lang.Exception) {
-                Log.d("GET_TIME_TABLE", e.toString())
-                _uiState.update { currentState -> currentState.copy(timeTableUiState = TimeTableUiState.Error) }
-            }
-        }
-    }
-
-    private fun getSchedule() {
-        println("GET_SCHEDULE")
-        val scheduleRepository =
-            NetworkScheduleRepository(token = uiState.value.token, id = uiState.value.groupId)
-        viewModelScope.launch {
-            _uiState.update { currentState -> currentState.copy(scheduleUiState = ScheduleUiState.Loading) }
-            try {
-                val schedule = scheduleRepository.getSchedule()
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        scheduleUiState = ScheduleUiState.Success(
-                            schedule
-                        )
-                    )
-                }
-                parseSchedule()
-            } catch (e: HttpException) {
-                Log.d("GET_SCHEDULE", e.toString())
-                _uiState.update { currentState -> currentState.copy(scheduleUiState = ScheduleUiState.Error) }
-            } catch (e: java.lang.Exception) {
-                Log.d("GET_SCHEDULE", e.toString())
-                _uiState.update { currentState -> currentState.copy(scheduleUiState = ScheduleUiState.Error) }
-            }
-        }
-    }
-
-    private fun calculateWeekType(date: LocalDate): Int {
-        val period = DAYS.between(
-            date,
-            LocalDate.parse((uiState.value.importantDatesUiState as ImportantDatesUiState.Success).dates.semester_start)
-        )
-        val currentWeek = (period / 7).toInt()
-        return abs(currentWeek % 4)
-    }
-
-    private fun parseSchedule() {
-        if (uiState.value.importantDatesUiState is ImportantDatesUiState.Success) {
-            val startDate =
-                LocalDate.parse((uiState.value.importantDatesUiState as ImportantDatesUiState.Success).dates.semester_start)
-            for (i in 0..27) {
-                val date = startDate.plusDays(i.toLong())
-                val weekType = calculateWeekType(date)
-                val list = if (uiState.value.scheduleUiState is ScheduleUiState.Success)
-                    (uiState.value.scheduleUiState as ScheduleUiState.Success).schedule
-                else listOf()
-                //ВНИМАНИЕ: КОСТЫЛЬ!!!
-                val filteredList =
-                    list.filter { ((it.week == weekType || it.name.contains("20")) && it.day == date.dayOfWeek.value - 1) }
-                val sortedList = filteredList.sortedBy { it -> it.clas }
-
-                val finalList = mutableListOf<Schedule>()
-                sortedList.forEach { it ->
-                    if (it.name.contains("(")) {
-                        val start = it.name.indexOf("(")
-                        val end = it.name.indexOf(")")
-                        val slice = it.name.slice(start..end)
-                        val count = slice.filter { char -> char.isDigit() }.toInt()
-                        for (j in 1..if (count < 6) count else 5) {
-                            finalList.add(
-                                Schedule(
-                                    name = it.name.slice(0 until start),
-                                    type = it.type.ifBlank { ("Пара") },
-                                    day = it.day,
-                                    clas = it.clas + j - 1,
-                                    week = it.week,
-                                    location = it.location,
-                                    teacher = it.teacher
-                                )
-                            )
-                        }
-                    } else {
-                        finalList.add(it)
-                    }
-                }
-                for (j in 0 until finalList.size - 1) {
-                    if (finalList[j + 1].clas - finalList[j].clas > 1) {
-                        finalList.add(
-                            Schedule(
-                                name = "Окно",
-                                type = (1.5 * (finalList[j + 1].clas - finalList[j].clas - 1)).toString(),
-                                clas = finalList[j].clas + 1
-                            )
-                        )
-                    }
-                }
-                _uiState.value.scheduleList.add(finalList.sortedBy { it.clas })
-            }
-        }
-    }
-
-    fun getTodaysSchedule(date: LocalDate):List<Schedule>{
-        return if (uiState.value.importantDatesUiState is ImportantDatesUiState.Success) {
+    fun getTodaysSchedule(date: LocalDate):List<SimpleScheduleElement>{
+        return if (uiState.value.importantDatesUiState is ImportantDatesUiState.Success && uiState.value.fullScheduleUiState is FullScheduleUiState.Success) {
             val start =
-                LocalDate.parse((uiState.value.importantDatesUiState as ImportantDatesUiState.Success).dates.semester_start)
+                LocalDate.parse((uiState.value.importantDatesUiState as ImportantDatesUiState.Success).dates.semesterStart)
             val diff = (DAYS.between(start, date).toInt())
-            uiState.value.scheduleList[abs(diff % 28)]
+            (uiState.value.fullScheduleUiState as FullScheduleUiState.Success).schedule[abs(diff % 28)]
         }else listOf()
+    }
+
+    private fun parseFromFullSchedule(fullSchedule: FullSchedule): List<List<SimpleScheduleElement>>{
+        val data = fullSchedule.schedule
+        val result = mutableListOf<List<SimpleScheduleElement>>()
+        for(i in 1..28){
+            val resultElement = mutableListOf<SimpleScheduleElement>()
+            val day = i%7
+            val week = i/7
+            val tempData = data.filter { it.day == day && it.dayNumber == week }.sortedBy { it.time.dayOrder }
+            for(element in tempData){
+                resultElement.add(
+                    SimpleScheduleElement(
+                        day = week*7 + day,
+                        number = element.time.dayOrder,
+                        times = element.time.timeString,
+                        type = element.subject.formFromString,
+                        name = element.subject.nameFromString,
+                        teacher = element.subject.teacherFull,
+                        room = element.room.name
+                    )
+                )
+            }
+            for(j in 0..tempData.size-2){
+                if(tempData[j+1].time.dayOrder - tempData[j].time.dayOrder > 1){
+                    resultElement.add(
+                        SimpleScheduleElement(
+                            day = week*7 + day,
+                            number = tempData[j].time.dayOrder+1,
+                            isWindow = true,
+                            windowDuration = ((tempData[j+1].time.dayOrder - tempData[j].time.dayOrder-1)*1.5).toString()
+                        )
+                    )
+                }
+            }
+            result.add(resultElement.sortedBy { it.number })
+        }
+        return result
+    }
+    fun getFullSchedule(refresh: Boolean = false){
+        println("GET_FULL_SCHEDULE")
+        val previousState = uiState.value.fullScheduleUiState
+        viewModelScope.launch {
+            _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Loading) }
+            try {
+                Log.d("TEST", "getFullSchedule started")
+                if (uiState.value.importantDatesUiState is ImportantDatesUiState.NotStarted || uiState.value.importantDatesUiState is ImportantDatesUiState.Error) suspendGetImportantDates(refresh)
+                if (uiState.value.userInfoUiState is UserInfoUiState.NotStarted || uiState.value.userInfoUiState is UserInfoUiState.Error)suspendGetUserInfo(refresh)
+                val res = mutableListOf<List<SimpleScheduleElement>>()
+                if(scheduleOfflineRepository.count() == 0 || refresh) {
+                    if(refresh) scheduleOfflineRepository.dump()
+                    var fullSchedule = FullSchedule()
+                    networkScheduleFromSiteRepository.getSchedule((uiState.value.userInfoUiState as UserInfoUiState.Success).userInfo.group) { it ->
+                        fullSchedule = it
+                    }
+                    res.addAll(parseFromFullSchedule(fullSchedule))
+                    for(list in res) {
+                        for (item in list)
+                            scheduleOfflineRepository.insertItem(item)
+                    }
+                    _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Success(res)) }
+                }else{
+                    for(i in 0..27){
+                        res.add(scheduleOfflineRepository.getAllItemsStream(i+1).first())
+                    }
+                    _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Success(res)) }
+                }
+                Log.d("TEST", "getFullSchedule ended")
+            }catch (e: HttpException){
+                if (previousState is FullScheduleUiState.Success) _uiState.update { currentState -> currentState.copy(fullScheduleUiState = previousState) }
+                else _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Error) }
+            }catch (e: java.lang.Exception){
+                if (previousState is FullScheduleUiState.Success) _uiState.update { currentState -> currentState.copy(fullScheduleUiState = previousState) }
+                else _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Error) }
+            }
+        }
     }
 }
