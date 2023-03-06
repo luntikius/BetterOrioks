@@ -42,6 +42,12 @@ class BetterOrioksViewModel(
     private val _uiState = MutableStateFlow(AppUiState())
     val uiState = _uiState.asStateFlow()
 
+    fun test(){
+        val repository = NetworkSubjectsFromSiteRepository()
+        viewModelScope.launch {
+            repository.getSubjects()
+        }
+    }
     fun retrieveToken() {
         viewModelScope.launch {
             _uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.Loading) }
