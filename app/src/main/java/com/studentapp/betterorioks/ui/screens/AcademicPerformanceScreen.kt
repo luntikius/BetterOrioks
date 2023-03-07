@@ -21,13 +21,14 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.model.BetterOrioksScreens
-import com.studentapp.betterorioks.model.Subject
+import com.studentapp.betterorioks.model.subjectsFromSite.SubjectFromSite
+import com.studentapp.betterorioks.model.subjectsFromSite.SubjectsData
 import com.studentapp.betterorioks.ui.components.ErrorScreen
 import com.studentapp.betterorioks.ui.components.LoadingScreen
 import com.studentapp.betterorioks.ui.components.RoundedMark
-import com.studentapp.betterorioks.ui.states.SubjectsUiState
 import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.BetterOrioksViewModel
+import com.studentapp.betterorioks.ui.states.SubjectsFromSiteUiState
 import com.studentapp.betterorioks.ui.theme.BetterOrioksTheme
 
 @Preview(showSystemUi = true, showBackground = true)
@@ -38,12 +39,12 @@ fun MyPreview(){
             Column {
                 AcademicPerformanceElement(
                     subjectName = "Изучение картофельных наук с добавлением перца чили и прочих",
-                    userPoints = 10.0,
+                    userPoints = "10.0",
                     systemPoints = 12,
                 )
                 AcademicPerformanceElement(
                     subjectName = "Математика для квадратика",
-                    userPoints = 50.0,
+                    userPoints = "50.0",
                     systemPoints = 100,
                 )
                 AcademicPerformanceElement()
@@ -54,10 +55,10 @@ fun MyPreview(){
 
 @Composable
 fun AcademicPerformanceScreen(uiState: AppUiState, navController: NavHostController, viewModel: BetterOrioksViewModel){
-    when(uiState.subjectsUiState){
-        is SubjectsUiState.Success ->
+    when(uiState.subjectsFromSiteUiState){
+        is SubjectsFromSiteUiState.Success ->
             AcademicPerformance(
-                subjects = (uiState.subjectsUiState as SubjectsUiState.Success).subjects,
+                subjects = (uiState.subjectsFromSiteUiState as SubjectsFromSiteUiState.Success).subjects,
                 setCurrentSubject = {viewModel.setCurrentSubject(it)},
                 onComponentClicked = {
                     navController.navigate(BetterOrioksScreens.AcademicPerformanceMore.name)
@@ -65,17 +66,17 @@ fun AcademicPerformanceScreen(uiState: AppUiState, navController: NavHostControl
                 viewModel = viewModel,
                 uiState = uiState
             )
-        is SubjectsUiState.Loading ->
-            AcademicPerformance(
-                viewModel = viewModel,
-                uiState = uiState,
-                isLoading = true
-            )
-        is SubjectsUiState.Error ->
+        is SubjectsFromSiteUiState.Error ->
             AcademicPerformance(
                 viewModel = viewModel,
                 uiState = uiState,
                 isError = true
+            )
+        else ->
+            AcademicPerformance(
+                viewModel = viewModel,
+                uiState = uiState,
+                isLoading = true
             )
     }
 }
@@ -84,7 +85,7 @@ fun AcademicPerformanceScreen(uiState: AppUiState, navController: NavHostControl
 fun AcademicPerformanceElement(
     modifier: Modifier = Modifier,
     subjectName: String = stringResource(R.string.blank),
-    userPoints: Double = 0.0,
+    userPoints: String = "-",
     systemPoints: Int = 10,
     onClick: () -> Unit = {}
 ){
@@ -121,7 +122,7 @@ fun AcademicPerformanceElement(
                     .wrapContentSize()
                     .padding(end = 8.dp)
             )
-            RoundedMark(userPoints = userPoints, systemPoints = systemPoints)
+            RoundedMark(userPoints = if(userPoints == "-") -2.0 else userPoints.toDouble(), systemPoints = systemPoints)
             Spacer(modifier = Modifier.width(8.dp))
             Icon(painter = painterResource(id = R.drawable.arrow_forward),
                 contentDescription = stringResource(R.string.move_next),
@@ -138,16 +139,16 @@ fun AcademicPerformanceElement(
 fun AcademicPerformance(
     modifier: Modifier = Modifier,
     onComponentClicked: () -> Unit = {},
-    subjects:List<Subject> = listOf(),
-    setCurrentSubject: (Subject) -> Unit = {},
+    subjects: SubjectsData = SubjectsData(),
+    setCurrentSubject: (SubjectFromSite) -> Unit = {},
     viewModel: BetterOrioksViewModel,
     uiState: AppUiState,
     isLoading: Boolean = false,
     isError: Boolean = false
 ){
     val pullRefreshState =
-        rememberPullRefreshState(uiState.isAcademicPerformanceRefreshing, {
-            viewModel.getAcademicPerformance()
+        rememberPullRefreshState(uiState.subjectsFromSiteUiState == SubjectsFromSiteUiState.Loading, {
+            viewModel.getAcademicPerformanceFromSite()
         })
     Box(modifier = modifier.pullRefresh(pullRefreshState)) {
         if(isLoading) {
@@ -161,11 +162,11 @@ fun AcademicPerformance(
         } else {
             LazyColumn(modifier = Modifier.pullRefresh(pullRefreshState).fillMaxSize()) {
                 item {Spacer(modifier = Modifier.size(16.dp))}
-                items(subjects) {
+                items(subjects.subjects) {
                     AcademicPerformanceElement(
                         subjectName = it.name,
-                        userPoints = it.currentGrade,
-                        systemPoints = it.maxGrade.toInt(),
+                        userPoints = it.grade.fullScore,
+                        systemPoints = it.getMaxScore(),
                         onClick = {
                             onComponentClicked()
                             setCurrentSubject(it)
@@ -176,7 +177,7 @@ fun AcademicPerformance(
             }
         }
         PullRefreshIndicator(
-            refreshing = uiState.isAcademicPerformanceRefreshing,
+            refreshing = uiState.subjectsFromSiteUiState is SubjectsFromSiteUiState.Loading,
             state = pullRefreshState, modifier = Modifier.align(Alignment.TopCenter),
             contentColor = MaterialTheme.colors.secondary
         )

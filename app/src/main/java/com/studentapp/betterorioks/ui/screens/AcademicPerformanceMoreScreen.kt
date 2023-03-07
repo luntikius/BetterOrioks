@@ -14,13 +14,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.studentapp.betterorioks.R
-import com.studentapp.betterorioks.model.SubjectMore
+import com.studentapp.betterorioks.model.subjectsFromSite.ControlEvent
 import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.components.ErrorScreen
 import com.studentapp.betterorioks.ui.components.LoadingScreen
 import com.studentapp.betterorioks.ui.components.RoundedMark
 import com.studentapp.betterorioks.ui.states.ImportantDatesUiState
-import com.studentapp.betterorioks.ui.states.SubjectsMoreUiState
+import com.studentapp.betterorioks.ui.states.SubjectsFromSiteUiState
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
@@ -49,12 +49,11 @@ fun AcademicPerformanceMoreElement(
     modifier: Modifier = Modifier,
     subjectName: String = stringResource(R.string.blank),
     subjectShort:String = "",
-    subjectFullName:String = "",
     userPoints: Double = 0.0,
     systemPoints: Int = 10,
     weeks: Int = 0
 ){
-    val finalSubjectShort = if(subjectShort != ""){" ($subjectShort)"}else{""}
+    val finalSubjectShort = if(subjectShort != "-" && subjectShort != " "){" ($subjectShort)"}else{""}
     val weeksLeft = when(weeks) {
         -2 -> stringResource(R.string.date_is_not_specified)
         -1 -> stringResource(R.string.event_passed)
@@ -83,16 +82,6 @@ fun AcademicPerformanceMoreElement(
             .weight(1f)
             .fillMaxWidth()
             .padding(start = 4.dp,end = 16.dp)) {
-            if (subjectFullName != "") {
-                Text(
-                    text = subjectFullName,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colors.primary,
-                    modifier = Modifier
-                        .wrapContentSize()
-                        .padding(start = 4.dp, end = 8.dp)
-                )
-            }
             Text(
                 text = "$subjectName$finalSubjectShort",
                 modifier = modifier.padding(start = 4.dp)
@@ -115,7 +104,7 @@ fun AcademicPerformanceMoreElement(
 fun AboutElement(
     uiState: AppUiState
 ){
-    val controlForm = if(uiState.currentSubject.controlForm == ""){ stringResource(R.string.not_specified) } else {uiState.currentSubject.controlForm}
+    val controlForm = if(uiState.currentSubject.formOfControl.name == ""){ stringResource(R.string.not_specified) } else {uiState.currentSubject.formOfControl.name}
     Text(text = stringResource(id = R.string.control_form,controlForm),
         modifier = Modifier.padding(top = 16.dp,start = 16.dp,end = 16.dp, bottom = 4.dp),
         color = MaterialTheme.colors.primary,
@@ -163,7 +152,7 @@ fun TopPerformanceMoreBar(onClick: () -> Unit = {}, uiState: AppUiState){
                         .padding(end = 16.dp),
                 )
                 Text(
-                    text = stringResource(id = R.string.of, currentSubject.maxGrade.toInt().toString()),
+                    text = stringResource(id = R.string.of, currentSubject.getMaxScore().toString()),
                     fontSize = 14.sp,
                     color = MaterialTheme.colors.primary,
                     textAlign = TextAlign.End,
@@ -172,8 +161,8 @@ fun TopPerformanceMoreBar(onClick: () -> Unit = {}, uiState: AppUiState){
                         .padding(end = 8.dp)
                 )
                 RoundedMark(
-                    userPoints = currentSubject.currentGrade,
-                    systemPoints = currentSubject.maxGrade.toInt()
+                    userPoints = if(currentSubject.grade.fullScore == "-") -2.0 else currentSubject.grade.fullScore.toDouble(),
+                    systemPoints = currentSubject.getMaxScore()
                 )
             }
         }
@@ -181,22 +170,14 @@ fun TopPerformanceMoreBar(onClick: () -> Unit = {}, uiState: AppUiState){
 }
 @Composable
 fun AcademicPerformanceMoreScreen(uiState: AppUiState, onButtonClick: () -> Unit){
-    when(uiState.currentSubjectDisciplines[uiState.currentSubject.id]){
-        is SubjectsMoreUiState.Success -> AcademicPerformanceMore(
-            disciplines = (uiState.currentSubjectDisciplines[uiState.currentSubject.id] as SubjectsMoreUiState.Success).Disciplines,
-            uiState = uiState,
-            onButtonClick = onButtonClick,
-            isLoading = false,
-            isError = false
-        )
-        is SubjectsMoreUiState.Loading -> AcademicPerformanceMore(
-            isLoading = true,
-            uiState = uiState,
-            isError = false,
-            onButtonClick = onButtonClick
-        )
-        else -> AcademicPerformanceMore(isLoading = true, isError = false, uiState = uiState, onButtonClick = onButtonClick)
-    }
+    AcademicPerformanceMore(
+        disciplines = (uiState.subjectsFromSiteUiState as SubjectsFromSiteUiState.Success).subjects.subjects.filter{ it.id == uiState.currentSubject.id }[0].getControlEvents(),
+        uiState = uiState,
+        onButtonClick = onButtonClick,
+        isLoading = false,
+        isError = false,
+        controlForm = uiState.currentSubject.formOfControl.name
+    )
 }
 
 
@@ -205,7 +186,8 @@ fun AcademicPerformanceMore (
     modifier: Modifier = Modifier,
     uiState: AppUiState,
     onButtonClick: () -> Unit = {},
-    disciplines: List<SubjectMore> = listOf(),
+    disciplines: List<ControlEvent> = listOf(),
+    controlForm: String = "",
     isLoading: Boolean,
     isError: Boolean
 ){
@@ -228,11 +210,10 @@ fun AcademicPerformanceMore (
                 ) {
                     items(disciplines) {
                         AcademicPerformanceMoreElement(
-                            subjectName = it.type,
-                            userPoints = it.currentGrade,
-                            systemPoints = it.maxGrade.toInt(),
-                            subjectFullName = it.name,
-                            subjectShort = it.alias,
+                            subjectName = it.type.name.ifBlank { controlForm },
+                            userPoints = if (it.grade.score == "-") -2.0 else if (it.grade.score == "н") -1.0 else it.grade.score.toDouble(),
+                            systemPoints = it.maxScore,
+                            subjectShort = it.shortName,
                             weeks = calculateWeeks(it.week, uiState)
                         )
                     }

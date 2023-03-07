@@ -22,9 +22,6 @@ class NetworkMainRepository(token:String)
         .build()
 
     //RetrofitServices
-    private val academicPerformanceRetrofitService: AcademicPerformanceApiService by lazy {
-        retrofit.create(AcademicPerformanceApiService::class.java)
-    }
 
     private val userInfoRetrofitService: UserInfoApiService by lazy {
         retrofit.create(UserInfoApiService::class.java)
@@ -39,9 +36,6 @@ class NetworkMainRepository(token:String)
     }
 
     //get functions
-    suspend fun getAcademicPerformance():List<Subject> {
-        return academicPerformanceRetrofitService.getAcademicPerformance(token = finalToken)
-    }
 
     suspend fun getUserInfo(): UserInfo {
         return userInfoRetrofitService.getUserInfo(token = finalToken)

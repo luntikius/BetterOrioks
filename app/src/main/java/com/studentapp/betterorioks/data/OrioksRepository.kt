@@ -1,9 +1,11 @@
 package com.studentapp.betterorioks.data
 
-import android.util.Log
+import com.studentapp.betterorioks.model.subjectsFromSite.SubjectsData
 import com.studentapp.betterorioks.network.OrioksAuthApiService
 import com.studentapp.betterorioks.network.OrioksAuthInfoApiService
 import com.studentapp.betterorioks.network.OrioksSubjectsApiService
+import kotlinx.serialization.decodeFromString
+import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okhttp3.Response
@@ -11,7 +13,7 @@ import okhttp3.ResponseBody
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 
-class NetworkSubjectsFromSiteRepository
+class NetworkOrioksRepository
 {
     private val BASE_URL =
         "https://orioks.miet.ru"
@@ -54,7 +56,7 @@ class NetworkSubjectsFromSiteRepository
         retrofitRequest.create(OrioksAuthApiService::class.java)
     }
 
-    private val orioksSubjectsApiService: OrioksSubjectsApiService by lazy{
+    private val orioksSubjectsRetrofitService: OrioksSubjectsApiService by lazy{
         retrofitRequest.create(OrioksSubjectsApiService::class.java)
     }
 
@@ -68,7 +70,13 @@ class NetworkSubjectsFromSiteRepository
             }
     }
 
-    suspend fun getSubjects() {
+    private val json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+        isLenient = true
+    }
+
+    suspend fun auth(login: String, password: String):String {
         val authScreen = orioksAuthInfoRetrofitService.getAuthInfo()
         val authCookies = getCookies(authScreen)
         val body = authScreen.body()?.string()
@@ -81,13 +89,22 @@ class NetworkSubjectsFromSiteRepository
                     startIndex = body.indexOf("name=\"_csrf\" value=\"")
                 )
         ) ?: ""
-        val authInfo = orioksAuthRetrofitService.auth(cookies = authCookies, csrf = csrf, login = "8211720", password = "20030615")
+
+        val authInfo = orioksAuthRetrofitService.auth(cookies = authCookies, csrf = csrf, login = login, password = password)
         val cookies = getCookies(authInfo)
-        val subjectsHtml = orioksSubjectsApiService.getSubjects(cookies = cookies).string()
-        val start = subjectsHtml.indexOf("\"dises\":")
-        val end = subjectsHtml.indexOf(string = "\n",startIndex = start)
-        val subjects = subjectsHtml.slice(start until end)
-        Log.d("OrioksAuthInfo", subjects)
+        return (cookies)
+    }
+
+    suspend fun getSubjects(cookies: String, setCookies: (String) -> Unit, ):SubjectsData{
+        val response = orioksSubjectsRetrofitService.getSubjects(cookies = cookies)
+        val subjectsHtml = response.body()?.string() ?: ""
+        val start = subjectsHtml.indexOf("{\"dises\":")
+        val end = subjectsHtml.indexOf(string = "</",startIndex = start)
+        val subjectsString = subjectsHtml.slice(start until end)
+        val subjects = json.decodeFromString<SubjectsData>(subjectsString)
+        val newCookies = getCookies(response)
+        setCookies(newCookies)
+        return (subjects)
     }
 
 

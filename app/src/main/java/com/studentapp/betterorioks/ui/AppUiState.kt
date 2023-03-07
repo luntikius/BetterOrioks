@@ -1,17 +1,15 @@
 package com.studentapp.betterorioks.ui
 
-import com.studentapp.betterorioks.model.Subject
+import com.studentapp.betterorioks.model.subjectsFromSite.SubjectFromSite
 import com.studentapp.betterorioks.ui.states.*
 import java.time.LocalDate
 
 data class AppUiState (
-    var currentSubject: Subject = Subject(),
-    var subjectsUiState: SubjectsUiState = SubjectsUiState.Loading,
-    var currentSubjectDisciplines: Map<Int, SubjectsMoreUiState> = mapOf(),
-    var isAcademicPerformanceRefreshing: Boolean = false,
+    var currentSubject: SubjectFromSite = SubjectFromSite(),
+    var subjectsFromSiteUiState: SubjectsFromSiteUiState = SubjectsFromSiteUiState.NotStarted,
     var token: String = "",
+    var authCookies: String = "",
     var authState: AuthState = AuthState.NotLoggedIn,
-    var loadingState: Boolean = true,
     var userInfoUiState: UserInfoUiState = UserInfoUiState.NotStarted,
     var academicDebtsUiState: DebtsUiState = DebtsUiState.NotStarted,
     var importantDatesUiState: ImportantDatesUiState = ImportantDatesUiState.NotStarted,

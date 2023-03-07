@@ -9,7 +9,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import androidx.navigation.NavController
 import com.studentapp.betterorioks.BetterOrioksApplication
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.data.*
@@ -18,11 +17,11 @@ import com.studentapp.betterorioks.data.schedule.ScheduleOfflineRepository
 import com.studentapp.betterorioks.model.*
 import com.studentapp.betterorioks.model.scheduleFromSite.FullSchedule
 import com.studentapp.betterorioks.model.scheduleFromSite.SimpleScheduleElement
+import com.studentapp.betterorioks.model.subjectsFromSite.SubjectFromSite
 import com.studentapp.betterorioks.ui.screens.dayOfWeekToInt
 import java.time.temporal.ChronoUnit.DAYS
 import com.studentapp.betterorioks.ui.states.*
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
@@ -35,7 +34,8 @@ class BetterOrioksViewModel(
    // private val academicPerformanceRepository: AcademicPerformanceRepository,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val networkScheduleFromSiteRepository: NetworkScheduleFromSiteRepository,
-    private val scheduleOfflineRepository: ScheduleOfflineRepository
+    private val scheduleOfflineRepository: ScheduleOfflineRepository,
+    private val orioksRepository: NetworkOrioksRepository
 ): ViewModel() {
 
 
@@ -43,23 +43,30 @@ class BetterOrioksViewModel(
     val uiState = _uiState.asStateFlow()
 
     fun test(){
-        val repository = NetworkSubjectsFromSiteRepository()
+    }
+
+    private fun setCookies(cookies: String){
+        _uiState.update { currentState -> currentState.copy(authCookies = cookies) }
         viewModelScope.launch {
-            repository.getSubjects()
+            userPreferencesRepository.setCookies(cookies)
         }
     }
     fun retrieveToken() {
         viewModelScope.launch {
             _uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.Loading) }
             val token = userPreferencesRepository.token.first()
-            _uiState.update { currentUiState -> currentUiState.copy(token = token) }
-            if (uiState.value.token != "") {
+            val cookies = userPreferencesRepository.authCookies.first()
+            _uiState.update { currentUiState -> currentUiState.copy(token = token, authCookies = cookies) }
+            if (uiState.value.token != "" && uiState.value.authCookies != "") {
                 _uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.LoggedIn) }
-            } else (_uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.NotLoggedIn) })
+            }else if(uiState.value.token != "" && uiState.value.authCookies == ""){
+                exit()
+            }
+            else (_uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.NotLoggedIn) })
         }
     }
 
-    fun exit(navController: NavController) {
+    fun exit() {
         viewModelScope.launch {
             _uiState.update { currentState -> currentState.copy(authState = AuthState.Loading) }
             val exitRepository = NetworkExitRepository(uiState.value.token)
@@ -68,13 +75,10 @@ class BetterOrioksViewModel(
                 userPreferencesRepository.dump()
                 scheduleOfflineRepository.dump()
                 _uiState.update { AppUiState() }
-                navController.popBackStack(
-                    route = BetterOrioksScreens.Schedule.name,
-                    inclusive = false
-                )
             } catch (e: HttpException) {
                 if (e.code() == 401) {
                     userPreferencesRepository.setToken("")
+                    userPreferencesRepository.setCookies("")
                     _uiState.update { currentState -> currentState.copy(authState = AuthState.NotLoggedIn) }
                 }
             } catch (e: IOException) {
@@ -83,79 +87,32 @@ class BetterOrioksViewModel(
         }
     }
 
-    fun getAcademicPerformance() {
-        println("GET_ACADEMIC_PERFORMANCE")
+    fun getAcademicPerformanceFromSite() {
+        println("GET_ACADEMIC_PERFORMANCE_FROM_SITE")
+        _uiState.update { currentState -> currentState.copy(subjectsFromSiteUiState = SubjectsFromSiteUiState.Loading) }
         viewModelScope.launch {
-            _uiState.update { currentState ->
-                currentState.copy(
-                    subjectsUiState = SubjectsUiState.Loading,
-                    isAcademicPerformanceRefreshing = true,
-                    loadingState = false
+            try {
+                val subjects = orioksRepository.getSubjects(
+                    cookies = _uiState.value.authCookies,
+                    setCookies = { setCookies(it) }
                 )
-            }
-            delay(500)
-            val academicPerformanceRepository = NetworkMainRepository(token = uiState.value.token)
-            val subjectsUiState = try {
-                val subjects = academicPerformanceRepository.getAcademicPerformance()
-                SubjectsUiState.Success(subjects)
+                Log.d("GET_ACADEMIC_PERFORMANCE_FROM_SITE", subjects.toString())
+                _uiState.update { currentState -> currentState.copy(subjectsFromSiteUiState = SubjectsFromSiteUiState.Success(subjects)) }
             } catch (e: java.lang.Exception) {
-                SubjectsUiState.Error
+                _uiState.update { currentState -> currentState.copy(subjectsFromSiteUiState = SubjectsFromSiteUiState.Error) }
             } catch (e: HttpException) {
-                SubjectsUiState.Error
+                _uiState.update { currentState -> currentState.copy(subjectsFromSiteUiState = SubjectsFromSiteUiState.Error) }
             }
-            _uiState.update { currentState ->
-                currentState.copy(
-                    subjectsUiState = subjectsUiState,
-                    isAcademicPerformanceRefreshing = false
-                )
-            }
-            if (uiState.value.subjectsUiState is SubjectsUiState.Success) {
-                (uiState.value.subjectsUiState as SubjectsUiState.Success).subjects.forEach { subject ->
-                    getAcademicPerformanceMore(subject.id)
-                }
-            }
-            getImportantDates()
+            suspendGetImportantDates()
         }
     }
 
-    private fun getAcademicPerformanceMore(disciplineId: Int) {
-        println("GET_ACADEMIC_PERFORMANCE_MORE")
-        val academicPerformanceMoreRepository =
-            NetworkAcademicPerformanceMoreRepository(disciplineId, token = uiState.value.token)
-        viewModelScope.launch {
-            _uiState.update { currentState ->
-                currentState.copy(
-                    currentSubjectDisciplines = _uiState.value.currentSubjectDisciplines + Pair(
-                        disciplineId,
-                        SubjectsMoreUiState.Loading
-                    )
-                )
-            }
-            val subjectsUiState = try {
-                val subjects = academicPerformanceMoreRepository.getAcademicPerformanceMore()
-                SubjectsMoreUiState.Success(subjects)
-            } catch (e: java.lang.Exception) {
-                SubjectsMoreUiState.Error
-            } catch (e: HttpException) {
-                SubjectsMoreUiState.Error
-            }
-            _uiState.update { currentState ->
-                currentState.copy(
-                    currentSubjectDisciplines = _uiState.value.currentSubjectDisciplines + Pair(
-                        disciplineId,
-                        subjectsUiState
-                    )
-                )
-            }
-        }
-    }
-
-    fun setCurrentSubject(subject: Subject) {
+    fun setCurrentSubject(subject: SubjectFromSite) {
         _uiState.update { currentState -> currentState.copy(currentSubject = subject) }
     }
 
     fun setCurrentDateWithMovingTopBar(date: LocalDate, lazyRowState: LazyListState, coroutineScope: CoroutineScope, startDate: LocalDate) {
-        _uiState.update { currentState -> currentState.copy(currentSelectedDate = date,) }
+        _uiState.update { currentState -> currentState.copy(currentSelectedDate = date) }
         coroutineScope.launch {
             lazyRowState.animateScrollToItem(abs(DAYS.between(startDate,date).toInt() - dayOfWeekToInt(date)))
             if (!uiState.value.scheduleInitUiState) _uiState.update { currentState -> currentState.copy(scheduleInitUiState = true) }
@@ -170,19 +127,36 @@ class BetterOrioksViewModel(
                 BetterOrioksViewModel(
                     userPreferencesRepository = application.userPreferencesRepository,
                     networkScheduleFromSiteRepository = application.networkScheduleFromSiteRepository,
-                    scheduleOfflineRepository = application.container.scheduleRepository
+                    scheduleOfflineRepository = application.container.scheduleRepository,
+                    orioksRepository = application.container.orioksRepository
                 )
             }
         }
     }
 
-    fun getToken(loginDetails: String) {
-        println("GET_TOKEN")
-        val encodedLoginDetails = Base64.getEncoder().encodeToString(loginDetails.toByteArray())
+    fun getAuthInfo(login: String = "", password: String = "") {
+        println("GET_AUTH_INFO")
+        val encodedLoginDetails = Base64.getEncoder().encodeToString("$login:$password".toByteArray())
         val tokenRepository = NetworkTokenRepository(encodedLoginDetails)
         viewModelScope.launch {
-            val token: Token = try {
-                tokenRepository.getToken()
+            try {
+                val token = tokenRepository.getToken()
+                val cookies = orioksRepository.auth(login = login, password = password)
+                if (token.token != "" && cookies != "") {
+                    userPreferencesRepository.setCookies(cookies = cookies)
+                    userPreferencesRepository.setToken(token = token.token)
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            token = token.token,
+                            authCookies = cookies,
+                            userInfoUiState = UserInfoUiState.NotStarted,
+                            academicDebtsUiState = DebtsUiState.NotStarted,
+                            subjectsFromSiteUiState = SubjectsFromSiteUiState.Loading,
+                            authState = AuthState.LoggedIn
+                        )
+                    }
+                    Log.d("GET_AUTH_INFO", cookies)
+                }
             } catch
                 (e: HttpException) {
                 val error = when (e.code()) {
@@ -191,19 +165,6 @@ class BetterOrioksViewModel(
                     else -> AuthState.UnexpectedError
                 }
                 _uiState.update { currentState -> currentState.copy(authState = error) }
-                Token()
-            }
-            if (token.token != "") {
-                userPreferencesRepository.setToken(token = token.token)
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        token = token.token,
-                        userInfoUiState = UserInfoUiState.NotStarted,
-                        academicDebtsUiState = DebtsUiState.NotStarted,
-                        subjectsUiState = SubjectsUiState.Loading,
-                        authState = AuthState.LoggedIn
-                    )
-                }
             }
         }
     }
@@ -211,12 +172,6 @@ class BetterOrioksViewModel(
     fun getUserInfo(refresh: Boolean = false){
         viewModelScope.launch {
             suspendGetUserInfo(refresh = refresh)
-        }
-    }
-
-    private fun getImportantDates(refresh: Boolean = false){
-        viewModelScope.launch {
-            suspendGetImportantDates(refresh = refresh)
         }
     }
     private suspend fun suspendGetUserInfo(refresh: Boolean = false) {
@@ -401,7 +356,7 @@ class BetterOrioksViewModel(
                 if(scheduleOfflineRepository.count() == 0 || refresh) {
                     if(refresh) scheduleOfflineRepository.dump()
                     var fullSchedule = FullSchedule()
-                    networkScheduleFromSiteRepository.getSchedule((uiState.value.userInfoUiState as UserInfoUiState.Success).userInfo.group) { it ->
+                    networkScheduleFromSiteRepository.getSchedule((uiState.value.userInfoUiState as UserInfoUiState.Success).userInfo.group) {
                         fullSchedule = it
                     }
                     res.addAll(parseFromFullSchedule(fullSchedule))

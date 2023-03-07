@@ -64,7 +64,7 @@ fun BetterOrioksApp(){
                         popEnterTransition = { fadeIn(animationSpec = tween(800)) },
                         popExitTransition = { fadeOut() },
                     ) {
-                        if (uiState.loadingState) viewModel.getAcademicPerformance()
+                        if (uiState.subjectsFromSiteUiState is SubjectsFromSiteUiState.NotStarted) viewModel.getAcademicPerformanceFromSite()
                         AcademicPerformanceScreen(
                             uiState = uiState,
                             navController = navController,
@@ -104,7 +104,7 @@ fun BetterOrioksApp(){
                     ) {
                         if(uiState.userInfoUiState == UserInfoUiState.NotStarted)viewModel.getUserInfo()
                         ProfileScreen(
-                            onExitClick = { viewModel.exit(navController)},
+                            onExitClick = { viewModel.exit()},
                             uiState = uiState,
                             onDebtClick = {navController.navigate(BetterOrioksScreens.Debts.name)},
                             viewModel = viewModel
@@ -141,7 +141,7 @@ fun BetterOrioksApp(){
             LoadingScreen(modifier = Modifier.fillMaxSize())
         }
         else -> {
-            AuthorizationScreen(onLogin = {viewModel.getToken(it)}, uiState = uiState)
+            AuthorizationScreen(onLogin = {s1,s2 -> viewModel.getAuthInfo(login = s1, password = s2)}, uiState = uiState)
         }
     }
 }

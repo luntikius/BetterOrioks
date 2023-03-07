@@ -56,4 +56,5 @@
     <string name="free_day">В этот день пар нет, отличный повод провести время с друзьями и отдохнуть на свежем воздухе!</string>
     <string name="error_while_loading_data">Не удалось обновить данные</string>
     <string name="expand">Раскрыть</string>
+    <string name="run_test">Запустить тест</string>
 </resources>

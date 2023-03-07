@@ -429,7 +429,7 @@ fun Schedule(
             }
         }
         PullRefreshIndicator(
-            refreshing = uiState.isAcademicPerformanceRefreshing,
+            refreshing = uiState.fullScheduleUiState is FullScheduleUiState.Loading,
             state = pullRefreshState, modifier = Modifier.align(Alignment.TopCenter),
             contentColor = MaterialTheme.colors.secondary
         )

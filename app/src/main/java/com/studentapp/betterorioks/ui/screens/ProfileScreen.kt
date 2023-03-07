@@ -22,6 +22,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.studentapp.betterorioks.R
+import com.studentapp.betterorioks.data.AdminIds
 import com.studentapp.betterorioks.model.UserInfo
 import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.BetterOrioksViewModel
@@ -149,8 +150,14 @@ fun ProfileScreen(
                 ProfileCard(uiState = uiState)
                 Spacer(modifier = Modifier.size(8.dp))
                 AnyButton(onClick = onDebtClick, text = R.string.Debts, icon = R.drawable.debt)
-                Spacer(modifier = Modifier.size(8.dp))
-                AnyButton(text = R.string.app_name, icon = R.drawable.visibility_on, onClick = {viewModel.test()})
+                val id = if(uiState.userInfoUiState is UserInfoUiState.Success) (uiState.userInfoUiState as UserInfoUiState.Success).userInfo.recordBookId else 0
+                if (id.toString() in AdminIds.ids) {
+                    Spacer(modifier = Modifier.size(8.dp))
+                    AnyButton(
+                        text = R.string.run_test,
+                        icon = R.drawable.visibility_on,
+                        onClick = { viewModel.test() })
+                }
             }
             //temp
             item{
@@ -182,7 +189,7 @@ fun ProfileScreen(
             }
         }
         PullRefreshIndicator(
-            refreshing = uiState.isAcademicPerformanceRefreshing,
+            refreshing = uiState.userInfoUiState is UserInfoUiState.Loading,
             state = pullRefreshState, modifier = Modifier.align(Alignment.TopCenter),
             contentColor = MaterialTheme.colors.secondary
         )

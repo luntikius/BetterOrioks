@@ -16,6 +16,7 @@ class UserPreferencesRepository(
 ) {
     private companion object {
         val TOKEN = stringPreferencesKey("token")
+        val AUTH_COOKIES = stringPreferencesKey("authCookies")
         val STUDENT_ID = intPreferencesKey("studentId")
         val FULL_NAME = stringPreferencesKey("fullName")
         val GROUP = stringPreferencesKey("group")
@@ -28,6 +29,12 @@ class UserPreferencesRepository(
     suspend fun setToken(token: String) {
         dataStore.edit{preferences ->
             preferences[TOKEN] = token
+        }
+    }
+
+    suspend fun setCookies(cookies: String){
+        dataStore.edit { preferences ->
+            preferences[AUTH_COOKIES] = cookies
         }
     }
 
@@ -62,7 +69,10 @@ class UserPreferencesRepository(
     }
 
     val token: Flow<String> = dataStore.data.catch{}.map{ preferences ->
-        preferences[TOKEN] ?:""
+        preferences[TOKEN] ?: ""
+    }
+    val authCookies: Flow<String> = dataStore.data.catch {}.map { preferences ->
+        preferences[AUTH_COOKIES] ?: ""
     }
     val semesterStart: Flow<String> = dataStore.data.catch {}.map {preferences -> preferences[SEMESTER_START] ?: ""}
     val sessionStart: Flow<String> = dataStore.data.catch {}.map { preferences -> preferences[SESSION_START] ?: "" }

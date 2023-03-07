@@ -290,7 +290,7 @@ fun AcademicDebtScreen(
                     }
                 }
                 PullRefreshIndicator(
-                    refreshing = uiState.isAcademicPerformanceRefreshing,
+                    refreshing = uiState.academicDebtsUiState is DebtsUiState.Loading,
                     state = pullRefreshState, modifier = Modifier.align(Alignment.TopCenter),
                     contentColor = MaterialTheme.colors.secondary
                 )

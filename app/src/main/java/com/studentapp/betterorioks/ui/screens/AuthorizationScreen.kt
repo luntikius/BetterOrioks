@@ -98,7 +98,7 @@ fun AuthenticationPasswordTextField(
 
 @Composable
 fun AuthorizationScreen(
-    onLogin: (String) -> Unit = {},
+    onLogin: (String,String) -> Unit,
     uiState: AppUiState = AppUiState()
 ){
     BetterOrioksTheme{
@@ -149,7 +149,7 @@ fun AuthorizationScreen(
                 )
                 Button(
                     onClick = {
-                        onLogin("$login:$password")
+                        onLogin(login, password)
                         password = ""
                         login = ""
                               },
