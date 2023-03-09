@@ -17,6 +17,7 @@ import com.studentapp.betterorioks.data.schedule.ScheduleOfflineRepository
 import com.studentapp.betterorioks.model.*
 import com.studentapp.betterorioks.model.scheduleFromSite.FullSchedule
 import com.studentapp.betterorioks.model.scheduleFromSite.SimpleScheduleElement
+import com.studentapp.betterorioks.model.subjectsFromSite.ControlEvent
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectFromSite
 import com.studentapp.betterorioks.ui.screens.dayOfWeekToInt
 import java.time.temporal.ChronoUnit.DAYS
@@ -109,6 +110,10 @@ class BetterOrioksViewModel(
 
     fun setCurrentSubject(subject: SubjectFromSite) {
         _uiState.update { currentState -> currentState.copy(currentSubject = subject) }
+    }
+
+    fun setCurrentControlEvent(controlEvent: ControlEvent){
+        _uiState.update { currentState -> currentState.copy(currentControlEvent = controlEvent) }
     }
 
     fun setCurrentDateWithMovingTopBar(date: LocalDate, lazyRowState: LazyListState, coroutineScope: CoroutineScope, startDate: LocalDate) {

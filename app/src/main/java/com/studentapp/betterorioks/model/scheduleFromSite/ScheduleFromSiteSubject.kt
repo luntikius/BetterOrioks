@@ -19,7 +19,7 @@ class ScheduleFromSiteSubject(
     val formFromString =
         if (name.contains("["))
             name.slice(name.indexOf("[")+1 until name.indexOf("]"))
-        else ""
+        else "Н/С"
 
     val nameFromString =
         if (name.contains("["))

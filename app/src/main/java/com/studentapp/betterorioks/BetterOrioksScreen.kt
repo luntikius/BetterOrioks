@@ -94,6 +94,9 @@ fun BetterOrioksApp(){
                                     inclusive = false
                                 )
                             },
+                            onControlEventClick = {
+                                viewModel.setCurrentControlEvent(it)
+                            }
                         )
 
                     }

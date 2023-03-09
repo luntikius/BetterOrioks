@@ -7,8 +7,8 @@
     <string name="ORIOKS">ОРИОКС</string>
     <string name="control_form">Форма контроля: %1$s</string>
     <string name="not_specified">Не назначено</string>
-    <string name="teachers">Преподаватели: %1$s</string>
-    <string name="teacher">Преподаватель: %1$s</string>
+    <string name="teachers">Преподаватели: </string>
+    <string name="teacher">Преподаватель: </string>
     <string name="loading_failed">Не удалось загрузить данные</string>
     <string name="login">Номер студенческого билета</string>
     <string name="password">Пароль</string>
@@ -57,4 +57,6 @@
     <string name="error_while_loading_data">Не удалось обновить данные</string>
     <string name="expand">Раскрыть</string>
     <string name="run_test">Запустить тест</string>
+    <string name="email">Почта: </string>
+    <string name="text_copied_to_buffer">Текст скопирован в буфер обмена</string>
 </resources>

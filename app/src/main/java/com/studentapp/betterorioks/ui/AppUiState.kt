@@ -1,11 +1,13 @@
 package com.studentapp.betterorioks.ui
 
+import com.studentapp.betterorioks.model.subjectsFromSite.ControlEvent
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectFromSite
 import com.studentapp.betterorioks.ui.states.*
 import java.time.LocalDate
 
 data class AppUiState (
     var currentSubject: SubjectFromSite = SubjectFromSite(),
+    var currentControlEvent: ControlEvent = ControlEvent(),
     var subjectsFromSiteUiState: SubjectsFromSiteUiState = SubjectsFromSiteUiState.NotStarted,
     var token: String = "",
     var authCookies: String = "",

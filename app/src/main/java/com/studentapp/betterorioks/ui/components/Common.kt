@@ -92,57 +92,39 @@ fun BottomNavigationBar(navController: NavHostController) {
         BottomNavItem.AcademicPerformance,
         BottomNavItem.Profile,
     )
-    BottomNavigation(
-        backgroundColor = MaterialTheme.colors.primaryVariant,
-        contentColor = Color.Black,
-        elevation = 8.dp,
-        modifier = Modifier
-            .wrapContentSize()
-            .defaultMinSize(minHeight = 60.dp)
-    ) {
-        val navBackStackEntry by navController.currentBackStackEntryAsState()
-        val currentRoute = navBackStackEntry?.destination?.route
-        val scheduleItem = BottomNavItem.Schedule
-        BottomNavigationItem(
-            icon = { Icon(painterResource(id = scheduleItem.icon), contentDescription = scheduleItem.title, modifier = Modifier.size(30.dp)) },
-            label = {
-                Text(
-                    text = scheduleItem.title,
-                    fontSize = 9.sp
-                )
-            },
-            selectedContentColor = MaterialTheme.colors.secondary,
-            unselectedContentColor = MaterialTheme.colors.secondary.copy(0.4f),
-            alwaysShowLabel = true,
-            selected = currentRoute == scheduleItem.screen_route,
-            onClick = {
-                navController.navigate(scheduleItem.screen_route) {
-
-                    navController.graph.startDestinationRoute?.let { screen_route ->
-                        popUpTo(screen_route) {
-                            saveState = true
-                        }
-                    }
-                    launchSingleTop = true
-                    restoreState = true
-                }
-            }
-        )
-        items.forEach { item ->
+    Column {
+        Divider()
+        BottomNavigation(
+            backgroundColor = MaterialTheme.colors.primaryVariant,
+            contentColor = Color.Black,
+            elevation = 8.dp,
+            modifier = Modifier
+                .wrapContentSize()
+                .defaultMinSize(minHeight = 60.dp)
+        ) {
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentRoute = navBackStackEntry?.destination?.route
+            val scheduleItem = BottomNavItem.Schedule
             BottomNavigationItem(
-                icon = { Icon(painterResource(id = item.icon), contentDescription = item.title, modifier = Modifier.size(30.dp)) },
+                icon = {
+                    Icon(
+                        painterResource(id = scheduleItem.icon),
+                        contentDescription = scheduleItem.title,
+                        modifier = Modifier.size(30.dp)
+                    )
+                },
                 label = {
                     Text(
-                        text = item.title,
+                        text = scheduleItem.title,
                         fontSize = 9.sp
                     )
                 },
                 selectedContentColor = MaterialTheme.colors.secondary,
                 unselectedContentColor = MaterialTheme.colors.secondary.copy(0.4f),
                 alwaysShowLabel = true,
-                selected = currentRoute == item.screen_route,
+                selected = currentRoute == scheduleItem.screen_route,
                 onClick = {
-                    navController.navigate(item.screen_route) {
+                    navController.navigate(scheduleItem.screen_route) {
 
                         navController.graph.startDestinationRoute?.let { screen_route ->
                             popUpTo(screen_route) {
@@ -150,10 +132,43 @@ fun BottomNavigationBar(navController: NavHostController) {
                             }
                         }
                         launchSingleTop = true
-                        restoreState = false
+                        restoreState = true
                     }
                 }
             )
+            items.forEach { item ->
+                BottomNavigationItem(
+                    icon = {
+                        Icon(
+                            painterResource(id = item.icon),
+                            contentDescription = item.title,
+                            modifier = Modifier.size(30.dp)
+                        )
+                    },
+                    label = {
+                        Text(
+                            text = item.title,
+                            fontSize = 9.sp
+                        )
+                    },
+                    selectedContentColor = MaterialTheme.colors.secondary,
+                    unselectedContentColor = MaterialTheme.colors.secondary.copy(0.4f),
+                    alwaysShowLabel = true,
+                    selected = currentRoute == item.screen_route,
+                    onClick = {
+                        navController.navigate(item.screen_route) {
+
+                            navController.graph.startDestinationRoute?.let { screen_route ->
+                                popUpTo(screen_route) {
+                                    saveState = true
+                                }
+                            }
+                            launchSingleTop = true
+                            restoreState = false
+                        }
+                    }
+                )
+            }
         }
     }
 }
