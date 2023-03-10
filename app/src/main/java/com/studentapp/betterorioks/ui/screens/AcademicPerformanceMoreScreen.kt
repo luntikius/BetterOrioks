@@ -2,6 +2,7 @@ package com.studentapp.betterorioks.ui.screens
 import android.content.Intent
 import android.net.Uri
 import android.widget.Toast
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -253,10 +254,11 @@ fun ResourcesPopup(controlEvent: ControlEvent, onDismiss: () -> Unit, controlFor
     ){
         Card(
             shape = RoundedCornerShape(16.dp),
+            border = BorderStroke(1.dp, color = MaterialTheme.colors.primary),
             modifier = Modifier
                 .padding(16.dp)
-                .shadow(16.dp)
-                .fillMaxHeight(0.5f),
+                .shadow(4.dp)
+                .fillMaxHeight(0.7f),
             backgroundColor = MaterialTheme.colors.background,
         ) {
             Column() {
@@ -265,7 +267,9 @@ fun ResourcesPopup(controlEvent: ControlEvent, onDismiss: () -> Unit, controlFor
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(16.dp),
+                        modifier = Modifier
+                            .padding(16.dp)
+                            .defaultMinSize(minHeight = 42.dp)
                     ) {
                         Text(
                             text = controlEvent.name.ifBlank { controlEvent.type.name.ifBlank { controlForm } },
@@ -286,7 +290,7 @@ fun ResourcesPopup(controlEvent: ControlEvent, onDismiss: () -> Unit, controlFor
                 }
                 Divider()
                 LazyColumn(
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                    modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 8.dp),
                     verticalArrangement = Arrangement.spacedBy(4.dp)
                 ){
                     item{ Spacer(modifier = Modifier.size(8.dp))}

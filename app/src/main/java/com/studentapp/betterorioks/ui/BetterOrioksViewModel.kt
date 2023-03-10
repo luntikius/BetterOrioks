@@ -9,16 +9,20 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.viewModelScope
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavController
 import com.studentapp.betterorioks.BetterOrioksApplication
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.data.*
 import com.studentapp.betterorioks.data.schedule.NetworkScheduleFromSiteRepository
 import com.studentapp.betterorioks.data.schedule.ScheduleOfflineRepository
+import com.studentapp.betterorioks.data.subjects.SimpleSubjectsOfflineRepository
 import com.studentapp.betterorioks.model.*
 import com.studentapp.betterorioks.model.scheduleFromSite.FullSchedule
 import com.studentapp.betterorioks.model.scheduleFromSite.SimpleScheduleElement
 import com.studentapp.betterorioks.model.subjectsFromSite.ControlEvent
+import com.studentapp.betterorioks.model.subjectsFromSite.SimpleSubject
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectFromSite
+import com.studentapp.betterorioks.model.subjectsFromSite.SubjectsData
 import com.studentapp.betterorioks.ui.screens.dayOfWeekToInt
 import java.time.temporal.ChronoUnit.DAYS
 import com.studentapp.betterorioks.ui.states.*
@@ -36,38 +40,51 @@ class BetterOrioksViewModel(
     private val userPreferencesRepository: UserPreferencesRepository,
     private val networkScheduleFromSiteRepository: NetworkScheduleFromSiteRepository,
     private val scheduleOfflineRepository: ScheduleOfflineRepository,
-    private val orioksRepository: NetworkOrioksRepository
+    private val orioksRepository: NetworkOrioksRepository,
+    private val simpleSubjectsOfflineRepository: SimpleSubjectsOfflineRepository
 ): ViewModel() {
 
 
     private val _uiState = MutableStateFlow(AppUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun test(){
-    }
-
-    private fun setCookies(cookies: String){
-        _uiState.update { currentState -> currentState.copy(authCookies = cookies) }
+    fun test(context: Context){
         viewModelScope.launch {
-            userPreferencesRepository.setCookies(cookies)
+            simpleSubjectsOfflineRepository.dump()
+            parseAcademicPerformance(subjectsData = (uiState.value.subjectsFromSiteUiState as SubjectsFromSiteUiState.Success).subjects).forEach{
+                simpleSubjectsOfflineRepository.insertItem(it)
+            }
+            simpleSubjectsOfflineRepository.modify()
+            val new = parseAcademicPerformance(subjectsData = (uiState.value.subjectsFromSiteUiState as SubjectsFromSiteUiState.Success).subjects)
+            val diff = calculateSubjectsDifferences(new)
         }
     }
-    fun retrieveToken() {
+
+    private fun setCookies(cookies: String, csrf: String){
+        _uiState.update { currentState -> currentState.copy(authCookies = cookies.ifBlank { uiState.value.authCookies }, csrf = csrf) }
+        viewModelScope.launch {
+            userPreferencesRepository.setCookies(cookies.ifBlank { uiState.value.authCookies })
+            userPreferencesRepository.setCsrf(csrf)
+        }
+    }
+    fun retrieveToken(context: Context, navController: NavController) {
         viewModelScope.launch {
             _uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.Loading) }
             val token = userPreferencesRepository.token.first()
             val cookies = userPreferencesRepository.authCookies.first()
-            _uiState.update { currentUiState -> currentUiState.copy(token = token, authCookies = cookies) }
+            val csrf = userPreferencesRepository.csrf.first()
+            _uiState.update { currentUiState -> currentUiState.copy(token = token, authCookies = cookies, csrf = csrf) }
             if (uiState.value.token != "" && uiState.value.authCookies != "") {
-                _uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.LoggedIn) }
+                _uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.LoggedIn, updateState = false) }
             }else if(uiState.value.token != "" && uiState.value.authCookies == ""){
-                exit()
+                _uiState.update { currentState -> currentState.copy(updateState = true) }
+                exit(context = context, navController = navController)
             }
             else (_uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.NotLoggedIn) })
         }
     }
 
-    fun exit() {
+    fun exit(context: Context, navController: NavController) {
         viewModelScope.launch {
             _uiState.update { currentState -> currentState.copy(authState = AuthState.Loading) }
             val exitRepository = NetworkExitRepository(uiState.value.token)
@@ -75,17 +92,105 @@ class BetterOrioksViewModel(
                 exitRepository.removeToken()
                 userPreferencesRepository.dump()
                 scheduleOfflineRepository.dump()
-                _uiState.update { AppUiState() }
+                navController.popBackStack()
+                _uiState.update { AppUiState(updateState = uiState.value.updateState, authState = AuthState.NotLoggedIn) }
             } catch (e: HttpException) {
                 if (e.code() == 401) {
-                    userPreferencesRepository.setToken("")
-                    userPreferencesRepository.setCookies("")
+                    userPreferencesRepository.dump()
+                    scheduleOfflineRepository.dump()
+                    navController.popBackStack()
                     _uiState.update { currentState -> currentState.copy(authState = AuthState.NotLoggedIn) }
+                }else{
+                    _uiState.update { currentState -> currentState.copy(authState = AuthState.LoggedIn) }
+                    Toast.makeText(context,context.getString(R.string.wasnt_able_to_delete_your_token), Toast.LENGTH_SHORT).show()
                 }
             } catch (e: IOException) {
                 _uiState.update { currentState -> currentState.copy(authState = AuthState.LoggedIn) }
+                Toast.makeText(context,context.getString(R.string.wasnt_able_to_delete_your_token), Toast.LENGTH_SHORT).show()
             }
         }
+    }
+
+    private suspend fun checkCookies(){
+        if(uiState.value.cookiesErrorCount >= 2) {
+            _uiState.update { currentState -> currentState.copy(cookiesErrorCount = 0) }
+            getAuthInfo(
+                login = userPreferencesRepository.login.first(),
+                password = userPreferencesRepository.password.first()
+            )
+        }
+    }
+
+    private fun parseAcademicPerformance(subjectsData: SubjectsData):List<SimpleSubject>{
+        val subjects = subjectsData.subjects
+        val result = mutableListOf<SimpleSubject>()
+        subjects.forEach {subject ->
+            result.add(SimpleSubject(
+                name = subject.name,
+                systemId = subject.id,
+                userScore = subject.grade.fullScore
+                )
+            )
+            val controlForm = subject.formOfControl.name
+            subject.getControlEvents().forEach{controlEvent ->
+                val finalSubjectShort = if(controlEvent.shortName != "-" && controlEvent.shortName != " "){"(${controlEvent.shortName})"}else{""}
+                result.add(
+                    SimpleSubject(
+                        name = "${controlEvent.type.name.ifBlank{controlForm}} $finalSubjectShort",
+                        systemId = subject.id,
+                        userScore = controlEvent.grade.score,
+                        isSubject = false
+                    )
+                )
+            }
+        }
+        return result
+    }
+
+    private suspend fun calculateSubjectsDifferences(simpleSubjects: List<SimpleSubject>):Map<SimpleSubject,List<SimpleSubject>>{
+        val savedSubjects = simpleSubjectsOfflineRepository.getSubjects().first()
+        val subjects = simpleSubjects.filter { it.isSubject }
+        val difference = mutableListOf<SimpleSubject>()
+        if(subjects.size == savedSubjects.size){
+            for(i in subjects.indices){
+                if(subjects[i].userScore != savedSubjects[i].userScore){
+                    difference.add(
+                        SimpleSubject(
+                            id = subjects[i].id,
+                            name = subjects[i].name,
+                            systemId = subjects[i].systemId,
+                            userScore = "${savedSubjects[i].userScore} -> ${subjects[i].userScore}",
+                            isSubject = subjects[i].isSubject
+                        )
+                    )
+                }
+            }
+        }
+        val diffMap = mutableMapOf<SimpleSubject,List<SimpleSubject>>()
+        difference.forEach{subject ->
+            val savedControlEvents = simpleSubjectsOfflineRepository.getControlEvents(subject.systemId).first()
+            val controlEvents = simpleSubjects.filter {it.systemId == subject.systemId && !it.isSubject}
+            val tempDiff = mutableListOf<SimpleSubject>()
+            if(controlEvents.size == savedControlEvents.size) {
+                for (i in controlEvents.indices) {
+                    println("${controlEvents[i].userScore} -> ${savedControlEvents[i].userScore}")
+                    if (controlEvents[i].userScore != savedControlEvents[i].userScore) {
+                        println("AA")
+                        tempDiff.add(
+                            SimpleSubject(
+                                id = controlEvents[i].id,
+                                name = controlEvents[i].name,
+                                systemId = controlEvents[i].systemId,
+                                userScore = "${savedControlEvents[i].userScore} -> ${controlEvents[i].userScore}",
+                                isSubject = controlEvents[i].isSubject
+                            )
+                        )
+                    }
+                }
+            }
+            diffMap[subject] = tempDiff
+        }
+        return diffMap
     }
 
     fun getAcademicPerformanceFromSite() {
@@ -95,16 +200,23 @@ class BetterOrioksViewModel(
             try {
                 val subjects = orioksRepository.getSubjects(
                     cookies = _uiState.value.authCookies,
-                    setCookies = { setCookies(it) }
+                    setCookies = {s1,s2 -> setCookies(s1,s2)}
                 )
-                Log.d("GET_ACADEMIC_PERFORMANCE_FROM_SITE", subjects.toString())
-                _uiState.update { currentState -> currentState.copy(subjectsFromSiteUiState = SubjectsFromSiteUiState.Success(subjects)) }
-            } catch (e: java.lang.Exception) {
+                Log.d("GET_ACADEMIC_PERFORMANCE_FROM_SITE", uiState.value.csrf)
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        subjectsFromSiteUiState = SubjectsFromSiteUiState.Success(
+                            subjects
+                        )
+                    )
+                }
+            } catch (e: Throwable) {
+                if(e.message == "Auth Error") _uiState.update { currentState -> currentState.copy(cookiesErrorCount = uiState.value.cookiesErrorCount + 1) }
+                checkCookies()
                 _uiState.update { currentState -> currentState.copy(subjectsFromSiteUiState = SubjectsFromSiteUiState.Error) }
-            } catch (e: HttpException) {
+            } catch (e: Exception) {
                 _uiState.update { currentState -> currentState.copy(subjectsFromSiteUiState = SubjectsFromSiteUiState.Error) }
             }
-            suspendGetImportantDates()
         }
     }
 
@@ -133,30 +245,32 @@ class BetterOrioksViewModel(
                     userPreferencesRepository = application.userPreferencesRepository,
                     networkScheduleFromSiteRepository = application.networkScheduleFromSiteRepository,
                     scheduleOfflineRepository = application.container.scheduleRepository,
-                    orioksRepository = application.container.orioksRepository
+                    orioksRepository = application.container.orioksRepository,
+                    simpleSubjectsOfflineRepository = application.container.simpleSubjectsOfflineRepository
                 )
             }
         }
     }
 
     fun getAuthInfo(login: String = "", password: String = "") {
-        println("GET_AUTH_INFO")
+        Log.d("GET_AUTH_INFO","Started")
         val encodedLoginDetails = Base64.getEncoder().encodeToString("$login:$password".toByteArray())
         val tokenRepository = NetworkTokenRepository(encodedLoginDetails)
         viewModelScope.launch {
             try {
                 val token = tokenRepository.getToken()
-                val cookies = orioksRepository.auth(login = login, password = password)
+                val cookies = orioksRepository.auth(login = login, password = password, setCookies = {s1,s2 -> setCookies(s1,s2)})
                 if (token.token != "" && cookies != "") {
                     userPreferencesRepository.setCookies(cookies = cookies)
                     userPreferencesRepository.setToken(token = token.token)
+                    userPreferencesRepository.setLoginAndPassword(login = login, password = password)
                     _uiState.update { currentState ->
                         currentState.copy(
                             token = token.token,
                             authCookies = cookies,
                             userInfoUiState = UserInfoUiState.NotStarted,
                             academicDebtsUiState = DebtsUiState.NotStarted,
-                            subjectsFromSiteUiState = SubjectsFromSiteUiState.Loading,
+                            subjectsFromSiteUiState = SubjectsFromSiteUiState.NotStarted,
                             authState = AuthState.LoggedIn
                         )
                     }
@@ -171,6 +285,7 @@ class BetterOrioksViewModel(
                 }
                 _uiState.update { currentState -> currentState.copy(authState = error) }
             }
+            Log.d("GET_AUTH_INFO","Ended")
         }
     }
 

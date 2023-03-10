@@ -2,6 +2,7 @@ package com.studentapp.betterorioks.ui.screens
 
 import android.content.Intent
 import android.net.Uri
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -155,8 +156,8 @@ fun ProfileScreen(
                     Spacer(modifier = Modifier.size(8.dp))
                     AnyButton(
                         text = R.string.run_test,
-                        icon = R.drawable.visibility_on,
-                        onClick = { viewModel.test() })
+                        icon = R.drawable.admin_button,
+                        onClick = { viewModel.test(context = context) })
                 }
             }
             //temp
@@ -166,6 +167,7 @@ fun ProfileScreen(
                     shape = RoundedCornerShape(16.dp),
                     backgroundColor = MaterialTheme.colors.surface,
                     elevation = 5.dp,
+                    border = BorderStroke(width = 1.dp,color = MaterialTheme.colors.secondary),
                     modifier = Modifier
                         .wrapContentHeight()
                         .fillMaxWidth()
@@ -175,8 +177,8 @@ fun ProfileScreen(
                         }
                 ) {
                     Text(
-                        text = "Это тестовая версия приложения, если вы нашли баг, пожалуйста сообщите о нем. \n(Нажмите для перехода в Telegram канал разработчика)",
-                        color = MaterialTheme.colors.primary,
+                        text = "Это тестовая версия приложения, если вы нашли баг, пожалуйста сообщите о нем в Telegram канале приложения. \n(Нажмите для перехода в Telegram канал разработчика)",
+                        color = MaterialTheme.colors.secondary,
                         fontSize = 14.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.padding(16.dp)

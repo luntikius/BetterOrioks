@@ -34,6 +34,7 @@ class NetworkOrioksRepository
         .newBuilder()
         .connectTimeout(10, TimeUnit.SECONDS)
         .readTimeout(10, TimeUnit.SECONDS)
+        .writeTimeout(10, TimeUnit.SECONDS)
         .followRedirects(false)
         .followSslRedirects(false)
         .addInterceptor(RequestInterceptor)
@@ -76,7 +77,12 @@ class NetworkOrioksRepository
         isLenient = true
     }
 
-    suspend fun auth(login: String, password: String):String {
+    private fun findCsrf(page: String): String{
+        val start = page.indexOf("csrf-token") + 21
+        val end = page.indexOf(startIndex = start, string = "\">")
+        return page.slice(start until end)
+    }
+    suspend fun auth(login: String, password: String, setCookies: (String, String) -> Unit):String {
         val authScreen = orioksAuthInfoRetrofitService.getAuthInfo()
         val authCookies = getCookies(authScreen)
         val body = authScreen.body()?.string()
@@ -89,23 +95,23 @@ class NetworkOrioksRepository
                     startIndex = body.indexOf("name=\"_csrf\" value=\"")
                 )
         ) ?: ""
-
+        setCookies("",csrf)
         val authInfo = orioksAuthRetrofitService.auth(cookies = authCookies, csrf = csrf, login = login, password = password)
         val cookies = getCookies(authInfo)
         return (cookies)
     }
 
-    suspend fun getSubjects(cookies: String, setCookies: (String) -> Unit, ):SubjectsData{
+    suspend fun getSubjects(cookies: String, setCookies: (String, String) -> Unit ):SubjectsData{
         val response = orioksSubjectsRetrofitService.getSubjects(cookies = cookies)
         val subjectsHtml = response.body()?.string() ?: ""
+        if("{\"dises\":" !in subjectsHtml) throw Throwable("Auth Error")
         val start = subjectsHtml.indexOf("{\"dises\":")
         val end = subjectsHtml.indexOf(string = "</",startIndex = start)
         val subjectsString = subjectsHtml.slice(start until end)
         val subjects = json.decodeFromString<SubjectsData>(subjectsString)
         val newCookies = getCookies(response)
-        setCookies(newCookies)
+        val csrf = findCsrf(subjectsHtml)
+        setCookies(newCookies, csrf)
         return (subjects)
     }
-
-
 }

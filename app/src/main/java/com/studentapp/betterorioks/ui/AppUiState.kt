@@ -6,11 +6,16 @@ import com.studentapp.betterorioks.ui.states.*
 import java.time.LocalDate
 
 data class AppUiState (
+    //temp
+    var updateState: Boolean = false,
+    //const
     var currentSubject: SubjectFromSite = SubjectFromSite(),
     var currentControlEvent: ControlEvent = ControlEvent(),
+    var cookiesErrorCount: Int = 0,
     var subjectsFromSiteUiState: SubjectsFromSiteUiState = SubjectsFromSiteUiState.NotStarted,
     var token: String = "",
     var authCookies: String = "",
+    var csrf: String = "",
     var authState: AuthState = AuthState.NotLoggedIn,
     var userInfoUiState: UserInfoUiState = UserInfoUiState.NotStarted,
     var academicDebtsUiState: DebtsUiState = DebtsUiState.NotStarted,

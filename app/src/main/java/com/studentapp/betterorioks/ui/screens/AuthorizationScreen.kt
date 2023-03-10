@@ -1,6 +1,7 @@
 package com.studentapp.betterorioks.ui.screens
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -19,12 +20,19 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.states.AuthState
 import com.studentapp.betterorioks.ui.theme.BetterOrioksTheme
+
+@Preview
+@Composable
+fun AuthPreview(){
+    AuthorizationScreen(onLogin = {s1,s2 -> }, uiState = AppUiState(updateState = true))
+}
 
 @Composable
 fun AuthenticationTextField(
@@ -73,6 +81,9 @@ fun AuthenticationPasswordTextField(
         singleLine = true,
         isError = isError,
         keyboardActions = KeyboardActions {onButton()},
+        keyboardOptions = KeyboardOptions(
+            keyboardType = KeyboardType.Password
+        ),
         visualTransformation = if (showPassword.value) VisualTransformation.None else PasswordVisualTransformation(),
         trailingIcon = {
             val icon = if(showPassword.value) R.drawable.visibility_on else R.drawable.visibility_off
@@ -97,6 +108,24 @@ fun AuthenticationPasswordTextField(
 }
 
 @Composable
+fun UpdateWarning(){
+    Card(
+        backgroundColor = MaterialTheme.colors.background,
+        modifier = Modifier.padding(vertical = 16.dp, horizontal = 32.dp),
+        shape = RoundedCornerShape(16.dp),
+        elevation = 0.dp,
+        border = BorderStroke(1.dp,MaterialTheme.colors.secondary)
+    ) {
+        Text(
+            stringResource(R.string.relogin),
+            color = MaterialTheme.colors.secondary,
+            modifier = Modifier.padding(16.dp),
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
 fun AuthorizationScreen(
     onLogin: (String,String) -> Unit,
     uiState: AppUiState = AppUiState()
@@ -116,6 +145,7 @@ fun AuthorizationScreen(
         Surface(color = MaterialTheme.colors.background, modifier = Modifier.fillMaxSize()) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Top,
                 modifier = Modifier.wrapContentSize(Alignment.Center)
             ) {
                 Image(
@@ -123,12 +153,15 @@ fun AuthorizationScreen(
                     contentDescription = null,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .size(250.dp)
+                        .size(220.dp)
                 )
+                if(uiState.updateState){
+                    UpdateWarning()
+                }
                 Text(
                     text = if(!isError) stringResource(R.string.text_on_login) else stringResource(id = errorText),
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(16.dp),
+                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 32.dp),
                     color = if(!isError) MaterialTheme.colors.onBackground else MaterialTheme.colors.error
                 )
                 AuthenticationTextField(

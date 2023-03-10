@@ -17,6 +17,9 @@ class UserPreferencesRepository(
     private companion object {
         val TOKEN = stringPreferencesKey("token")
         val AUTH_COOKIES = stringPreferencesKey("authCookies")
+        val CSRF = stringPreferencesKey("csrf")
+        val LOGIN = stringPreferencesKey("login")
+        val PASSWORD = stringPreferencesKey("password")
         val STUDENT_ID = intPreferencesKey("studentId")
         val FULL_NAME = stringPreferencesKey("fullName")
         val GROUP = stringPreferencesKey("group")
@@ -35,6 +38,19 @@ class UserPreferencesRepository(
     suspend fun setCookies(cookies: String){
         dataStore.edit { preferences ->
             preferences[AUTH_COOKIES] = cookies
+        }
+    }
+
+    suspend fun setCsrf(csrf: String){
+        dataStore.edit { preferences ->
+            preferences[CSRF] = csrf
+        }
+    }
+
+    suspend fun setLoginAndPassword(login: String, password: String){
+        dataStore.edit { preferences ->
+            preferences[LOGIN] = login
+            preferences[PASSWORD] = password
         }
     }
 
@@ -58,6 +74,9 @@ class UserPreferencesRepository(
     suspend fun dump(){
         dataStore.edit { preferences ->
             preferences[TOKEN] = ""
+            preferences[AUTH_COOKIES] = ""
+            preferences[LOGIN] = ""
+            preferences[PASSWORD] = ""
             preferences[SESSION_START] = ""
             preferences[SEMESTER_START] = ""
             preferences[STUDENT_ID] = 0
@@ -81,5 +100,7 @@ class UserPreferencesRepository(
     val group: Flow<String> = dataStore.data.catch {  }.map { preferences -> preferences[GROUP] ?: "" }
     val studyDirection: Flow<String> = dataStore.data.catch {  }.map { preferences -> preferences[STUDY_DIRECTION] ?: "" }
     val department: Flow<String> = dataStore.data.catch {  }.map { preferences -> preferences[DEPARTMENT] ?: "" }
-
+    val login: Flow<String> = dataStore.data.catch {  }.map { preferences -> preferences[LOGIN] ?: "" }
+    val password: Flow<String> = dataStore.data.catch {  }.map { preferences -> preferences[PASSWORD] ?: "" }
+    val csrf: Flow<String> = dataStore.data.catch {  }.map { preferences -> preferences[CSRF] ?: "" }
 }

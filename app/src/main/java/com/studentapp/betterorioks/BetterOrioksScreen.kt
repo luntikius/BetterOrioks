@@ -32,9 +32,10 @@ fun BetterOrioksApp(){
     val viewModel: BetterOrioksViewModel = viewModel(factory = BetterOrioksViewModel.Factory)
     val uiState by viewModel.uiState.collectAsState()
     val navController = rememberAnimatedNavController()
+    val context = LocalContext.current
 
     if (uiState.authState == AuthState.NotLoggedIn)
-        viewModel.retrieveToken()
+        viewModel.retrieveToken(context = context, navController = navController)
 
     when (uiState.authState) {
         AuthState.LoggedIn -> {
@@ -107,7 +108,7 @@ fun BetterOrioksApp(){
                     ) {
                         if(uiState.userInfoUiState == UserInfoUiState.NotStarted)viewModel.getUserInfo()
                         ProfileScreen(
-                            onExitClick = { viewModel.exit()},
+                            onExitClick = { viewModel.exit(context = context, navController = navController)},
                             uiState = uiState,
                             onDebtClick = {navController.navigate(BetterOrioksScreens.Debts.name)},
                             viewModel = viewModel
