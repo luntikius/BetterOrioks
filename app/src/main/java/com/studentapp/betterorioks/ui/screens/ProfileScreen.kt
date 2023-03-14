@@ -27,9 +27,7 @@ import com.studentapp.betterorioks.data.AdminIds
 import com.studentapp.betterorioks.model.UserInfo
 import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.BetterOrioksViewModel
-import com.studentapp.betterorioks.ui.components.AnyButton
-import com.studentapp.betterorioks.ui.components.ErrorScreen
-import com.studentapp.betterorioks.ui.components.LoadingScreen
+import com.studentapp.betterorioks.ui.components.*
 import com.studentapp.betterorioks.ui.states.UserInfoUiState
 
 @Composable
@@ -159,6 +157,13 @@ fun ProfileScreen(
                         icon = R.drawable.admin_button,
                         onClick = { viewModel.test(context = context) })
                 }
+                Spacer(modifier = Modifier.size(8.dp))
+                SwitchButton(
+                    sendNotifications = uiState.sendNotifications,
+                    changeNotifications = {viewModel.changeNotificationState(switchValue = it)},
+                    text = R.string.notifications,
+                    icon = R.drawable.notifications
+                )
             }
             //temp
             item{

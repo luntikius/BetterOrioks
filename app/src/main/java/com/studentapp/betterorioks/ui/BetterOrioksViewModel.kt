@@ -13,6 +13,7 @@ import androidx.navigation.NavController
 import com.studentapp.betterorioks.BetterOrioksApplication
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.data.*
+import com.studentapp.betterorioks.data.background.WorkManagerBetterOrioksRepository
 import com.studentapp.betterorioks.data.schedule.NetworkScheduleFromSiteRepository
 import com.studentapp.betterorioks.data.schedule.ScheduleOfflineRepository
 import com.studentapp.betterorioks.data.subjects.SimpleSubjectsOfflineRepository
@@ -23,6 +24,7 @@ import com.studentapp.betterorioks.model.subjectsFromSite.ControlEvent
 import com.studentapp.betterorioks.model.subjectsFromSite.SimpleSubject
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectFromSite
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectsData
+import com.studentapp.betterorioks.ui.components.makeStatusNotification
 import com.studentapp.betterorioks.ui.screens.dayOfWeekToInt
 import java.time.temporal.ChronoUnit.DAYS
 import com.studentapp.betterorioks.ui.states.*
@@ -41,6 +43,7 @@ class BetterOrioksViewModel(
     private val networkScheduleFromSiteRepository: NetworkScheduleFromSiteRepository,
     private val scheduleOfflineRepository: ScheduleOfflineRepository,
     private val orioksRepository: NetworkOrioksRepository,
+    private val workManagerBetterOrioksRepository: WorkManagerBetterOrioksRepository,
     private val simpleSubjectsOfflineRepository: SimpleSubjectsOfflineRepository
 ): ViewModel() {
 
@@ -48,16 +51,17 @@ class BetterOrioksViewModel(
     private val _uiState = MutableStateFlow(AppUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun test(context: Context){
-        viewModelScope.launch {
-            simpleSubjectsOfflineRepository.dump()
-            parseAcademicPerformance(subjectsData = (uiState.value.subjectsFromSiteUiState as SubjectsFromSiteUiState.Success).subjects).forEach{
-                simpleSubjectsOfflineRepository.insertItem(it)
-            }
-            simpleSubjectsOfflineRepository.modify()
-            val new = parseAcademicPerformance(subjectsData = (uiState.value.subjectsFromSiteUiState as SubjectsFromSiteUiState.Success).subjects)
-            val diff = calculateSubjectsDifferences(new)
-        }
+    fun test(context: Context) {
+//        viewModelScope.launch {
+//            workManagerBetterOrioksRepository.cancelChecks()
+//            workManagerBetterOrioksRepository.checkForUpdates(cookies = uiState.value.authCookies)
+//            simpleSubjectsOfflineRepository.getSubjects()
+//        }
+        makeStatusNotification("ABOBA","ADADJADADJA",context)
+    }
+
+    fun changeNotificationState(switchValue:Boolean){
+        _uiState.update { currentState -> currentState.copy(sendNotifications = switchValue) }
     }
 
     private fun setCookies(cookies: String, csrf: String){
@@ -147,52 +151,6 @@ class BetterOrioksViewModel(
         return result
     }
 
-    private suspend fun calculateSubjectsDifferences(simpleSubjects: List<SimpleSubject>):Map<SimpleSubject,List<SimpleSubject>>{
-        val savedSubjects = simpleSubjectsOfflineRepository.getSubjects().first()
-        val subjects = simpleSubjects.filter { it.isSubject }
-        val difference = mutableListOf<SimpleSubject>()
-        if(subjects.size == savedSubjects.size){
-            for(i in subjects.indices){
-                if(subjects[i].userScore != savedSubjects[i].userScore){
-                    difference.add(
-                        SimpleSubject(
-                            id = subjects[i].id,
-                            name = subjects[i].name,
-                            systemId = subjects[i].systemId,
-                            userScore = "${savedSubjects[i].userScore} -> ${subjects[i].userScore}",
-                            isSubject = subjects[i].isSubject
-                        )
-                    )
-                }
-            }
-        }
-        val diffMap = mutableMapOf<SimpleSubject,List<SimpleSubject>>()
-        difference.forEach{subject ->
-            val savedControlEvents = simpleSubjectsOfflineRepository.getControlEvents(subject.systemId).first()
-            val controlEvents = simpleSubjects.filter {it.systemId == subject.systemId && !it.isSubject}
-            val tempDiff = mutableListOf<SimpleSubject>()
-            if(controlEvents.size == savedControlEvents.size) {
-                for (i in controlEvents.indices) {
-                    println("${controlEvents[i].userScore} -> ${savedControlEvents[i].userScore}")
-                    if (controlEvents[i].userScore != savedControlEvents[i].userScore) {
-                        println("AA")
-                        tempDiff.add(
-                            SimpleSubject(
-                                id = controlEvents[i].id,
-                                name = controlEvents[i].name,
-                                systemId = controlEvents[i].systemId,
-                                userScore = "${savedControlEvents[i].userScore} -> ${controlEvents[i].userScore}",
-                                isSubject = controlEvents[i].isSubject
-                            )
-                        )
-                    }
-                }
-            }
-            diffMap[subject] = tempDiff
-        }
-        return diffMap
-    }
-
     fun getAcademicPerformanceFromSite() {
         println("GET_ACADEMIC_PERFORMANCE_FROM_SITE")
         _uiState.update { currentState -> currentState.copy(subjectsFromSiteUiState = SubjectsFromSiteUiState.Loading) }
@@ -209,6 +167,10 @@ class BetterOrioksViewModel(
                             subjects
                         )
                     )
+                }
+                if(subjects.subjects.isNotEmpty()) {
+                    val parsed = parseAcademicPerformance(subjects)
+                    simpleSubjectsOfflineRepository.insertItems(parsed)
                 }
             } catch (e: Throwable) {
                 if(e.message == "Auth Error") _uiState.update { currentState -> currentState.copy(cookiesErrorCount = uiState.value.cookiesErrorCount + 1) }
@@ -246,6 +208,7 @@ class BetterOrioksViewModel(
                     networkScheduleFromSiteRepository = application.networkScheduleFromSiteRepository,
                     scheduleOfflineRepository = application.container.scheduleRepository,
                     orioksRepository = application.container.orioksRepository,
+                    workManagerBetterOrioksRepository = application.container.workManagerBetterOrioksRepository,
                     simpleSubjectsOfflineRepository = application.container.simpleSubjectsOfflineRepository
                 )
             }
@@ -254,6 +217,7 @@ class BetterOrioksViewModel(
 
     fun getAuthInfo(login: String = "", password: String = "") {
         Log.d("GET_AUTH_INFO","Started")
+        _uiState.update { currentState -> currentState.copy(authState = AuthState.Loading) }
         val encodedLoginDetails = Base64.getEncoder().encodeToString("$login:$password".toByteArray())
         val tokenRepository = NetworkTokenRepository(encodedLoginDetails)
         viewModelScope.launch {
@@ -284,6 +248,8 @@ class BetterOrioksViewModel(
                     else -> AuthState.UnexpectedError
                 }
                 _uiState.update { currentState -> currentState.copy(authState = error) }
+            }catch(e: java.net.SocketTimeoutException){
+                _uiState.update { currentState -> currentState.copy(authState = AuthState.TimeOut)}
             }
             Log.d("GET_AUTH_INFO","Ended")
         }

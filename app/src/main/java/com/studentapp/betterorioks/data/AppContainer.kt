@@ -1,5 +1,6 @@
 package com.studentapp.betterorioks.data
 import android.content.Context
+import com.studentapp.betterorioks.data.background.WorkManagerBetterOrioksRepository
 import com.studentapp.betterorioks.data.schedule.ScheduleDatabase
 import com.studentapp.betterorioks.data.schedule.ScheduleOfflineRepository
 import com.studentapp.betterorioks.data.subjects.SimpleSubjectsDatabase
@@ -11,6 +12,7 @@ interface AppContainer {
     val simpleSubjectsOfflineRepository: SimpleSubjectsOfflineRepository
     val scheduleRepository: ScheduleOfflineRepository
     val orioksRepository: NetworkOrioksRepository
+    val workManagerBetterOrioksRepository: WorkManagerBetterOrioksRepository
 }
 
 class DefaultAppContainer(private val context: Context): AppContainer {
@@ -25,5 +27,9 @@ class DefaultAppContainer(private val context: Context): AppContainer {
 
     override val orioksRepository: NetworkOrioksRepository by lazy{
         NetworkOrioksRepository()
+    }
+
+    override val workManagerBetterOrioksRepository: WorkManagerBetterOrioksRepository by lazy{
+        WorkManagerBetterOrioksRepository(context = context)
     }
 }

@@ -61,4 +61,6 @@
     <string name="text_copied_to_buffer">Текст скопирован в буфер обмена</string>
     <string name="relogin">Приложение недавно обновилось, чтобы пользоваться его новыми функциями, пожалуйста, войдите в аккаунт заново.</string>
     <string name="wasnt_able_to_delete_your_token">Не удалось удалить ваш токен</string>
+    <string name="time_out_exeption">Превышено время авторизации, повторите попытку позже</string>
+    <string name="notifications">Уведомления о изменении оценок</string>
 </resources>

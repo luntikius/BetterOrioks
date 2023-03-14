@@ -139,6 +139,7 @@ fun AuthorizationScreen(
         val errorText = when(uiState.authState){
             AuthState.UnexpectedError -> R.string.unexpected_error
             AuthState.TokenLimitReached -> R.string.token_limit_reached
+            AuthState.TimeOut -> R.string.time_out_exeption
             else -> R.string.bad_login_or_password
             }
 

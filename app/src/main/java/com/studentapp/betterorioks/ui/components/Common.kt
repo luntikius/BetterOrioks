@@ -1,5 +1,13 @@
 package com.studentapp.betterorioks.ui.components
 
+import android.Manifest
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.TaskStackBuilder
+import android.content.Context
+import android.content.Intent
+import android.content.pm.PackageManager
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -18,10 +26,16 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
+import com.studentapp.betterorioks.MainActivity
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.model.BottomNavItem
+import com.studentapp.betterorioks.ui.theme.BetterOrioksTheme
+
 
 @Preview
 @Composable
@@ -216,3 +230,96 @@ fun AnyButton (
     }
 }
 
+@Preview
+@Composable
+fun SwitchButton(
+    modifier: Modifier = Modifier,
+    sendNotifications: Boolean = false,
+    changeNotifications: (Boolean) -> Unit = {},
+    @StringRes text: Int = R.string.not_specified,
+    icon: Int = R.drawable.admin_button
+){
+    BetterOrioksTheme() {
+        Card(
+            shape = RoundedCornerShape(16.dp),
+            backgroundColor = MaterialTheme.colors.surface,
+            elevation = 5.dp,
+            modifier = modifier
+                .wrapContentHeight()
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 3.dp)
+                .defaultMinSize(minHeight = 72.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Spacer(modifier = Modifier.size(16.dp))
+                Icon(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.secondary,
+                    modifier = Modifier.size(32.dp)
+                )
+                Text(
+                    text = stringResource(text),
+                    modifier = Modifier.padding(16.dp).fillMaxWidth().weight(1f),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+                Switch(
+                    checked = sendNotifications,
+                    onCheckedChange = changeNotifications,
+                    colors = SwitchDefaults.colors(
+                        checkedTrackColor = MaterialTheme.colors.secondary,
+                        uncheckedTrackColor = MaterialTheme.colors.background,
+                        checkedThumbColor = MaterialTheme.colors.secondaryVariant,
+                        uncheckedThumbColor = MaterialTheme.colors.secondaryVariant
+                    )
+                )
+                Spacer(modifier = Modifier.width(16.dp))
+            }
+        }
+    }
+}
+
+val VERBOSE_NOTIFICATION_CHANNEL_NAME: CharSequence = "Уведомления об успеваемости"
+const val VERBOSE_NOTIFICATION_CHANNEL_DESCRIPTION =
+    "Показывает уведомления каждый раз, когда меняется оценка студента"
+const val CHANNEL_ID = "VERBOSE_NOTIFICATION"
+const val NOTIFICATION_ID = 1
+
+fun makeStatusNotification(message: String, head: String, context: Context) {
+
+    val name = VERBOSE_NOTIFICATION_CHANNEL_NAME
+    val description = VERBOSE_NOTIFICATION_CHANNEL_DESCRIPTION
+    val importance = NotificationManager.IMPORTANCE_HIGH
+    val channel = NotificationChannel(CHANNEL_ID, name, importance)
+    channel.description = description
+    val resultIntent = Intent(context, MainActivity::class.java)
+
+    val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(context).run {
+        addNextIntentWithParentStack(resultIntent)
+        getPendingIntent(0, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+    }
+    val notificationManager =
+        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
+
+    notificationManager?.createNotificationChannel(channel)
+
+    val builder = NotificationCompat.Builder(context, CHANNEL_ID)
+        .setSmallIcon(R.drawable.ic_launcher_foreground)
+        .setContentTitle("Изменение баллов по предмету $head")
+        .setContentIntent(resultPendingIntent)
+        .setContentText(message)
+        .setPriority(NotificationCompat.PRIORITY_HIGH)
+        .setVibrate(LongArray(0))
+
+    // Show the notification
+    if (ActivityCompat.checkSelfPermission(
+            context,
+            Manifest.permission.POST_NOTIFICATIONS
+        ) != PackageManager.PERMISSION_GRANTED
+    ) {
+        return
+    }else {
+        NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, builder.build())
+    }
+}

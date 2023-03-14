@@ -1,6 +1,5 @@
 package com.example.betterorioks.ui
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -81,6 +80,7 @@ fun AcademicPerformanceScreen(uiState: AppUiState, navController: NavHostControl
     }
 }
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AcademicPerformanceElement(
     modifier: Modifier = Modifier,
@@ -93,12 +93,12 @@ fun AcademicPerformanceElement(
     Card(
         shape = RoundedCornerShape(16.dp),
         elevation = 5.dp,
+        onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
             .padding(horizontal = 16.dp, vertical = 3.dp)
             .defaultMinSize(minHeight = 72.dp)
-            .clickable(onClick = onClick)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,

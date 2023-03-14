@@ -14,7 +14,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -255,9 +254,9 @@ fun ResourcesPopup(controlEvent: ControlEvent, onDismiss: () -> Unit, controlFor
         Card(
             shape = RoundedCornerShape(16.dp),
             border = BorderStroke(1.dp, color = MaterialTheme.colors.primary),
+            elevation = 4.dp,
             modifier = Modifier
                 .padding(16.dp)
-                .shadow(4.dp)
                 .fillMaxHeight(0.7f),
             backgroundColor = MaterialTheme.colors.background,
         ) {

@@ -83,6 +83,7 @@ class NetworkOrioksRepository
         return page.slice(start until end)
     }
     suspend fun auth(login: String, password: String, setCookies: (String, String) -> Unit):String {
+
         val authScreen = orioksAuthInfoRetrofitService.getAuthInfo()
         val authCookies = getCookies(authScreen)
         val body = authScreen.body()?.string()
@@ -101,7 +102,7 @@ class NetworkOrioksRepository
         return (cookies)
     }
 
-    suspend fun getSubjects(cookies: String, setCookies: (String, String) -> Unit ):SubjectsData{
+    suspend fun getSubjects(cookies: String, setCookies: (String, String) -> Unit = { _: String, _: String -> } ):SubjectsData{
         val response = orioksSubjectsRetrofitService.getSubjects(cookies = cookies)
         val subjectsHtml = response.body()?.string() ?: ""
         if("{\"dises\":" !in subjectsHtml) throw Throwable("Auth Error")

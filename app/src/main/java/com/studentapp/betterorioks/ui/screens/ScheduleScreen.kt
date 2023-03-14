@@ -138,27 +138,30 @@ fun DatePicker(
     val visibleIndex = lazyRowState.firstVisibleItemIndex
 
     Column(modifier = modifier.background(color = MaterialTheme.colors.background)) {
-        Card(shape = RoundedCornerShape(0), backgroundColor = MaterialTheme.colors.primaryVariant) {
+        Card(
+            shape = RoundedCornerShape(0),
+            backgroundColor = MaterialTheme.colors.primaryVariant,
+            modifier = Modifier.clickable {
+                coroutineScope.launch {
+                    lazyListState.scrollToItem(
+                        abs(
+                            DAYS.between(
+                                startDate,
+                                LocalDate.now()
+                            )
+                        ).toInt()
+                    )
+                }
+                coroutineScope.launch {
+                    lazyRowState.scrollToItem(BACK_ITEMS - dayOfWeekToInt(LocalDate.now()))
+                }
+            }
+        ) {
             Text(
                 text = monthToString(startDate.plusDays(visibleIndex.toLong()), context = LocalContext.current),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp)
-                    .clickable {
-                        coroutineScope.launch {
-                            lazyListState.scrollToItem(
-                                abs(
-                                    DAYS.between(
-                                        startDate,
-                                        LocalDate.now()
-                                    )
-                                ).toInt()
-                            )
-                        }
-                        coroutineScope.launch {
-                            lazyRowState.scrollToItem(BACK_ITEMS - dayOfWeekToInt(LocalDate.now()))
-                        }
-                    }
                 ,
                 textAlign = TextAlign.Center,
                 fontSize = 18.sp,

@@ -6,5 +6,6 @@ enum class AuthState {
     BadLoginOrPassword,
     TokenLimitReached,
     UnexpectedError,
-    NotLoggedIn
+    NotLoggedIn,
+    TimeOut
 }
