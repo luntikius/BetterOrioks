@@ -1,7 +1,13 @@
 package com.studentapp.betterorioks.ui.screens
 
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
+import android.widget.Toast
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -22,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.app.ActivityCompat
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.data.AdminIds
 import com.studentapp.betterorioks.model.UserInfo
@@ -129,6 +136,7 @@ fun ExitButton(onExitClick: () -> Unit){
     }
 }
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ProfileScreen(
@@ -158,11 +166,25 @@ fun ProfileScreen(
                         onClick = { viewModel.test(context = context) })
                 }
                 Spacer(modifier = Modifier.size(8.dp))
+                val launcher = rememberLauncherForActivityResult(
+                    ActivityResultContracts.RequestPermission()
+                ) { isGranted: Boolean ->
+                    if (isGranted) {
+                        viewModel.changeNotificationState(switchValue = true)
+                    } else {
+                        Toast.makeText(context, R.string.notifications_permission_required, Toast.LENGTH_SHORT).show()
+                    }
+                }
                 SwitchButton(
                     sendNotifications = uiState.sendNotifications,
-                    changeNotifications = {viewModel.changeNotificationState(switchValue = it)},
+                    changeNotifications = {
+                        if(ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                            launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                        }else {
+                            viewModel.changeNotificationState(switchValue = it)
+                        } },
                     text = R.string.notifications,
-                    icon = R.drawable.notifications
+                    icon = R.drawable.notifications,
                 )
             }
             //temp

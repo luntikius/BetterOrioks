@@ -1,7 +1,6 @@
 package com.studentapp.betterorioks.ui.screens
 import android.content.Intent
 import android.net.Uri
-import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -14,11 +13,9 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
-import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
@@ -158,7 +155,7 @@ fun TeacherElement(teacher: Teacher){
         color = MaterialTheme.colors.primary,
         fontSize = 16.sp
     )
-    val clipboardManager = LocalClipboardManager.current
+    val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse("mailto:${teacher.email}")) }
     val context = LocalContext.current
     val annotatedString = buildAnnotatedString {
         withStyle(
@@ -174,10 +171,7 @@ fun TeacherElement(teacher: Teacher){
         }
     }
     ClickableText(text = annotatedString,
-        onClick = {
-            clipboardManager.setText(AnnotatedString(teacher.email))
-            Toast.makeText(context, context.getString(R.string.text_copied_to_buffer), Toast.LENGTH_SHORT).show()
-                  },
+        onClick = { context.startActivity(intent) },
         modifier = Modifier.padding(start = 16.dp,end = 16.dp, bottom = 8.dp),
     )
 }

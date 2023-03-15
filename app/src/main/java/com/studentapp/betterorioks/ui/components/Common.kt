@@ -230,14 +230,13 @@ fun AnyButton (
     }
 }
 
-@Preview
 @Composable
 fun SwitchButton(
     modifier: Modifier = Modifier,
     sendNotifications: Boolean = false,
     changeNotifications: (Boolean) -> Unit = {},
     @StringRes text: Int = R.string.not_specified,
-    icon: Int = R.drawable.admin_button
+    icon: Int = R.drawable.admin_button,
 ){
     BetterOrioksTheme() {
         Card(
@@ -281,8 +280,7 @@ fun SwitchButton(
 }
 
 val VERBOSE_NOTIFICATION_CHANNEL_NAME: CharSequence = "Уведомления об успеваемости"
-const val VERBOSE_NOTIFICATION_CHANNEL_DESCRIPTION =
-    "Показывает уведомления каждый раз, когда меняется оценка студента"
+const val VERBOSE_NOTIFICATION_CHANNEL_DESCRIPTION = "Показывает уведомления каждый раз, когда меняется оценка студента"
 const val CHANNEL_ID = "VERBOSE_NOTIFICATION"
 const val NOTIFICATION_ID = 1
 

@@ -61,6 +61,11 @@ class BetterOrioksViewModel(
     }
 
     fun changeNotificationState(switchValue:Boolean){
+        if(switchValue) {
+            workManagerBetterOrioksRepository.checkForUpdates(cookies = uiState.value.authCookies)
+        } else{
+            workManagerBetterOrioksRepository.cancelChecks()
+        }
         _uiState.update { currentState -> currentState.copy(sendNotifications = switchValue) }
     }
 
