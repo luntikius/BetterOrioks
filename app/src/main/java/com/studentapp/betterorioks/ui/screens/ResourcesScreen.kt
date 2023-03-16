@@ -126,7 +126,7 @@ fun Category(category: ResourceCategory){
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(16.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp)
                 .animateContentSize(
                     animationSpec = spring(
                         dampingRatio = Spring.DampingRatioNoBouncy,
@@ -159,15 +159,15 @@ fun Category(category: ResourceCategory){
                 }
             }
             if (isExpanded) {
-                Spacer(modifier = Modifier.size(16.dp))
+                Spacer(modifier = Modifier.size(8.dp))
                 category.resources.forEach {
                     val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(it.link)) }
-                    Divider(modifier = Modifier.padding(horizontal = 16.dp))
+
+                    Divider()
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .padding(
-                                horizontal = 16.dp,
                                 vertical = 8.dp
                             )
                             .clickable {

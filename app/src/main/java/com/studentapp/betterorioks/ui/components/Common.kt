@@ -273,7 +273,7 @@ fun SwitchButton(
                     onCheckedChange = changeNotifications,
                     colors = SwitchDefaults.colors(
                         checkedTrackColor = MaterialTheme.colors.secondary,
-                        uncheckedTrackColor = MaterialTheme.colors.background,
+                        uncheckedTrackColor = MaterialTheme.colors.primary,
                         checkedThumbColor = MaterialTheme.colors.secondary,
                         uncheckedThumbColor = MaterialTheme.colors.secondary
                     ),

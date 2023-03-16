@@ -9,7 +9,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.clickable
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -185,11 +185,11 @@ fun ProfileScreen(
                     icon = R.drawable.notifications,
                 )
             }
-            //temp
             item{
                 Spacer(modifier = Modifier.size(8.dp))
                 Card(
                     shape = RoundedCornerShape(16.dp),
+                    onClick = {context.startActivity(intent)},
                     backgroundColor = MaterialTheme.colors.surface,
                     elevation = 5.dp,
                     border = BorderStroke(width = 1.dp,color = MaterialTheme.colors.secondary),
@@ -197,17 +197,16 @@ fun ProfileScreen(
                         .wrapContentHeight()
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp, vertical = 3.dp)
-                        .clickable {
-                            context.startActivity(intent)
-                        }
                 ) {
-                    Text(
-                        text = "Это тестовая версия приложения, если вы нашли баг, пожалуйста сообщите о нем в Telegram канале приложения. \n(Нажмите для перехода в Telegram канал разработчика)",
-                        color = MaterialTheme.colors.secondary,
-                        fontSize = 14.sp,
-                        textAlign = TextAlign.Center,
-                        modifier = Modifier.padding(16.dp)
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Image(painter = painterResource(id = R.drawable.telegram), contentDescription = null, modifier = Modifier.size(64.dp).padding(start = 16.dp))
+                        Text(
+                            text = "Телеграм канал приложения с новостями и отзывами",
+                            color = MaterialTheme.colors.secondary,
+                            fontSize = 16.sp,
+                            modifier = Modifier.padding(16.dp)
+                        )
+                    }
                 }
                 Spacer(modifier = Modifier.size(8.dp))
             }

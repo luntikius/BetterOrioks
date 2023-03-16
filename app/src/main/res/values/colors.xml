@@ -2,5 +2,5 @@
 <resources>
     <color name="light_green">#FFA2FF82</color>
     <color name="bar_day">#FFEFF7FF</color>
-    <color name="bar_night">#FF222222</color>
+    <color name="bar_night">#FF222228</color>
 </resources>

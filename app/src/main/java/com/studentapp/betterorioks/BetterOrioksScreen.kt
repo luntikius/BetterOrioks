@@ -147,16 +147,10 @@ fun BetterOrioksApp(){
                     composable(
                         route = BetterOrioksScreens.Resources.name,
                         enterTransition = {
-                            slideIntoContainer(
-                                AnimatedContentScope.SlideDirection.Left,
-                                animationSpec = tween(700)
-                            )
+                            fadeIn()
                         },
                         exitTransition = {
-                            slideOutOfContainer(
-                                AnimatedContentScope.SlideDirection.Right,
-                                animationSpec = tween(700)
-                            )
+                            fadeOut()
                         }
                     ){
                         if(uiState.resourcesUiState is ResourcesUiState.NotStarted) viewModel.getResources()

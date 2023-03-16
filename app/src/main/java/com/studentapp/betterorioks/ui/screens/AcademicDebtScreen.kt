@@ -13,6 +13,7 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
@@ -36,9 +37,9 @@ import com.studentapp.betterorioks.ui.theme.BetterOrioksTheme
 @Composable
 fun AcademicDebtTopBar(onClick: () -> Unit = {}){
     Card(
-        backgroundColor = MaterialTheme.colors.surface,
-        shape = RoundedCornerShape(16.dp),
-        elevation = 8.dp
+        backgroundColor = MaterialTheme.colors.primaryVariant,
+        shape = RoundedCornerShape(0),
+        elevation = 0.dp
     ) {
         Box(
             modifier = Modifier
@@ -100,7 +101,7 @@ fun AcademicDebtElement(
     controlForm: String = "",
     teachers: List<String> = listOf()
 ){
-    var isExpanded by remember { mutableStateOf(false) }
+    var isExpanded by rememberSaveable { mutableStateOf(false) }
     Column(
         modifier = modifier.animateContentSize(animationSpec = spring(
             dampingRatio = Spring.DampingRatioLowBouncy,
@@ -219,82 +220,79 @@ fun AcademicDebtElement(
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun AcademicDebtScreen(
-    modifier: Modifier = Modifier,
     onClick: () -> Unit = {},
     uiState: AppUiState = AppUiState(),
     viewModel: BetterOrioksViewModel
 ){
-    Card(
-        shape = RoundedCornerShape(16.dp),
-        elevation = 10.dp,
-        modifier = modifier
-            .fillMaxSize()
-            .padding(16.dp),
-    ) {
-        Scaffold(
-            topBar = { AcademicDebtTopBar(onClick = onClick) },
-            backgroundColor = MaterialTheme.colors.surface
-        ) { innerPadding ->
-            val pullRefreshState = rememberPullRefreshState((uiState.academicDebtsUiState == DebtsUiState.Loading), { viewModel.getAcademicDebts() })
-            Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
-                LazyColumn(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    modifier = Modifier
-                        .padding(innerPadding)
-                        .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
-                        .fillMaxSize()
-                ) {
-                    when (uiState.academicDebtsUiState) {
-                        DebtsUiState.Error -> {
-                            item { ErrorScreen(modifier = Modifier.fillMaxSize()) }
-                        }
-                        is DebtsUiState.Success -> {
-                            val debts = (uiState.academicDebtsUiState as DebtsUiState.Success).debts
-                            if (debts.isNotEmpty()) {
-                                items(debts) {
-                                    AcademicDebtElement(
-                                        subjectName = it.name,
-                                        userPoints = it.currentGrade,
-                                        systemPoints = it.maxGrade.toInt(),
-                                        deadline = it.deadline,
-                                        consultationSchedule = it.consultationSchedule,
-                                        controlForm = it.controlForm,
-                                        teachers = it.teachers
-                                    )
-                                }
-                            } else {
-                                item {
-                                    Spacer(modifier = Modifier.size(16.dp))
-                                }
-                                item {
-                                    Image(
-                                        painterResource(id = R.drawable.done_img),
-                                        contentDescription = null,
-                                        modifier = Modifier.wrapContentSize(Alignment.Center).size(150.dp)
-                                    )
-                                }
-                                item {
-                                    Text(
-                                        text = stringResource(R.string.no_debts),
-                                        fontSize = 18.sp,
-                                        textAlign = TextAlign.Center,
-                                        modifier = Modifier.fillMaxSize(),
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
+    Scaffold(
+        topBar = { AcademicDebtTopBar(onClick = onClick) },
+        backgroundColor = MaterialTheme.colors.surface
+    ) { innerPadding ->
+        val pullRefreshState = rememberPullRefreshState(
+            (uiState.academicDebtsUiState == DebtsUiState.Loading),
+            { viewModel.getAcademicDebts() })
+        Box(modifier = Modifier.pullRefresh(pullRefreshState)) {
+            LazyColumn(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .padding(innerPadding)
+                    .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
+                    .fillMaxSize()
+            ) {
+                when (uiState.academicDebtsUiState) {
+                    DebtsUiState.Error -> {
+                        item { ErrorScreen(modifier = Modifier.fillMaxSize()) }
+                    }
+                    is DebtsUiState.Success -> {
+                        val debts = (uiState.academicDebtsUiState as DebtsUiState.Success).debts
+                        if (debts.isNotEmpty()) {
+                            items(debts) {
+                                AcademicDebtElement(
+                                    subjectName = it.name,
+                                    userPoints = it.currentGrade,
+                                    systemPoints = it.maxGrade.toInt(),
+                                    deadline = it.deadline,
+                                    consultationSchedule = it.consultationSchedule,
+                                    controlForm = it.controlForm,
+                                    teachers = it.teachers
+                                )
                             }
                         }
-                        else -> {
-                            item { LoadingScreen(modifier = Modifier.fillMaxSize()) }
+                        else {
+                            item {
+                                Spacer(modifier = Modifier.size(16.dp))
+                            }
+                            item {
+                                Image(
+                                    painterResource(id = R.drawable.done_img),
+                                    contentDescription = null,
+                                    modifier = Modifier
+                                        .wrapContentSize(Alignment.Center)
+                                        .size(150.dp)
+                                )
+                            }
+                            item {
+                                Text(
+                                    text = stringResource(R.string.no_debts),
+                                    fontSize = 18.sp,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.fillMaxSize(),
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
                         }
                     }
+                    else -> {
+                        item { LoadingScreen(modifier = Modifier.fillMaxSize()) }
+                    }
                 }
-                PullRefreshIndicator(
-                    refreshing = uiState.academicDebtsUiState is DebtsUiState.Loading,
-                    state = pullRefreshState, modifier = Modifier.align(Alignment.TopCenter),
-                    contentColor = MaterialTheme.colors.secondary
-                )
             }
-            }
+            PullRefreshIndicator(
+                refreshing = uiState.academicDebtsUiState is DebtsUiState.Loading,
+                state = pullRefreshState, modifier = Modifier.align(Alignment.TopCenter),
+                contentColor = MaterialTheme.colors.secondary
+            )
         }
     }
+
+}
