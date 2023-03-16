@@ -1,5 +1,7 @@
 package com.studentapp.betterorioks
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import androidx.compose.animation.*
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,6 +27,7 @@ import com.studentapp.betterorioks.ui.states.*
 //Screens
 
 
+@RequiresApi(Build.VERSION_CODES.TIRAMISU)
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
 fun BetterOrioksApp(){
@@ -97,6 +100,9 @@ fun BetterOrioksApp(){
                             },
                             onControlEventClick = {
                                 viewModel.setCurrentControlEvent(it)
+                            },
+                            onResourceClick = {
+                                navController.navigate(BetterOrioksScreens.Resources.name)
                             }
                         )
 
@@ -111,7 +117,7 @@ fun BetterOrioksApp(){
                             onExitClick = { viewModel.exit(context = context, navController = navController)},
                             uiState = uiState,
                             onDebtClick = {navController.navigate(BetterOrioksScreens.Debts.name)},
-                            viewModel = viewModel
+                            viewModel = viewModel,
                         )
                     }
                     composable(
@@ -136,6 +142,31 @@ fun BetterOrioksApp(){
                                 inclusive = false,)},
                             uiState = uiState,
                             viewModel = viewModel
+                        )
+                    }
+                    composable(
+                        route = BetterOrioksScreens.Resources.name,
+                        enterTransition = {
+                            slideIntoContainer(
+                                AnimatedContentScope.SlideDirection.Left,
+                                animationSpec = tween(700)
+                            )
+                        },
+                        exitTransition = {
+                            slideOutOfContainer(
+                                AnimatedContentScope.SlideDirection.Right,
+                                animationSpec = tween(700)
+                            )
+                        }
+                    ){
+                        if(uiState.resourcesUiState is ResourcesUiState.NotStarted) viewModel.getResources()
+                        ResourcesScreen(
+                            resourcesUiState = uiState.resourcesUiState,
+                            onBackButtonClick = {navController.popBackStack(
+                                route = BetterOrioksScreens.AcademicPerformanceMore.name,
+                                inclusive = false,)},
+                            onRefresh = {viewModel.getResources()},
+                            subjectName = uiState.currentSubject.name
                         )
                     }
                 }

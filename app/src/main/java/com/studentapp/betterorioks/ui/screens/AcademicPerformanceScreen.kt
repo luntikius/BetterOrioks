@@ -157,7 +157,9 @@ fun AcademicPerformance(
             }
         } else if(isError){
             LazyColumn(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxSize()) {
-                item{ ErrorScreen(modifier = Modifier.fillMaxSize()) }
+                item{
+                    ErrorScreen(modifier = Modifier.wrapContentSize(Alignment.Center).fillMaxWidth())
+                }
             }
         } else {
             LazyColumn(modifier = Modifier.pullRefresh(pullRefreshState).fillMaxSize()) {

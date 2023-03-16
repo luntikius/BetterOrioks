@@ -24,7 +24,6 @@ import com.studentapp.betterorioks.model.subjectsFromSite.ControlEvent
 import com.studentapp.betterorioks.model.subjectsFromSite.SimpleSubject
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectFromSite
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectsData
-import com.studentapp.betterorioks.ui.components.makeStatusNotification
 import com.studentapp.betterorioks.ui.screens.dayOfWeekToInt
 import java.time.temporal.ChronoUnit.DAYS
 import com.studentapp.betterorioks.ui.states.*
@@ -38,7 +37,6 @@ import java.util.*
 import kotlin.math.abs
 
 class BetterOrioksViewModel(
-   // private val academicPerformanceRepository: AcademicPerformanceRepository,
     private val userPreferencesRepository: UserPreferencesRepository,
     private val networkScheduleFromSiteRepository: NetworkScheduleFromSiteRepository,
     private val scheduleOfflineRepository: ScheduleOfflineRepository,
@@ -51,13 +49,16 @@ class BetterOrioksViewModel(
     private val _uiState = MutableStateFlow(AppUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun test(context: Context) {
-//        viewModelScope.launch {
-//            workManagerBetterOrioksRepository.cancelChecks()
-//            workManagerBetterOrioksRepository.checkForUpdates(cookies = uiState.value.authCookies)
-//            simpleSubjectsOfflineRepository.getSubjects()
-//        }
-        makeStatusNotification("ABOBA","ADADJADADJA",context)
+    fun test() {
+        viewModelScope.launch {
+            try {
+                orioksRepository.getResources(
+                    disciplineId = (uiState.value.subjectsFromSiteUiState as SubjectsFromSiteUiState.Success).subjects.subjects[0].id,
+                    scienceId = (uiState.value.subjectsFromSiteUiState as SubjectsFromSiteUiState.Success).subjects.subjects[0].scienceId,
+                    cookies = uiState.value.authCookies
+                )
+            }catch (_:Throwable){}
+        }
     }
 
     fun changeNotificationState(switchValue:Boolean){
@@ -65,6 +66,9 @@ class BetterOrioksViewModel(
             workManagerBetterOrioksRepository.checkForUpdates(cookies = uiState.value.authCookies)
         } else{
             workManagerBetterOrioksRepository.cancelChecks()
+        }
+        viewModelScope.launch {
+            userPreferencesRepository.setSendNotifications(switchValue)
         }
         _uiState.update { currentState -> currentState.copy(sendNotifications = switchValue) }
     }
@@ -82,7 +86,8 @@ class BetterOrioksViewModel(
             val token = userPreferencesRepository.token.first()
             val cookies = userPreferencesRepository.authCookies.first()
             val csrf = userPreferencesRepository.csrf.first()
-            _uiState.update { currentUiState -> currentUiState.copy(token = token, authCookies = cookies, csrf = csrf) }
+            val sendNotifications = userPreferencesRepository.sendNotifications.first()
+            _uiState.update { currentUiState -> currentUiState.copy(token = token, authCookies = cookies, csrf = csrf, sendNotifications = sendNotifications) }
             if (uiState.value.token != "" && uiState.value.authCookies != "") {
                 _uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.LoggedIn, updateState = false) }
             }else if(uiState.value.token != "" && uiState.value.authCookies == ""){
@@ -101,6 +106,7 @@ class BetterOrioksViewModel(
                 exitRepository.removeToken()
                 userPreferencesRepository.dump()
                 scheduleOfflineRepository.dump()
+                workManagerBetterOrioksRepository.cancelChecks()
                 navController.popBackStack()
                 _uiState.update { AppUiState(updateState = uiState.value.updateState, authState = AuthState.NotLoggedIn) }
             } catch (e: HttpException) {
@@ -156,6 +162,25 @@ class BetterOrioksViewModel(
         return result
     }
 
+    fun getResources(){
+        println("GET_RESOURCES")
+        _uiState.update { currentState -> currentState.copy(resourcesUiState = ResourcesUiState.Loading) }
+        viewModelScope.launch {
+            try {
+                val resList = orioksRepository.getResources(
+                    cookies = uiState.value.authCookies,
+                    scienceId = uiState.value.currentSubject.scienceId,
+                    disciplineId = uiState.value.currentSubject.id
+                )
+                _uiState.update { currentState -> currentState.copy(resourcesUiState = ResourcesUiState.Success(resList)) }
+            }catch (e:Throwable){
+                Log.d("GET_RESOURCES", e.message.toString())
+                _uiState.update { currentState -> currentState.copy(resourcesUiState = ResourcesUiState.Error) }
+                checkCookies()
+            }
+        }
+    }
+
     fun getAcademicPerformanceFromSite() {
         println("GET_ACADEMIC_PERFORMANCE_FROM_SITE")
         _uiState.update { currentState -> currentState.copy(subjectsFromSiteUiState = SubjectsFromSiteUiState.Loading) }
@@ -180,15 +205,15 @@ class BetterOrioksViewModel(
             } catch (e: Throwable) {
                 if(e.message == "Auth Error") _uiState.update { currentState -> currentState.copy(cookiesErrorCount = uiState.value.cookiesErrorCount + 1) }
                 checkCookies()
-                _uiState.update { currentState -> currentState.copy(subjectsFromSiteUiState = SubjectsFromSiteUiState.Error) }
+                _uiState.update { currentState -> currentState.copy(subjectsFromSiteUiState = SubjectsFromSiteUiState.Error(e.message.toString())) }
             } catch (e: Exception) {
-                _uiState.update { currentState -> currentState.copy(subjectsFromSiteUiState = SubjectsFromSiteUiState.Error) }
+                _uiState.update { currentState -> currentState.copy(subjectsFromSiteUiState = SubjectsFromSiteUiState.Error(e.message.toString())) }
             }
         }
     }
 
     fun setCurrentSubject(subject: SubjectFromSite) {
-        _uiState.update { currentState -> currentState.copy(currentSubject = subject) }
+        _uiState.update { currentState -> currentState.copy(currentSubject = subject, resourcesUiState = ResourcesUiState.NotStarted) }
     }
 
     fun setCurrentControlEvent(controlEvent: ControlEvent){

@@ -142,7 +142,7 @@ fun AboutElement(
 ){
     val controlForm = if(uiState.currentSubject.formOfControl.name == ""){ stringResource(R.string.not_specified) } else {uiState.currentSubject.formOfControl.name}
     Text(text = stringResource(id = R.string.control_form,controlForm),
-        modifier = Modifier.padding(top = 16.dp,start = 16.dp,end = 16.dp, bottom = 4.dp),
+        modifier = Modifier.padding(top = 8.dp,start = 16.dp,end = 16.dp, bottom = 8.dp),
         color = MaterialTheme.colors.primary,
         fontSize = 16.sp
     )
@@ -224,7 +224,7 @@ fun TopPerformanceMoreBar(onClick: () -> Unit = {}, uiState: AppUiState){
     }
 }
 @Composable
-fun AcademicPerformanceMoreScreen(uiState: AppUiState, onButtonClick: () -> Unit, onControlEventClick: (ControlEvent) -> Unit){
+fun AcademicPerformanceMoreScreen(uiState: AppUiState, onButtonClick: () -> Unit, onControlEventClick: (ControlEvent) -> Unit, onResourceClick: () -> Unit){
     AcademicPerformanceMore(
         disciplines = (uiState.subjectsFromSiteUiState as SubjectsFromSiteUiState.Success).subjects.subjects.filter{ it.id == uiState.currentSubject.id }[0].getControlEvents(),
         uiState = uiState,
@@ -232,7 +232,9 @@ fun AcademicPerformanceMoreScreen(uiState: AppUiState, onButtonClick: () -> Unit
         isLoading = false,
         isError = false,
         controlForm = uiState.currentSubject.formOfControl.name,
-        setCurrentControlEvent = onControlEventClick
+        setCurrentControlEvent = onControlEventClick,
+        scienceId = uiState.currentSubject.scienceId,
+        onResourceClick = onResourceClick
     )
 }
 @Composable
@@ -336,15 +338,55 @@ fun ResourcesPopup(controlEvent: ControlEvent, onDismiss: () -> Unit, controlFor
 }
 
 @Composable
+fun BottomButtons(
+    scienceId:Int,
+    onResourceClick: () -> Unit
+){
+    val context = LocalContext.current
+    val url = "https://orioks.miet.ru/mdl-gateway/course?science_id=${scienceId}"
+    val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(url)) }
+    Row(modifier = Modifier.padding(top = 16.dp)) {
+        OutlinedButton(
+            border = BorderStroke(1.dp,MaterialTheme.colors.primary),
+            onClick = onResourceClick,
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                backgroundColor = MaterialTheme.colors.surface,
+                contentColor = MaterialTheme.colors.secondary,
+                disabledContentColor = MaterialTheme.colors.primary
+            ),
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(stringResource(R.string.Resources))
+        }
+        Spacer(modifier = Modifier.size(8.dp))
+        OutlinedButton(
+            border = BorderStroke(1.dp,MaterialTheme.colors.primary),
+            onClick = { context.startActivity(intent) },
+            shape = RoundedCornerShape(16.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                backgroundColor = MaterialTheme.colors.surface,
+                contentColor = MaterialTheme.colors.secondary
+            ),
+            modifier = Modifier.weight(1f)
+        ) {
+            Text(stringResource(R.string.moodle_course))
+        }
+    }
+}
+
+@Composable
 fun AcademicPerformanceMore (
     modifier: Modifier = Modifier,
     uiState: AppUiState,
     onButtonClick: () -> Unit = {},
     disciplines: List<ControlEvent> = listOf(),
     controlForm: String = "",
+    scienceId: Int,
     isLoading: Boolean,
     isError: Boolean,
-    setCurrentControlEvent: (ControlEvent) -> Unit = {}
+    setCurrentControlEvent: (ControlEvent) -> Unit = {},
+    onResourceClick: () -> Unit
 ){
 
     Scaffold(
@@ -377,6 +419,7 @@ fun AcademicPerformanceMore (
                         }
                     )
                 }
+                item { BottomButtons(scienceId = scienceId, onResourceClick = onResourceClick) }
                 item { AboutElement(uiState = uiState) }
                 item{
                     val teacherStringId = if(uiState.currentSubject.teachers.size == 1){

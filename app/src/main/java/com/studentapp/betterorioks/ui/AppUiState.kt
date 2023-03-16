@@ -24,4 +24,5 @@ data class AppUiState (
     var currentSelectedDate: LocalDate = LocalDate.now(),
     var fullScheduleUiState: FullScheduleUiState = FullScheduleUiState.NotStarted,
     var scheduleInitUiState: Boolean = false,
+    val resourcesUiState: ResourcesUiState = ResourcesUiState.NotStarted
     )

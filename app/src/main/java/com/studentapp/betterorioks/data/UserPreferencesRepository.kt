@@ -1,10 +1,7 @@
 package com.studentapp.betterorioks.data
 
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.stringPreferencesKey
-import androidx.datastore.preferences.core.Preferences
-import androidx.datastore.preferences.core.edit
-import androidx.datastore.preferences.core.intPreferencesKey
+import androidx.datastore.preferences.core.*
 import com.studentapp.betterorioks.model.ImportantDates
 import com.studentapp.betterorioks.model.UserInfo
 import kotlinx.coroutines.flow.Flow
@@ -27,6 +24,7 @@ class UserPreferencesRepository(
         val DEPARTMENT = stringPreferencesKey("department")
         val SEMESTER_START = stringPreferencesKey("sessionEnd")
         val SESSION_START = stringPreferencesKey("sessionStart")
+        val SEND_NOTIFICATIONS = booleanPreferencesKey("sendNotifications")
     }
 
     suspend fun setToken(token: String) {
@@ -71,12 +69,20 @@ class UserPreferencesRepository(
         }
     }
 
+    suspend fun setSendNotifications(value: Boolean){
+        dataStore.edit{
+            preferences ->
+            preferences[SEND_NOTIFICATIONS] = value
+        }
+    }
+
     suspend fun dump(){
         dataStore.edit { preferences ->
             preferences[TOKEN] = ""
             preferences[AUTH_COOKIES] = ""
             preferences[LOGIN] = ""
             preferences[PASSWORD] = ""
+            preferences[SEND_NOTIFICATIONS] = false
             preferences[SESSION_START] = ""
             preferences[SEMESTER_START] = ""
             preferences[STUDENT_ID] = 0
@@ -103,4 +109,5 @@ class UserPreferencesRepository(
     val login: Flow<String> = dataStore.data.catch {  }.map { preferences -> preferences[LOGIN] ?: "" }
     val password: Flow<String> = dataStore.data.catch {  }.map { preferences -> preferences[PASSWORD] ?: "" }
     val csrf: Flow<String> = dataStore.data.catch {  }.map { preferences -> preferences[CSRF] ?: "" }
+    val sendNotifications: Flow<Boolean> = dataStore.data.catch {  }.map { preferences -> preferences[SEND_NOTIFICATIONS] ?: false }
 }

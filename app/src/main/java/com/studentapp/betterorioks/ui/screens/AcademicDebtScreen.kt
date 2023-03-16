@@ -270,7 +270,7 @@ fun AcademicDebtScreen(
                                     Image(
                                         painterResource(id = R.drawable.done_img),
                                         contentDescription = null,
-                                        modifier = Modifier.wrapContentSize(Alignment.Center)
+                                        modifier = Modifier.wrapContentSize(Alignment.Center).size(150.dp)
                                     )
                                 }
                                 item {

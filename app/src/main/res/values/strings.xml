@@ -64,4 +64,6 @@
     <string name="time_out_exeption">Превышено время авторизации, повторите попытку позже</string>
     <string name="notifications">Уведомления об изменении оценок</string>
     <string name="notifications_permission_required">Для включения данной функции необходимо предоставить разрешение на отправку уведомлений</string>
+    <string name="moodle_course">Курс Moodle</string>
+    <string name="Resources">Ресурсы</string>
 </resources>

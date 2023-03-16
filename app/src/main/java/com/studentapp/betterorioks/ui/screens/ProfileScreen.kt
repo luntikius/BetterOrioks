@@ -50,9 +50,7 @@ fun ProfileCardContent(userInfo: UserInfo){
             )
             Divider()
             Row(verticalAlignment = Alignment.CenterVertically){
-                Text(text = stringResource(R.string.student_number))
-                Spacer(modifier = Modifier.width(32.dp))
-                Spacer(modifier = Modifier.weight(1f))
+                Text(text = stringResource(R.string.student_number), modifier = Modifier.weight(1f))
                 Text(text = userInfo.recordBookId.toString(), textAlign = TextAlign.End)
             }
             Divider()
@@ -163,7 +161,7 @@ fun ProfileScreen(
                     AnyButton(
                         text = R.string.run_test,
                         icon = R.drawable.admin_button,
-                        onClick = { viewModel.test(context = context) })
+                        onClick = { viewModel.test() })
                 }
                 Spacer(modifier = Modifier.size(8.dp))
                 val launcher = rememberLauncherForActivityResult(

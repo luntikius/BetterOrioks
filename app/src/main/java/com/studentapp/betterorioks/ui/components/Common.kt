@@ -18,6 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -91,6 +92,7 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
             Image(
                 painter = painterResource(id = R.drawable.error_img),
                 contentDescription = null,
+                modifier = Modifier.size(150.dp)
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
@@ -238,7 +240,7 @@ fun SwitchButton(
     @StringRes text: Int = R.string.not_specified,
     icon: Int = R.drawable.admin_button,
 ){
-    BetterOrioksTheme() {
+    BetterOrioksTheme {
         Card(
             shape = RoundedCornerShape(16.dp),
             backgroundColor = MaterialTheme.colors.surface,
@@ -259,7 +261,10 @@ fun SwitchButton(
                 )
                 Text(
                     text = stringResource(text),
-                    modifier = Modifier.padding(16.dp).fillMaxWidth().weight(1f),
+                    modifier = Modifier
+                        .padding(16.dp)
+                        .fillMaxWidth()
+                        .weight(1f),
                     fontWeight = FontWeight.Bold,
                     fontSize = 18.sp
                 )
@@ -269,15 +274,17 @@ fun SwitchButton(
                     colors = SwitchDefaults.colors(
                         checkedTrackColor = MaterialTheme.colors.secondary,
                         uncheckedTrackColor = MaterialTheme.colors.background,
-                        checkedThumbColor = MaterialTheme.colors.secondaryVariant,
-                        uncheckedThumbColor = MaterialTheme.colors.secondaryVariant
-                    )
+                        checkedThumbColor = MaterialTheme.colors.secondary,
+                        uncheckedThumbColor = MaterialTheme.colors.secondary
+                    ),
+                    modifier = Modifier.scale(1.2f)
                 )
                 Spacer(modifier = Modifier.width(16.dp))
             }
         }
     }
 }
+
 
 val VERBOSE_NOTIFICATION_CHANNEL_NAME: CharSequence = "Уведомления об успеваемости"
 const val VERBOSE_NOTIFICATION_CHANNEL_DESCRIPTION = "Показывает уведомления каждый раз, когда меняется оценка студента"
@@ -292,6 +299,7 @@ fun makeStatusNotification(message: String, head: String, context: Context) {
     val channel = NotificationChannel(CHANNEL_ID, name, importance)
     channel.description = description
     val resultIntent = Intent(context, MainActivity::class.java)
+
 
     val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(context).run {
         addNextIntentWithParentStack(resultIntent)

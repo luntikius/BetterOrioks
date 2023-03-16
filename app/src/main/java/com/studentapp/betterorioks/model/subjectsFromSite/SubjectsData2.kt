@@ -5,8 +5,7 @@ import kotlinx.serialization.SerialName
 
 @Keep
 @kotlinx.serialization.Serializable
-class SubjectsData (
+class SubjectsData2 {
     @SerialName("dises")
-    val subjects: List<SubjectFromSite> = listOf(),
-)
-
+    val subjects: Map<String,SubjectFromSite> = mapOf()
+}

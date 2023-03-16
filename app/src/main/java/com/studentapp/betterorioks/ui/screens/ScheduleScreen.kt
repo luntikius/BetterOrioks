@@ -306,7 +306,8 @@ fun ScheduleList(viewModel: BetterOrioksViewModel, modifier: Modifier = Modifier
                     Spacer(modifier = Modifier.size(16.dp))
                     Image(
                         painter = painterResource(id = R.drawable.happy_flame),
-                        contentDescription = null
+                        contentDescription = null,
+                        modifier = Modifier.size(150.dp)
                     )
                     Spacer(modifier = Modifier.size(8.dp))
                     Text(
