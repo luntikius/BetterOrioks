@@ -75,7 +75,14 @@
   Контакты
 </h2>
 <p>
+  Узнать новости приложения и оставить свой отзыв можно в
   <a href="https://t.me/+YQD5-csbrqk4ZjEy" target="_blank">
-    <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/8/82/Telegram_logo.svg/512px-Telegram_logo.svg.png?20220101141644" height=20px>
+    Телеграм-канале
   </a>
+  <br>
+  Почта для связи: luntikius@gmail.com
+  <br>
+  Моя страничка в 
+  <a href="https://vk.com/luntikius">VK</a>
 </p>
+
