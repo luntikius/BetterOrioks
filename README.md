@@ -80,7 +80,8 @@
     Телеграм-канале
   </a>
   <br>
-  Почта для связи: luntikius@gmail.com
+  Почта для связи: 
+  <a href="mailto:luntikius@gmail.com">luntikius@gmail.com</a>
   <br>
   Моя страничка в 
   <a href="https://vk.com/luntikius">VK</a>
