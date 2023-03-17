@@ -1,4 +1,4 @@
-package com.example.betterorioks.ui
+package com.studentapp.betterorioks.ui.screens
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,6 +13,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -158,12 +159,24 @@ fun AcademicPerformance(
         } else if(isError){
             LazyColumn(verticalArrangement = Arrangement.Center, modifier = Modifier.fillMaxSize()) {
                 item{
-                    ErrorScreen(modifier = Modifier.wrapContentSize(Alignment.Center).fillMaxWidth())
+                    ErrorScreen(modifier = Modifier
+                        .wrapContentSize(Alignment.Center)
+                        .fillMaxWidth())
                 }
             }
         } else {
-            LazyColumn(modifier = Modifier.pullRefresh(pullRefreshState).fillMaxSize()) {
+            LazyColumn(modifier = Modifier
+                .pullRefresh(pullRefreshState)
+                .fillMaxSize()) {
                 item {Spacer(modifier = Modifier.size(16.dp))}
+                item {
+                    Text(
+                        text = stringResource(R.string.academic_performance_caps),
+                        modifier = Modifier.padding(horizontal = 16.dp,vertical = 8.dp),
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 22.sp
+                    )
+                }
                 items(subjects.subjects) {
                     AcademicPerformanceElement(
                         subjectName = it.name,
@@ -174,6 +187,28 @@ fun AcademicPerformance(
                             setCurrentSubject(it)
                         }
                     )
+                }
+                if(subjects.debts.isNotEmpty()) {
+                    item {
+                        Spacer(modifier = Modifier.size(16.dp))
+                        Text(
+                            text = stringResource(id = R.string.Debts),
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp
+                        )
+                    }
+                    items(subjects.debts) {
+                        AcademicPerformanceElement(
+                            subjectName = it.name,
+                            userPoints = it.grade.fullScore,
+                            systemPoints = it.getMaxScore(),
+                            onClick = {
+                                onComponentClicked()
+                                setCurrentSubject(it)
+                            }
+                        )
+                    }
                 }
                 item {Spacer(modifier = Modifier.size(16.dp))}
             }

@@ -50,13 +50,10 @@ class BetterOrioksViewModel(
     val uiState = _uiState.asStateFlow()
 
     fun test() {
+        val tag = "test"
         viewModelScope.launch {
             try {
-                orioksRepository.getResources(
-                    disciplineId = (uiState.value.subjectsFromSiteUiState as SubjectsFromSiteUiState.Success).subjects.subjects[0].id,
-                    scienceId = (uiState.value.subjectsFromSiteUiState as SubjectsFromSiteUiState.Success).subjects.subjects[0].scienceId,
-                    cookies = uiState.value.authCookies
-                )
+                Log.d(tag,orioksRepository.getSubjects(cookies = uiState.value.authCookies).debts.toString())
             }catch (_:Throwable){}
         }
     }
@@ -263,7 +260,6 @@ class BetterOrioksViewModel(
                             token = token.token,
                             authCookies = cookies,
                             userInfoUiState = UserInfoUiState.NotStarted,
-                            academicDebtsUiState = DebtsUiState.NotStarted,
                             subjectsFromSiteUiState = SubjectsFromSiteUiState.NotStarted,
                             authState = AuthState.LoggedIn
                         )
@@ -383,28 +379,6 @@ class BetterOrioksViewModel(
                 )
             }
             else _uiState.update { currentState -> currentState.copy(importantDatesUiState = ImportantDatesUiState.Error) }
-        }
-    }
-
-    fun getAcademicDebts() {
-        println("GET_ACADEMIC_DEBTS")
-        val mainRepository = NetworkMainRepository(uiState.value.token)
-        viewModelScope.launch {
-            _uiState.update { currentState -> currentState.copy(academicDebtsUiState = DebtsUiState.Loading) }
-            try {
-                val academicDebts = mainRepository.getAcademicDebt()
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        academicDebtsUiState = DebtsUiState.Success(
-                            academicDebts
-                        )
-                    )
-                }
-            } catch (e: HttpException) {
-                _uiState.update { currentState -> currentState.copy(academicDebtsUiState = DebtsUiState.Error) }
-            } catch (e: java.lang.Exception) {
-                _uiState.update { currentState -> currentState.copy(academicDebtsUiState = DebtsUiState.Error) }
-            }
         }
     }
 

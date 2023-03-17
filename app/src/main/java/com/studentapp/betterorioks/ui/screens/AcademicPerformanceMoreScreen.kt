@@ -18,6 +18,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.tooling.preview.Preview
@@ -27,6 +28,7 @@ import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupProperties
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.model.subjectsFromSite.ControlEvent
+import com.studentapp.betterorioks.model.subjectsFromSite.DebtControlEvent
 import com.studentapp.betterorioks.model.subjectsFromSite.Resource
 import com.studentapp.betterorioks.model.subjectsFromSite.Teacher
 import com.studentapp.betterorioks.ui.AppUiState
@@ -226,7 +228,8 @@ fun TopPerformanceMoreBar(onClick: () -> Unit = {}, uiState: AppUiState){
 @Composable
 fun AcademicPerformanceMoreScreen(uiState: AppUiState, onButtonClick: () -> Unit, onControlEventClick: (ControlEvent) -> Unit, onResourceClick: () -> Unit){
     AcademicPerformanceMore(
-        disciplines = (uiState.subjectsFromSiteUiState as SubjectsFromSiteUiState.Success).subjects.subjects.filter{ it.id == uiState.currentSubject.id }[0].getControlEvents(),
+        disciplines = (uiState.subjectsFromSiteUiState as SubjectsFromSiteUiState.Success).subjects.subjects.firstOrNull { it.id == uiState.currentSubject.id }
+            ?.getControlEvents() ?: listOf(),
         uiState = uiState,
         onButtonClick = onButtonClick,
         isLoading = false,
@@ -234,7 +237,8 @@ fun AcademicPerformanceMoreScreen(uiState: AppUiState, onButtonClick: () -> Unit
         controlForm = uiState.currentSubject.formOfControl.name,
         setCurrentControlEvent = onControlEventClick,
         scienceId = uiState.currentSubject.scienceId,
-        onResourceClick = onResourceClick
+        onResourceClick = onResourceClick,
+        debtControlEvents = uiState.currentSubject.debtControlEvents
     )
 }
 @Composable
@@ -338,6 +342,67 @@ fun ResourcesPopup(controlEvent: ControlEvent, onDismiss: () -> Unit, controlFor
 }
 
 @Composable
+fun DebtControlEventElement(debtControlEvent: DebtControlEvent){
+    Column(
+        Modifier
+            .padding(top = 4.dp) ){
+        Text(
+            stringResource(R.string.resit),
+            fontSize = 20.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(vertical =  16.dp)
+        )
+        Divider(color = MaterialTheme.colors.onBackground)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .height(IntrinsicSize.Min)
+                .padding(vertical = 8.dp)
+        ) {
+            Text("1", modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Divider(
+                Modifier
+                    .fillMaxHeight()
+                    .width(2.dp)
+                    .padding(vertical = 8.dp)
+                ,
+                color = MaterialTheme.colors.primary
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            Column {
+                Text(text = stringResource(id = R.string.date_of_resit,debtControlEvent.date1), modifier = Modifier.padding(vertical = 2.dp))
+                Text(text = stringResource(id = R.string.time_of_resit,debtControlEvent.time1), modifier = Modifier.padding(vertical = 2.dp))
+                Text(text = stringResource(id = R.string.room_number, debtControlEvent.room1), modifier = Modifier.padding(vertical = 2.dp))
+            }
+        }
+        Divider(color = MaterialTheme.colors.onBackground)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .height(IntrinsicSize.Min)
+                .padding(vertical = 8.dp)
+        ) {
+            Text("2", modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp), fontWeight = FontWeight.Bold, fontSize = 20.sp)
+            Divider(
+                Modifier
+                    .fillMaxHeight()
+                    .width(2.dp)
+                    .padding(vertical = 8.dp)
+                ,
+                color = MaterialTheme.colors.primary
+            )
+            Spacer(modifier = Modifier.size(16.dp))
+            Column {
+                Text(text = stringResource(id = R.string.date_of_resit,debtControlEvent.date1), modifier = Modifier.padding(vertical = 2.dp))
+                Text(text = stringResource(id = R.string.time_of_resit,debtControlEvent.time1), modifier = Modifier.padding(vertical = 2.dp))
+                Text(text = stringResource(id = R.string.room_number, debtControlEvent.room1), modifier = Modifier.padding(vertical = 2.dp))
+            }
+        }
+        Divider(color = MaterialTheme.colors.onBackground)
+    }
+}
+
+@Composable
 fun BottomButtons(
     scienceId:Int,
     onResourceClick: () -> Unit
@@ -386,7 +451,8 @@ fun AcademicPerformanceMore (
     isLoading: Boolean,
     isError: Boolean,
     setCurrentControlEvent: (ControlEvent) -> Unit = {},
-    onResourceClick: () -> Unit
+    onResourceClick: () -> Unit,
+    debtControlEvents: List<DebtControlEvent> = listOf()
 ){
 
     Scaffold(
@@ -405,6 +471,16 @@ fun AcademicPerformanceMore (
                     .padding(innerPadding)
                     .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
             ) {
+                if(disciplines.isNotEmpty())
+                    item{
+                        Text(
+                            stringResource(R.string.control_events),
+                            fontSize = 20.sp,
+                            fontWeight = FontWeight.Bold,
+                            modifier = Modifier.padding(vertical =  16.dp)
+                        )
+                        Divider(color = MaterialTheme.colors.onBackground)
+                    }
                 items(disciplines) {
                     AcademicPerformanceMoreElement(
                         subjectName = it.type.name.ifBlank { controlForm },
@@ -418,6 +494,9 @@ fun AcademicPerformanceMore (
                             popupIsVisible = true
                         }
                     )
+                }
+                items(debtControlEvents){
+                    DebtControlEventElement(debtControlEvent = it)
                 }
                 item { BottomButtons(scienceId = scienceId, onResourceClick = onResourceClick) }
                 item { AboutElement(uiState = uiState) }

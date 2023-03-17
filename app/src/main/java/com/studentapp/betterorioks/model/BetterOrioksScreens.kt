@@ -9,6 +9,5 @@ enum class BetterOrioksScreens {
     AcademicPerformance,
     AcademicPerformanceMore,
     Profile,
-    Debts,
     Resources
 }

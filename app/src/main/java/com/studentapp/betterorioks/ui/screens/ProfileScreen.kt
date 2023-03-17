@@ -139,7 +139,6 @@ fun ExitButton(onExitClick: () -> Unit){
 @Composable
 fun ProfileScreen(
     onExitClick: () -> Unit = {},
-    onDebtClick: () -> Unit = {},
     uiState: AppUiState = AppUiState(),
     viewModel: BetterOrioksViewModel
 ){
@@ -153,8 +152,6 @@ fun ProfileScreen(
             item {
                 Spacer(modifier = Modifier.size(16.dp))
                 ProfileCard(uiState = uiState)
-                Spacer(modifier = Modifier.size(8.dp))
-                AnyButton(onClick = onDebtClick, text = R.string.Debts, icon = R.drawable.debt)
                 val id = if(uiState.userInfoUiState is UserInfoUiState.Success) (uiState.userInfoUiState as UserInfoUiState.Success).userInfo.recordBookId else 0
                 if (id.toString() in AdminIds.ids) {
                     Spacer(modifier = Modifier.size(8.dp))

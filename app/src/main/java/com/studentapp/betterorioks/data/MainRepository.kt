@@ -27,10 +27,6 @@ class NetworkMainRepository(token:String)
         retrofit.create(UserInfoApiService::class.java)
     }
 
-    private val academicDebtRetrofitService: AcademicDebtApiService by lazy {
-        retrofit.create(AcademicDebtApiService::class.java)
-    }
-
     private val importantDatesRetrofitService: ImportantDatesApiService by lazy{
         retrofit.create(ImportantDatesApiService::class.java)
     }
@@ -39,10 +35,6 @@ class NetworkMainRepository(token:String)
 
     suspend fun getUserInfo(): UserInfo {
         return userInfoRetrofitService.getUserInfo(token = finalToken)
-    }
-
-    suspend fun getAcademicDebt():List<AcademicDebt>{
-        return academicDebtRetrofitService.getAcademicDebt(token = finalToken)
     }
 
     suspend fun getImportantDates(): ImportantDates {

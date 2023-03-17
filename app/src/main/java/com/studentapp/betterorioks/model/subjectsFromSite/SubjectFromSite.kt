@@ -34,7 +34,9 @@ class SubjectFromSite(
     @SerialName("mvb")
     val maxAvailableScore: Int = 0,
     @SerialName("is_exam_time")
-    val isExamTime: Boolean = false
+    val isExamTime: Boolean = false,
+    @SerialName("debtKms")
+    val debtControlEvents: List<DebtControlEvent> = listOf()
 ) {
     fun getControlEvents():List<ControlEvent>{
         val controlEvents = mutableListOf<ControlEvent>()

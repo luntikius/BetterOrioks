@@ -66,4 +66,9 @@
     <string name="notifications_permission_required">Для включения данной функции необходимо предоставить разрешение на отправку уведомлений</string>
     <string name="moodle_course">Курс Moodle</string>
     <string name="Resources">Ресурсы</string>
+    <string name="academic_performance_caps">Успеваемость</string>
+    <string name="control_events">Контрольные мероприятия</string>
+    <string name="resit">Пересдачи</string>
+    <string name="date_of_resit">Дата проведения: %1$s</string>
+    <string name="time_of_resit">Время проведения: %1$s</string>
 </resources>

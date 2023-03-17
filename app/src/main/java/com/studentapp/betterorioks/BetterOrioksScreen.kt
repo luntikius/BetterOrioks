@@ -13,7 +13,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
-import com.example.betterorioks.ui.AcademicPerformanceScreen
+import com.studentapp.betterorioks.ui.screens.AcademicPerformanceScreen
 import com.studentapp.betterorioks.ui.components.BottomNavigationBar
 import com.studentapp.betterorioks.model.BetterOrioksScreens
 import com.studentapp.betterorioks.ui.components.LoadingScreen
@@ -116,32 +116,7 @@ fun BetterOrioksApp(){
                         ProfileScreen(
                             onExitClick = { viewModel.exit(context = context, navController = navController)},
                             uiState = uiState,
-                            onDebtClick = {navController.navigate(BetterOrioksScreens.Debts.name)},
                             viewModel = viewModel,
-                        )
-                    }
-                    composable(
-                        route = BetterOrioksScreens.Debts.name,
-                        enterTransition = {
-                            slideIntoContainer(
-                                AnimatedContentScope.SlideDirection.Left,
-                                animationSpec = tween(700)
-                            )
-                        },
-                        exitTransition = {
-                            slideOutOfContainer(
-                                AnimatedContentScope.SlideDirection.Right,
-                                animationSpec = tween(700)
-                            )
-                        }
-                    ){
-                        if(uiState.academicDebtsUiState == DebtsUiState.NotStarted){viewModel.getAcademicDebts()}
-                        AcademicDebtScreen(
-                            onClick = {navController.popBackStack(
-                                route = BetterOrioksScreens.Profile.name,
-                                inclusive = false,)},
-                            uiState = uiState,
-                            viewModel = viewModel
                         )
                     }
                     composable(

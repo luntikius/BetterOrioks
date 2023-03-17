@@ -19,7 +19,6 @@ data class AppUiState (
     var csrf: String = "",
     var authState: AuthState = AuthState.NotLoggedIn,
     var userInfoUiState: UserInfoUiState = UserInfoUiState.NotStarted,
-    var academicDebtsUiState: DebtsUiState = DebtsUiState.NotStarted,
     var importantDatesUiState: ImportantDatesUiState = ImportantDatesUiState.NotStarted,
     var currentSelectedDate: LocalDate = LocalDate.now(),
     var fullScheduleUiState: FullScheduleUiState = FullScheduleUiState.NotStarted,

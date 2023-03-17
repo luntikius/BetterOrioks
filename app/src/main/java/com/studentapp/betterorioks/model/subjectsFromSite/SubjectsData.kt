@@ -8,5 +8,7 @@ import kotlinx.serialization.SerialName
 class SubjectsData (
     @SerialName("dises")
     val subjects: List<SubjectFromSite> = listOf(),
+    @SerialName("dolg_dises")
+    val debts: List<SubjectFromSite> = listOf()
 )
 

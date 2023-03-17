@@ -114,7 +114,7 @@ class NetworkOrioksRepository
     private fun parseString(s: String): SubjectsData{
         return if (s[s.indexOf(":")+1] == "{".toCharArray()[0]){
             val temp = json.decodeFromString<SubjectsData2>(s)
-            SubjectsData(subjects = temp.subjects.values.toList())
+            SubjectsData(subjects = temp.subjects.values.toList(), debts = temp.debts)
         } else json.decodeFromString(s)
     }
 

@@ -8,4 +8,6 @@ import kotlinx.serialization.SerialName
 class SubjectsData2 {
     @SerialName("dises")
     val subjects: Map<String,SubjectFromSite> = mapOf()
+    @SerialName("dolg_dises")
+    val debts: List<SubjectFromSite> = listOf()
 }

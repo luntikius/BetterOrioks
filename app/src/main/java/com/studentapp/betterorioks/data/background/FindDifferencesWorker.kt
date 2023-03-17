@@ -58,7 +58,7 @@ class FindDifferencesWorker(
                             id = subjects[i].id,
                             name = subjects[i].name,
                             systemId = subjects[i].systemId,
-                            userScore = "${savedSubjects[i].userScore} -> ${subjects[i].userScore}",
+                            userScore = "c ${savedSubjects[i].userScore} на ${subjects[i].userScore}",
                             isSubject = subjects[i].isSubject
                         )
                     )
