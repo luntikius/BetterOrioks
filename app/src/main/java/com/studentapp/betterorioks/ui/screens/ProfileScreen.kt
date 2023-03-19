@@ -159,28 +159,41 @@ fun ProfileScreen(
                         text = R.string.run_test,
                         icon = R.drawable.admin_button,
                         onClick = { viewModel.test() })
-                }
-                Spacer(modifier = Modifier.size(8.dp))
-                val launcher = rememberLauncherForActivityResult(
-                    ActivityResultContracts.RequestPermission()
-                ) { isGranted: Boolean ->
-                    if (isGranted) {
-                        viewModel.changeNotificationState(switchValue = true)
-                    } else {
-                        Toast.makeText(context, R.string.notifications_permission_required, Toast.LENGTH_SHORT).show()
+
+                    //Ниже кнопка с уведомлениями
+                    Spacer(modifier = Modifier.size(8.dp))
+                    val launcher = rememberLauncherForActivityResult(
+                        ActivityResultContracts.RequestPermission()
+                    ) { isGranted: Boolean ->
+                        if (isGranted) {
+                            viewModel.changeNotificationState(switchValue = true)
+                        }
+                        else {
+                            Toast.makeText(
+                                context,
+                                R.string.notifications_permission_required,
+                                Toast.LENGTH_SHORT
+                            ).show()
+                        }
                     }
+                    SwitchButton(
+                        sendNotifications = uiState.sendNotifications,
+                        changeNotifications = {
+                            if (ActivityCompat.checkSelfPermission(
+                                    context,
+                                    android.Manifest.permission.POST_NOTIFICATIONS
+                                ) != PackageManager.PERMISSION_GRANTED
+                            ) {
+                                launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                            }
+                            else {
+                                viewModel.changeNotificationState(switchValue = it)
+                            }
+                        },
+                        text = R.string.notifications,
+                        icon = R.drawable.notifications,
+                    )
                 }
-                SwitchButton(
-                    sendNotifications = uiState.sendNotifications,
-                    changeNotifications = {
-                        if(ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                            launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-                        }else {
-                            viewModel.changeNotificationState(switchValue = it)
-                        } },
-                    text = R.string.notifications,
-                    icon = R.drawable.notifications,
-                )
             }
             item{
                 Spacer(modifier = Modifier.size(8.dp))

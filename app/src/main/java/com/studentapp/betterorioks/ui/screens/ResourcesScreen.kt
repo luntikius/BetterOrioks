@@ -2,6 +2,7 @@ package com.studentapp.betterorioks.ui.screens
 
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -171,7 +172,11 @@ fun Category(category: ResourceCategory){
                                 vertical = 8.dp
                             )
                             .clickable {
-                                context.startActivity(intent)
+                                try {
+                                    context.startActivity(intent)
+                                }catch (_e:Throwable){
+                                    Toast.makeText(context, context.getString(R.string.toast_unsupported_file_format), Toast.LENGTH_LONG).show()
+                                }
                             }
                     ) {
                         Column(

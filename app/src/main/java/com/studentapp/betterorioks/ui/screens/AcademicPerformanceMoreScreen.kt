@@ -1,6 +1,7 @@
 package com.studentapp.betterorioks.ui.screens
 import android.content.Intent
 import android.net.Uri
+import android.widget.Toast
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -301,7 +302,11 @@ fun ResourcesPopup(controlEvent: ControlEvent, onDismiss: () -> Unit, controlFor
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    context.startActivity(intent)
+                                    try {
+                                        context.startActivity(intent)
+                                    }catch(_:Throwable){
+                                        Toast.makeText(context, context.getString(R.string.toast_unsupported_file_format), Toast.LENGTH_LONG).show()
+                                    }
                                 }
                         ) {
                             Row (
@@ -415,6 +420,7 @@ fun BottomButtons(
             border = BorderStroke(1.dp,MaterialTheme.colors.primary),
             onClick = onResourceClick,
             shape = RoundedCornerShape(16.dp),
+            enabled = false,
             colors = ButtonDefaults.outlinedButtonColors(
                 backgroundColor = MaterialTheme.colors.surface,
                 contentColor = MaterialTheme.colors.secondary,
