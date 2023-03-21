@@ -169,3 +169,9 @@
   <a href="https://vk.com/luntikius">VK</a>
 </p>
 
+<p>
+  Капибара для поднятия настроения
+</p>
+<p>
+  <img src="https://github.com/luntikius/BetterOrioks/blob/master/img/capy.jpg?raw=true" height=250px>
+</p>
