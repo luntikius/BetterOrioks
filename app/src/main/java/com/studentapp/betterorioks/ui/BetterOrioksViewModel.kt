@@ -24,7 +24,6 @@ import com.studentapp.betterorioks.model.subjectsFromSite.ControlEvent
 import com.studentapp.betterorioks.model.subjectsFromSite.SimpleSubject
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectFromSite
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectsData
-import com.studentapp.betterorioks.ui.components.makeStatusNotification
 import com.studentapp.betterorioks.ui.screens.dayOfWeekToInt
 import java.time.temporal.ChronoUnit.DAYS
 import com.studentapp.betterorioks.ui.states.*
@@ -56,7 +55,8 @@ class BetterOrioksViewModel(
         val tag = "test"
         viewModelScope.launch {
             try {
-                makeStatusNotification("ABOBA","TEST",context)
+                _uiState.update { it.copy(theme = 2) }
+                userPreferencesRepository.setTheme(2)
             }catch (e:Throwable){
                 Log.d(tag,e.message.toString())
             }
@@ -89,7 +89,8 @@ class BetterOrioksViewModel(
             val cookies = userPreferencesRepository.authCookies.first()
             val csrf = userPreferencesRepository.csrf.first()
             val sendNotifications = userPreferencesRepository.sendNotifications.first()
-            _uiState.update { currentUiState -> currentUiState.copy(token = token, authCookies = cookies, csrf = csrf, sendNotifications = sendNotifications) }
+            val theme = userPreferencesRepository.theme.first()
+            _uiState.update { currentUiState -> currentUiState.copy(token = token, authCookies = cookies, csrf = csrf, sendNotifications = sendNotifications, theme = theme) }
             if (uiState.value.token != "" && uiState.value.authCookies != "") {
                 _uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.LoggedIn, updateState = false) }
             }else if(uiState.value.token != "" && uiState.value.authCookies == ""){

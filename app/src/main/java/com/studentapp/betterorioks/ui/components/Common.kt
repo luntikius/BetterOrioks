@@ -35,7 +35,6 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.studentapp.betterorioks.MainActivity
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.model.BottomNavItem
-import com.studentapp.betterorioks.ui.theme.BetterOrioksTheme
 
 
 @Preview
@@ -205,7 +204,7 @@ fun AnyButton (
         modifier = modifier
             .wrapContentHeight()
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 3.dp)
+            .padding(horizontal = 16.dp,vertical = 3.dp)
             .defaultMinSize(minHeight = 72.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -240,47 +239,45 @@ fun SwitchButton(
     @StringRes text: Int = R.string.not_specified,
     icon: Int = R.drawable.admin_button,
 ){
-    BetterOrioksTheme {
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            backgroundColor = MaterialTheme.colors.surface,
-            elevation = 5.dp,
-            modifier = modifier
-                .wrapContentHeight()
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 3.dp)
-                .defaultMinSize(minHeight = 72.dp)
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Spacer(modifier = Modifier.size(16.dp))
-                Icon(
-                    painter = painterResource(icon),
-                    contentDescription = null,
-                    tint = MaterialTheme.colors.secondary,
-                    modifier = Modifier.size(32.dp)
-                )
-                Text(
-                    text = stringResource(text),
-                    modifier = Modifier
-                        .padding(16.dp)
-                        .fillMaxWidth()
-                        .weight(1f),
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-                Switch(
-                    checked = sendNotifications,
-                    onCheckedChange = changeNotifications,
-                    colors = SwitchDefaults.colors(
-                        checkedTrackColor = MaterialTheme.colors.secondary,
-                        uncheckedTrackColor = MaterialTheme.colors.primary,
-                        checkedThumbColor = MaterialTheme.colors.secondary,
-                        uncheckedThumbColor = MaterialTheme.colors.secondary
-                    ),
-                    modifier = Modifier.scale(1.2f)
-                )
-                Spacer(modifier = Modifier.width(16.dp))
-            }
+    Card(
+        shape = RoundedCornerShape(size = 16.dp),
+        backgroundColor = MaterialTheme.colors.surface,
+        elevation = 5.dp,
+        modifier = modifier
+            .wrapContentHeight()
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp,vertical = 3.dp)
+            .defaultMinSize(minHeight = 72.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Spacer(modifier = Modifier.size(16.dp))
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = MaterialTheme.colors.secondary,
+                modifier = Modifier.size(32.dp)
+            )
+            Text(
+                text = stringResource(text),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .weight(1f),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
+            Switch(
+                checked = sendNotifications,
+                onCheckedChange = changeNotifications,
+                colors = SwitchDefaults.colors(
+                    checkedTrackColor = MaterialTheme.colors.secondary,
+                    uncheckedTrackColor = MaterialTheme.colors.primary,
+                    checkedThumbColor = MaterialTheme.colors.secondary,
+                    uncheckedThumbColor = MaterialTheme.colors.secondary
+                ),
+                modifier = Modifier.scale(1.2f)
+            )
+            Spacer(modifier = Modifier.width(16.dp))
         }
     }
 }

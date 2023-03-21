@@ -26,7 +26,6 @@ import androidx.compose.ui.unit.sp
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.states.AuthState
-import com.studentapp.betterorioks.ui.theme.BetterOrioksTheme
 
 @Preview
 @Composable
@@ -130,83 +129,80 @@ fun AuthorizationScreen(
     onLogin: (String,String) -> Unit,
     uiState: AppUiState = AppUiState()
 ){
-    BetterOrioksTheme{
-        var login by rememberSaveable { mutableStateOf("") }
-        var password by rememberSaveable { mutableStateOf("") }
-        val focusManager = LocalFocusManager.current
-        val isError = !(uiState.authState == AuthState.NotLoggedIn || uiState.authState == AuthState.LoggedIn)
-        @StringRes
-        val errorText = when(uiState.authState){
-            AuthState.UnexpectedError -> R.string.unexpected_error
-            AuthState.TokenLimitReached -> R.string.token_limit_reached
-            AuthState.TimeOut -> R.string.time_out_exeption
-            else -> R.string.bad_login_or_password
+    var login by rememberSaveable { mutableStateOf("") }
+    var password by rememberSaveable { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
+    val isError = !(uiState.authState == AuthState.NotLoggedIn || uiState.authState == AuthState.LoggedIn)
+    @StringRes
+    val errorText = when(uiState.authState){
+        AuthState.UnexpectedError -> R.string.unexpected_error
+        AuthState.TokenLimitReached -> R.string.token_limit_reached
+        AuthState.TimeOut -> R.string.time_out_exeption
+        else -> R.string.bad_login_or_password
+    }
+    Surface(color = MaterialTheme.colors.background, modifier = Modifier.fillMaxSize()) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Top,
+            modifier = Modifier.wrapContentSize(Alignment.Center)
+        ) {
+            Image(
+                painter = painterResource(id = R.drawable.logo),
+                contentDescription = null,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .size(220.dp)
+            )
+            if(uiState.updateState){
+                UpdateWarning()
             }
-
-        Surface(color = MaterialTheme.colors.background, modifier = Modifier.fillMaxSize()) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Top,
-                modifier = Modifier.wrapContentSize(Alignment.Center)
-            ) {
-                Image(
-                    painter = painterResource(id = R.drawable.logo),
-                    contentDescription = null,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .size(220.dp)
-                )
-                if(uiState.updateState){
-                    UpdateWarning()
-                }
-                Text(
-                    text = if(!isError) stringResource(R.string.text_on_login) else stringResource(id = errorText),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(vertical = 16.dp, horizontal = 32.dp),
-                    color = if(!isError) MaterialTheme.colors.onBackground else MaterialTheme.colors.error
-                )
-                AuthenticationTextField(
-                    value = login,
-                    onValueChange = { login = it },
-                    label = stringResource(R.string.login),
-                    isError = isError
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                AuthenticationPasswordTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = stringResource(R.string.password),
-                    onButton = {
-                        focusManager.clearFocus()
+            Text(
+                text = if(!isError) stringResource(R.string.text_on_login) else stringResource(id = errorText),
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(vertical = 16.dp, horizontal = 32.dp),
+                color = if(!isError) MaterialTheme.colors.onBackground else MaterialTheme.colors.error
+            )
+            AuthenticationTextField(
+                value = login,
+                onValueChange = { login = it },
+                label = stringResource(R.string.login),
+                isError = isError
+            )
+            Spacer(modifier = Modifier.size(8.dp))
+            AuthenticationPasswordTextField(
+                value = password,
+                onValueChange = { password = it },
+                label = stringResource(R.string.password),
+                onButton = {
+                    focusManager.clearFocus()
                     },
-                    isError = isError
-                )
-                Button(
-                    onClick = {
-                        onLogin(login, password)
-                        password = ""
-                        login = ""
-                              },
-                    shape = RoundedCornerShape(16.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = MaterialTheme.colors.primaryVariant,
-                        contentColor = MaterialTheme.colors.secondary ,
-                        disabledContentColor = MaterialTheme.colors.secondary.copy(0.4f)
-                    ),
-                    modifier = Modifier.padding(16.dp),
-                    enabled = (login != "" && password != ""),
-                    elevation = ButtonDefaults.elevation(10.dp)
-                ) {
-                    Row{
-                        Text(
-                            text = stringResource(R.string.LogIn),
-                            fontSize = 16.sp,
-                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
-                        )
-                    }
+                isError = isError
+            )
+            Button(
+                onClick = {
+                    onLogin(login, password)
+                    password = ""
+                    login = ""
+                          },
+                shape = RoundedCornerShape(16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    backgroundColor = MaterialTheme.colors.primaryVariant,
+                    contentColor = MaterialTheme.colors.secondary ,
+                    disabledContentColor = MaterialTheme.colors.secondary.copy(0.4f)
+                ),
+                modifier = Modifier.padding(16.dp),
+                enabled = (login != "" && password != ""),
+                elevation = ButtonDefaults.elevation(10.dp)
+            ) {
+                Row{
+                    Text(
+                        text = stringResource(R.string.LogIn),
+                        fontSize = 16.sp,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp),
+                    )
                 }
-                Spacer(modifier = Modifier.size(40.dp))
             }
+            Spacer(modifier = Modifier.size(40.dp))
         }
     }
 }
