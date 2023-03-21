@@ -79,24 +79,57 @@
   <li>
     Информация о студенте
   </li>
+  
+  <li>
+    Новости
+  </li>
 </ul>
 </p>
 
 <p>
   Также приложение может присылать уведомления об изменении оценок.
 </p>
+
+<h3>
+  Просмотр успеваемости студента
+</h3>
 <p>
-  В будущем будет добавлена возможность просмотра следующей информации:
-<ul>
-  <li>
-    Новости
-  </li>
-  
-  <li>
-    Текущие заявки
-  </li>
-</ul>
+  Приложение позволяет смотреть текущие баллы по дисциплинам и по каждому из контрольных мероприятий.
+ </p>
+ <p>
+  <img src="https://github.com/luntikius/BetterOrioks/blob/master/img/academic_performance_screen.png?raw=true" height=350px>
 </p>
+
+<h3>
+  Получение уведомлений об изменении оценок
+</h3>
+<p>
+  Есть возможность включить уведомления об изменении баллов по дисциплинам.
+ </p>
+ <p>
+  <img src="https://github.com/luntikius/BetterOrioks/blob/master/img/notifications_toggle.png?raw=true" height=75px>
+</p>
+
+<h3>
+  Просмотр ресурсов
+</h3>
+<p>
+  В приложении можно посмотреть ресурсы ко всей дисциплине и к конкретным контрольным мероприятиям.
+ </p>
+ <p>
+  <img src="https://github.com/luntikius/BetterOrioks/blob/master/img/resources_screen.png?raw=true" height=250px>
+</p>
+
+<h3>
+  Просмотр расписания текущего семестра
+</h3>
+<p>
+  Доступен просмотр расписания на конкретный день.
+</p>
+ <p>
+  <img src="https://github.com/luntikius/BetterOrioks/blob/master/img/schedule_screen.png?raw=true" height=350px>
+</p>
+
 
 <h2 id="p4">
   Куда уходят мои данные?
