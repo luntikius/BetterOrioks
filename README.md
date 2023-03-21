@@ -97,7 +97,7 @@
   Приложение позволяет смотреть текущие баллы по дисциплинам и по каждому из контрольных мероприятий.
  </p>
  <p>
-  <img src="https://github.com/luntikius/BetterOrioks/blob/master/img/academic_performance_screen.png?raw=true" height=350px>
+  <img src="https://github.com/luntikius/BetterOrioks/blob/master/img/academic_performance_screen.png?raw=true" height=450px>
 </p>
 
 <h3>
@@ -117,7 +117,7 @@
   В приложении можно посмотреть ресурсы ко всей дисциплине и к конкретным контрольным мероприятиям.
  </p>
  <p>
-  <img src="https://github.com/luntikius/BetterOrioks/blob/master/img/resources_screen.png?raw=true" height=250px>
+  <img src="https://github.com/luntikius/BetterOrioks/blob/master/img/resources_screen.png?raw=true" height=350px>
 </p>
 
 <h3>
@@ -127,7 +127,7 @@
   Доступен просмотр расписания на конкретный день.
 </p>
  <p>
-  <img src="https://github.com/luntikius/BetterOrioks/blob/master/img/schedule_screen.png?raw=true" height=350px>
+  <img src="https://github.com/luntikius/BetterOrioks/blob/master/img/schedule_screen.png?raw=true" height=600px>
 </p>
 
 
