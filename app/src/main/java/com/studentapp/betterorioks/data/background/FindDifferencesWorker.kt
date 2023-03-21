@@ -80,7 +80,7 @@ class FindDifferencesWorker(
                                 id = controlEvents[i].id,
                                 name = controlEvents[i].name,
                                 systemId = controlEvents[i].systemId,
-                                userScore = "${savedControlEvents[i].userScore} -> ${controlEvents[i].userScore}",
+                                userScore = "c ${savedControlEvents[i].userScore} на ${controlEvents[i].userScore}",
                                 isSubject = controlEvents[i].isSubject
                             )
                         )

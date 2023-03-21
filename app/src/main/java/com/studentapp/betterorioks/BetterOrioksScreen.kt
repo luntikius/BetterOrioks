@@ -66,7 +66,7 @@ fun BetterOrioksApp(){
                         exitTransition = { fadeOut() },
                         enterTransition = { fadeIn() },
                         popEnterTransition = { fadeIn(animationSpec = tween(800)) },
-                        popExitTransition = { fadeOut() },
+                        popExitTransition = { fadeOut() }
                     ) {
                         if (uiState.subjectsFromSiteUiState is SubjectsFromSiteUiState.NotStarted) viewModel.getAcademicPerformanceFromSite()
                         AcademicPerformanceScreen(
@@ -113,6 +113,7 @@ fun BetterOrioksApp(){
                         popExitTransition = { fadeOut() }
                     ) {
                         if(uiState.userInfoUiState == UserInfoUiState.NotStarted)viewModel.getUserInfo()
+                        if(uiState.newsUiState == NewsUiState.NotStarted)viewModel.getNews()
                         ProfileScreen(
                             onExitClick = { viewModel.exit(context = context, navController = navController)},
                             uiState = uiState,

@@ -24,6 +24,7 @@ import com.studentapp.betterorioks.model.subjectsFromSite.ControlEvent
 import com.studentapp.betterorioks.model.subjectsFromSite.SimpleSubject
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectFromSite
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectsData
+import com.studentapp.betterorioks.ui.components.makeStatusNotification
 import com.studentapp.betterorioks.ui.screens.dayOfWeekToInt
 import java.time.temporal.ChronoUnit.DAYS
 import com.studentapp.betterorioks.ui.states.*
@@ -33,6 +34,8 @@ import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.temporal.ChronoUnit
 import java.util.*
 import kotlin.math.abs
 
@@ -49,12 +52,14 @@ class BetterOrioksViewModel(
     private val _uiState = MutableStateFlow(AppUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun test() {
+    fun test(context: Context) {
         val tag = "test"
         viewModelScope.launch {
             try {
-                Log.d(tag,orioksRepository.getSubjects(cookies = uiState.value.authCookies).debts.toString())
-            }catch (_:Throwable){}
+                makeStatusNotification("ABOBA","TEST",context)
+            }catch (e:Throwable){
+                Log.d(tag,e.message.toString())
+            }
         }
     }
 
@@ -133,6 +138,41 @@ class BetterOrioksViewModel(
         }
     }
 
+    fun getResources(){
+        println("GET_RESOURCES")
+        _uiState.update { currentState -> currentState.copy(resourcesUiState = ResourcesUiState.Loading) }
+        viewModelScope.launch {
+            try {
+                val resList = orioksRepository.getResources(
+                    cookies = uiState.value.authCookies,
+                    scienceId = uiState.value.currentSubject.scienceId,
+                    disciplineId = uiState.value.currentSubject.id
+                )
+                _uiState.update { currentState -> currentState.copy(resourcesUiState = ResourcesUiState.Success(resList)) }
+            }catch (e:Throwable){
+                Log.d("GET_RESOURCES", e.message.toString())
+                _uiState.update { currentState -> currentState.copy(resourcesUiState = ResourcesUiState.Error) }
+                checkCookies()
+            }
+        }
+    }
+
+    fun getNews(){
+        println("GET_NEWS")
+        _uiState.update { currentState -> currentState.copy(newsUiState = NewsUiState.Loading) }
+        viewModelScope.launch {
+            try {
+                val news = orioksRepository.getNews(cookies = uiState.value.authCookies)
+                if (news.isNotEmpty())
+                    _uiState.update { currentState -> currentState.copy(newsUiState = NewsUiState.Success(news)) }
+            }catch (e:Throwable){
+                Log.d("GET_NEWS", e.message.toString())
+                _uiState.update { currentState -> currentState.copy(newsUiState = NewsUiState.Error) }
+                checkCookies()
+            }
+        }
+    }
+
     private fun parseAcademicPerformance(subjectsData: SubjectsData):List<SimpleSubject>{
         val subjects = subjectsData.subjects
         val result = mutableListOf<SimpleSubject>()
@@ -157,25 +197,6 @@ class BetterOrioksViewModel(
             }
         }
         return result
-    }
-
-    fun getResources(){
-        println("GET_RESOURCES")
-        _uiState.update { currentState -> currentState.copy(resourcesUiState = ResourcesUiState.Loading) }
-        viewModelScope.launch {
-            try {
-                val resList = orioksRepository.getResources(
-                    cookies = uiState.value.authCookies,
-                    scienceId = uiState.value.currentSubject.scienceId,
-                    disciplineId = uiState.value.currentSubject.id
-                )
-                _uiState.update { currentState -> currentState.copy(resourcesUiState = ResourcesUiState.Success(resList)) }
-            }catch (e:Throwable){
-                Log.d("GET_RESOURCES", e.message.toString())
-                _uiState.update { currentState -> currentState.copy(resourcesUiState = ResourcesUiState.Error) }
-                checkCookies()
-            }
-        }
     }
 
     fun getAcademicPerformanceFromSite() {
@@ -413,13 +434,14 @@ class BetterOrioksViewModel(
                 )
             }
             for(j in 0..tempData.size-2){
-                if(tempData[j+1].time.dayOrder - tempData[j].time.dayOrder > 1){
+                val timeBetweenPairs = abs(ChronoUnit.MINUTES.between(LocalDateTime.parse(tempData[j+1].time.timeFrom), LocalDateTime.parse(tempData[j].time.timeTo)))
+                if(timeBetweenPairs > 10){
                     resultElement.add(
                         SimpleScheduleElement(
                             day = week*7 + day,
-                            number = tempData[j].time.dayOrder+1,
+                            number = tempData[j].time.dayOrder,
                             isWindow = true,
-                            windowDuration = ((tempData[j+1].time.dayOrder - tempData[j].time.dayOrder-1)*1.5).toString()
+                            windowDuration = timeBetweenPairs.toString()
                         )
                     )
                 }

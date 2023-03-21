@@ -7,9 +7,9 @@ import android.os.Build
 import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.annotation.RequiresApi
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -17,8 +17,7 @@ import androidx.compose.material.*
 import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -26,15 +25,18 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.data.AdminIds
+import com.studentapp.betterorioks.model.News
 import com.studentapp.betterorioks.model.UserInfo
 import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.BetterOrioksViewModel
 import com.studentapp.betterorioks.ui.components.*
+import com.studentapp.betterorioks.ui.states.NewsUiState
 import com.studentapp.betterorioks.ui.states.UserInfoUiState
 
 @Composable
@@ -60,21 +62,6 @@ fun ProfileCardContent(userInfo: UserInfo){
                 Spacer(modifier = Modifier.weight(1f))
                 Text(text = userInfo.group, textAlign = TextAlign.End)
             }
-            Divider()
-            Row(verticalAlignment = Alignment.CenterVertically){
-                Text(text = stringResource(R.string.direction))
-                Spacer(modifier = Modifier.width(32.dp))
-                Spacer(modifier = Modifier.weight(1f))
-                Text(text = userInfo.studyDirection, textAlign = TextAlign.End)
-            }
-            Divider()
-            Row(verticalAlignment = Alignment.CenterVertically){
-                Text(text = stringResource(R.string.institute))
-                Spacer(modifier = Modifier.width(32.dp))
-                Spacer(modifier = Modifier.weight(1f))
-                Text(text = userInfo.department, textAlign = TextAlign.End)
-            }
-
         }
     }
 }
@@ -134,7 +121,84 @@ fun ExitButton(onExitClick: () -> Unit){
     }
 }
 
-@RequiresApi(Build.VERSION_CODES.TIRAMISU)
+@Composable
+fun News(
+    uiState: AppUiState
+){
+    Card(
+        shape = RoundedCornerShape(16.dp),
+        backgroundColor = MaterialTheme.colors.surface,
+        elevation = 5.dp,
+        modifier = Modifier
+            .wrapContentHeight()
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        Column(modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth()) {
+            Row(
+                modifier = Modifier.padding(vertical = 16.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    painter = painterResource(R.drawable.newspaper),
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.secondary,
+                    modifier = Modifier.size(32.dp)
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+                Text(
+                    stringResource(R.string.latest_news),
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .weight(1f)
+                )
+            }
+            when (uiState.newsUiState) {
+                is NewsUiState.Success -> {
+                    NewsContent(news = uiState.newsUiState.news)
+                }
+                is NewsUiState.Error   -> {
+                    ErrorScreen(modifier = Modifier.wrapContentSize(Alignment.Center).fillMaxWidth())
+                }
+                else                   -> {
+                    LoadingScreen(modifier = Modifier.wrapContentSize(Alignment.Center).fillMaxWidth())
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun NewsContent(news: List<News>){
+    val context = LocalContext.current
+    Column(
+        modifier = Modifier.padding(bottom = 4.dp)
+    ){
+        news.forEach{
+            val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse("https://orioks.miet.ru/${it.link}")) }
+            Divider()
+            Row(modifier = Modifier
+                .clickable { context.startActivity(intent) },
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    it.name,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f).padding(vertical = 16.dp)
+                )
+                Icon(painter = painterResource(id = R.drawable.arrow_forward),
+                    contentDescription = null,
+                    tint = MaterialTheme.colors.primary,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ProfileScreen(
@@ -144,7 +208,10 @@ fun ProfileScreen(
 ){
     val context = LocalContext.current
     val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/+YQD5-csbrqk4ZjEy")) }
-    val pullRefreshState = rememberPullRefreshState((uiState.userInfoUiState == UserInfoUiState.Loading), { viewModel.getUserInfo(refresh = true) })
+    val pullRefreshState = rememberPullRefreshState((uiState.userInfoUiState == UserInfoUiState.Loading), {
+        viewModel.getUserInfo(refresh = true)
+        viewModel.getNews()
+    })
     Box (modifier = Modifier
         .pullRefresh(pullRefreshState)
         .fillMaxSize()) {
@@ -158,42 +225,35 @@ fun ProfileScreen(
                     AnyButton(
                         text = R.string.run_test,
                         icon = R.drawable.admin_button,
-                        onClick = { viewModel.test() })
-
-                    //Ниже кнопка с уведомлениями
-                    Spacer(modifier = Modifier.size(8.dp))
-                    val launcher = rememberLauncherForActivityResult(
-                        ActivityResultContracts.RequestPermission()
-                    ) { isGranted: Boolean ->
-                        if (isGranted) {
-                            viewModel.changeNotificationState(switchValue = true)
-                        }
-                        else {
-                            Toast.makeText(
-                                context,
-                                R.string.notifications_permission_required,
-                                Toast.LENGTH_SHORT
-                            ).show()
-                        }
-                    }
-                    SwitchButton(
-                        sendNotifications = uiState.sendNotifications,
-                        changeNotifications = {
-                            if (ActivityCompat.checkSelfPermission(
-                                    context,
-                                    android.Manifest.permission.POST_NOTIFICATIONS
-                                ) != PackageManager.PERMISSION_GRANTED
-                            ) {
-                                launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-                            }
-                            else {
-                                viewModel.changeNotificationState(switchValue = it)
-                            }
-                        },
-                        text = R.string.notifications,
-                        icon = R.drawable.notifications,
-                    )
+                        onClick = { viewModel.test(context) })
                 }
+                Spacer(modifier = Modifier.size(8.dp))
+                News(uiState = uiState)
+                Spacer(modifier = Modifier.size(8.dp))
+                val launcher = rememberLauncherForActivityResult(
+                    ActivityResultContracts.RequestPermission()
+                ) { isGranted: Boolean ->
+                    if (isGranted) {
+                        viewModel.changeNotificationState(switchValue = true)
+                    } else {
+                        Toast.makeText(context, R.string.notifications_permission_required, Toast.LENGTH_SHORT).show()
+                    }
+                }
+                SwitchButton(
+                    sendNotifications = uiState.sendNotifications,
+                    changeNotifications = {
+                        if(ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                                launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+                            }else{
+                                Toast.makeText(context,"Приложению необходим доступ к уведомлениям",Toast.LENGTH_SHORT).show()
+                            }
+                        }else {
+                            viewModel.changeNotificationState(switchValue = it)
+                        } },
+                    text = R.string.notifications,
+                    icon = R.drawable.notifications,
+                )
             }
             item{
                 Spacer(modifier = Modifier.size(8.dp))
@@ -209,7 +269,9 @@ fun ProfileScreen(
                         .padding(horizontal = 16.dp, vertical = 3.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(painter = painterResource(id = R.drawable.telegram), contentDescription = null, modifier = Modifier.size(64.dp).padding(start = 16.dp))
+                        Image(painter = painterResource(id = R.drawable.telegram), contentDescription = null, modifier = Modifier
+                            .size(64.dp)
+                            .padding(start = 16.dp))
                         Text(
                             text = "Телеграм канал приложения с новостями и отзывами",
                             color = MaterialTheme.colors.secondary,

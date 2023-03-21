@@ -420,7 +420,6 @@ fun BottomButtons(
             border = BorderStroke(1.dp,MaterialTheme.colors.primary),
             onClick = onResourceClick,
             shape = RoundedCornerShape(16.dp),
-            enabled = false,
             colors = ButtonDefaults.outlinedButtonColors(
                 backgroundColor = MaterialTheme.colors.surface,
                 contentColor = MaterialTheme.colors.secondary,

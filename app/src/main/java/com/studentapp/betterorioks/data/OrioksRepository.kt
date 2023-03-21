@@ -1,13 +1,11 @@
 package com.studentapp.betterorioks.data
 
+import com.studentapp.betterorioks.model.News
 import com.studentapp.betterorioks.model.subjectsFromSite.ResourceCategory
 import com.studentapp.betterorioks.model.subjectsFromSite.Resource
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectsData
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectsData2
-import com.studentapp.betterorioks.network.OrioksAuthApiService
-import com.studentapp.betterorioks.network.OrioksAuthInfoApiService
-import com.studentapp.betterorioks.network.OrioksSubjectsApiService
-import com.studentapp.betterorioks.network.ResourcesApiService
+import com.studentapp.betterorioks.network.*
 import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
@@ -18,11 +16,13 @@ import org.jsoup.Jsoup
 import retrofit2.Retrofit
 import java.util.concurrent.TimeUnit
 
+private const val BASE_URL =
+    "https://orioks.miet.ru"
+
+private const val NEWS_COUNT = 3
+
 class NetworkOrioksRepository
 {
-    private val BASE_URL =
-        "https://orioks.miet.ru"
-
     object RequestInterceptor : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {
             val request = chain
@@ -68,6 +68,10 @@ class NetworkOrioksRepository
 
     private val orioksResourcesRetrofitService: ResourcesApiService by lazy {
         retrofitRequest.create(ResourcesApiService::class.java)
+    }
+
+    private val orioksNewsRetrofitService: NewsApiService by lazy {
+        retrofitRequest.create(NewsApiService::class.java)
     }
 
     private fun getCookies (response: retrofit2.Response<ResponseBody>):String{
@@ -159,5 +163,27 @@ class NetworkOrioksRepository
             )
         }
         return result
+    }
+
+    suspend fun getNews(cookies: String): List<News>{
+        val news = mutableListOf<News>()
+        val response = orioksNewsRetrofitService.getNews(cookies = cookies).string()
+        val table = Jsoup.parse(response).getElementsByClass("Table").firstOrNull()
+        table?.getElementsByTag("tr")?.forEachIndexed { index, element ->
+            if(index != 0 && index <= NEWS_COUNT){
+                val columns = element.getElementsByTag("td")
+                val date = columns[0].ownText()
+                val name = columns[1].ownText()
+                val link = columns[2].children().attr("href")
+                news.add(
+                    News(
+                        date = date,
+                        name = name,
+                        link = link
+                    )
+                )
+            }
+        }
+        return news
     }
 }

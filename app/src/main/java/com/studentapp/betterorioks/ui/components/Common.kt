@@ -298,8 +298,8 @@ fun makeStatusNotification(message: String, head: String, context: Context) {
     val importance = NotificationManager.IMPORTANCE_HIGH
     val channel = NotificationChannel(CHANNEL_ID, name, importance)
     channel.description = description
-    val resultIntent = Intent(context, MainActivity::class.java)
 
+    val resultIntent = Intent(context, MainActivity::class.java)
 
     val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(context).run {
         addNextIntentWithParentStack(resultIntent)
@@ -316,7 +316,7 @@ fun makeStatusNotification(message: String, head: String, context: Context) {
         .setContentIntent(resultPendingIntent)
         .setContentText(message)
         .setPriority(NotificationCompat.PRIORITY_HIGH)
-        .setVibrate(LongArray(0))
+        .setVibrate(LongArray(1) { it.toLong() })
 
     // Show the notification
     if (ActivityCompat.checkSelfPermission(

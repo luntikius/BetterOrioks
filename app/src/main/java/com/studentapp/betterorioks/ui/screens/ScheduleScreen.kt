@@ -281,7 +281,7 @@ fun ScheduleItem(it: SimpleScheduleElement){
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
-                    "Окно ${it.windowDuration} часа",
+                    "Окно ${it.windowDuration} минут",
                 )
             }
         }

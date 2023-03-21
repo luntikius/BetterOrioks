@@ -25,6 +25,7 @@ class UserPreferencesRepository(
         val SEMESTER_START = stringPreferencesKey("sessionEnd")
         val SESSION_START = stringPreferencesKey("sessionStart")
         val SEND_NOTIFICATIONS = booleanPreferencesKey("sendNotifications")
+        val LAST_NEWS_LINK = stringPreferencesKey("lastNewsLink")
     }
 
     suspend fun setToken(token: String) {
@@ -90,6 +91,14 @@ class UserPreferencesRepository(
             preferences[GROUP] = ""
             preferences[STUDY_DIRECTION] = ""
             preferences[DEPARTMENT] = ""
+            preferences[LAST_NEWS_LINK] = ""
+        }
+    }
+
+    suspend fun setLastNewsLink(link: String){
+        dataStore.edit {
+            preferences ->
+            preferences[LAST_NEWS_LINK] = link
         }
     }
 
@@ -109,5 +118,6 @@ class UserPreferencesRepository(
     val login: Flow<String> = dataStore.data.catch {  }.map { preferences -> preferences[LOGIN] ?: "" }
     val password: Flow<String> = dataStore.data.catch {  }.map { preferences -> preferences[PASSWORD] ?: "" }
     val csrf: Flow<String> = dataStore.data.catch {  }.map { preferences -> preferences[CSRF] ?: "" }
+    val lastNewsLink: Flow<String> = dataStore.data.catch {  }.map { preferences -> preferences[LAST_NEWS_LINK] ?: "" }
     val sendNotifications: Flow<Boolean> = dataStore.data.catch {  }.map { preferences -> preferences[SEND_NOTIFICATIONS] ?: false }
 }
