@@ -41,8 +41,8 @@ fun BetterOrioksApp(){
 
     BetterOrioksTheme(
         darkTheme = when(uiState.theme){
-            1 -> isSystemInDarkTheme()
-            2 -> false
+            0 -> isSystemInDarkTheme()
+            1 -> false
             else -> true
         }
     ) {

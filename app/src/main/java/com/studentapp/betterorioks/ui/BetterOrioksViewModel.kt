@@ -101,6 +101,10 @@ class BetterOrioksViewModel(
         }
     }
 
+    fun setTheme(themeId: Int){
+        _uiState.update { currentState -> currentState.copy(theme = themeId) }
+    }
+
     fun exit(context: Context, navController: NavController) {
         viewModelScope.launch {
             _uiState.update { currentState -> currentState.copy(authState = AuthState.Loading) }

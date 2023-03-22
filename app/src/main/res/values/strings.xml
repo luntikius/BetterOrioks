@@ -73,4 +73,6 @@
     <string name="time_of_resit">Время проведения: %1$s</string>
     <string name="toast_unsupported_file_format">Произошла ошибка при открытии файла, возможно на вашем устройстве нет приложения, поддерживающего данный формат файла</string>
     <string name="latest_news">Последние новости</string>
+    <string name="theme">Тема</string>
+    <string name="menu">меню</string>
 </resources>

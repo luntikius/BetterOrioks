@@ -18,6 +18,7 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -40,9 +41,15 @@ import com.studentapp.betterorioks.ui.states.NewsUiState
 import com.studentapp.betterorioks.ui.states.UserInfoUiState
 
 @Composable
-fun ProfileCardContent(userInfo: UserInfo){
-    Row(modifier = Modifier.padding(16.dp)){
-        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+fun ProfileCardContent(userInfo: UserInfo) {
+    Row(modifier = Modifier.padding(16.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Icon(
+                painter = painterResource(id = R.drawable.profile),
+                contentDescription = null,
+                tint = MaterialTheme.colors.secondary,
+                modifier = Modifier.size(64.dp)
+            )
             Text(
                 text = userInfo.fullName,
                 fontWeight = FontWeight.Bold,
@@ -50,17 +57,13 @@ fun ProfileCardContent(userInfo: UserInfo){
                 textAlign = TextAlign.Center,
                 modifier = Modifier.fillMaxWidth()
             )
-            Divider()
-            Row(verticalAlignment = Alignment.CenterVertically){
-                Text(text = stringResource(R.string.student_number), modifier = Modifier.weight(1f))
-                Text(text = userInfo.recordBookId.toString(), textAlign = TextAlign.End)
-            }
-            Divider()
-            Row(verticalAlignment = Alignment.CenterVertically){
-                Text(text = stringResource(R.string.group))
-                Spacer(modifier = Modifier.width(32.dp))
-                Spacer(modifier = Modifier.weight(1f))
-                Text(text = userInfo.group, textAlign = TextAlign.End)
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = "${userInfo.recordBookId} · ${userInfo.group}",
+                    textAlign = TextAlign.Center,
+                    color = MaterialTheme.colors.primary,
+                    modifier = Modifier.fillMaxWidth()
+                )
             }
         }
     }
@@ -70,12 +73,12 @@ fun ProfileCardContent(userInfo: UserInfo){
 fun ProfileCard(uiState: AppUiState){
     Card(
         shape = RoundedCornerShape(16.dp),
-        backgroundColor = MaterialTheme.colors.surface,
-        elevation = 5.dp,
+        backgroundColor = MaterialTheme.colors.background,
+        elevation = 0.dp,
         modifier = Modifier
             .wrapContentHeight()
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 3.dp)
+            .padding(horizontal = 16.dp,vertical = 3.dp)
     ) {
         when (uiState.userInfoUiState) {
             is UserInfoUiState.Success ->
@@ -99,7 +102,7 @@ fun ExitButton(onExitClick: () -> Unit){
         modifier = Modifier
             .wrapContentHeight()
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 3.dp)
+            .padding(horizontal = 16.dp,vertical = 3.dp)
             .defaultMinSize(minHeight = 72.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -134,7 +137,9 @@ fun News(
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
     ) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth()) {
+        Column(modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .fillMaxWidth()) {
             Row(
                 modifier = Modifier.padding(vertical = 16.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -160,10 +165,14 @@ fun News(
                     NewsContent(news = uiState.newsUiState.news)
                 }
                 is NewsUiState.Error   -> {
-                    ErrorScreen(modifier = Modifier.wrapContentSize(Alignment.Center).fillMaxWidth())
+                    ErrorScreen(modifier = Modifier
+                        .wrapContentSize(Alignment.Center)
+                        .fillMaxWidth())
                 }
                 else                   -> {
-                    LoadingScreen(modifier = Modifier.wrapContentSize(Alignment.Center).fillMaxWidth())
+                    LoadingScreen(modifier = Modifier
+                        .wrapContentSize(Alignment.Center)
+                        .fillMaxWidth())
                 }
             }
         }
@@ -187,7 +196,9 @@ fun NewsContent(news: List<News>){
                     it.name,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
-                    modifier = Modifier.weight(1f).padding(vertical = 16.dp)
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(vertical = 16.dp)
                 )
                 Icon(painter = painterResource(id = R.drawable.arrow_forward),
                     contentDescription = null,
@@ -198,6 +209,83 @@ fun NewsContent(news: List<News>){
         }
     }
 }
+
+@Composable
+fun ThemeSelectorButton(
+    onChange: (Int) -> Unit = {},
+    icon: Int = R.drawable.dark_mode,
+    text: Int = R.string.theme,
+    items: List<String>,
+    currentSelectedId: Int
+){
+    Card(
+        shape = RoundedCornerShape(size = 16.dp),
+        backgroundColor = MaterialTheme.colors.surface,
+        elevation = 5.dp,
+        modifier = Modifier
+            .wrapContentHeight()
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp,vertical = 3.dp)
+            .defaultMinSize(minHeight = 72.dp)
+    ) {
+        var expanded by rememberSaveable { mutableStateOf(false) }
+        Row(verticalAlignment = Alignment.CenterVertically){
+            Spacer(modifier = Modifier.size(16.dp))
+            Icon(
+                painter = painterResource(icon),
+                contentDescription = null,
+                tint = MaterialTheme.colors.secondary,
+                modifier = Modifier.size(32.dp)
+            )
+            Text(
+                text = stringResource(text),
+                modifier = Modifier
+                    .padding(16.dp)
+                    .fillMaxWidth()
+                    .weight(1f),
+                fontWeight = FontWeight.Bold,
+                fontSize = 18.sp
+            )
+            Row(modifier = Modifier.clickable { expanded = true }, verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    items[currentSelectedId],
+                )
+                Icon(
+                    painterResource(
+                        id = R.drawable.expand_more
+                    ),
+                    contentDescription = null,
+                    modifier = Modifier.size(30.dp),
+                    tint = MaterialTheme.colors.primary
+                )
+                DropdownMenu(
+                    expanded = expanded,
+                    onDismissRequest = { expanded = false },
+
+                    ){
+                    items.forEachIndexed { index,s ->
+                        DropdownMenuItem(onClick = {
+                            onChange(index)
+                            expanded = false
+                        }) {
+                            Text(
+                                s,
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp,vertical = 4.dp)
+                                    .wrapContentSize(Alignment.Center)
+                            )
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.size(16.dp))
+        }
+    }
+}
+
+val themeItems = listOf(
+    "Системная","Светлая", "Тёмная"
+)
 
 @OptIn(ExperimentalMaterialApi::class)
 @Composable
@@ -240,8 +328,8 @@ fun ProfileScreen(
                     }
                 }
                 SwitchButton(
-                    sendNotifications = uiState.sendNotifications,
-                    changeNotifications = {
+                    isOn = uiState.sendNotifications,
+                    onChange = {
                         if(ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
                             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                                 launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
@@ -253,6 +341,12 @@ fun ProfileScreen(
                         } },
                     text = R.string.notifications,
                     icon = R.drawable.notifications,
+                )
+                Spacer(modifier = Modifier.size(8.dp))
+                ThemeSelectorButton(
+                    onChange = {viewModel.setTheme(it)},
+                    items = themeItems,
+                    currentSelectedId = uiState.theme
                 )
             }
             item{
@@ -266,7 +360,7 @@ fun ProfileScreen(
                     modifier = Modifier
                         .wrapContentHeight()
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 3.dp)
+                        .padding(horizontal = 16.dp,vertical = 3.dp)
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Image(painter = painterResource(id = R.drawable.telegram), contentDescription = null, modifier = Modifier

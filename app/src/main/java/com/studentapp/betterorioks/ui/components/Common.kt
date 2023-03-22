@@ -234,8 +234,8 @@ fun AnyButton (
 @Composable
 fun SwitchButton(
     modifier: Modifier = Modifier,
-    sendNotifications: Boolean = false,
-    changeNotifications: (Boolean) -> Unit = {},
+    isOn: Boolean = false,
+    onChange: (Boolean) -> Unit = {},
     @StringRes text: Int = R.string.not_specified,
     icon: Int = R.drawable.admin_button,
 ){
@@ -267,8 +267,8 @@ fun SwitchButton(
                 fontSize = 18.sp
             )
             Switch(
-                checked = sendNotifications,
-                onCheckedChange = changeNotifications,
+                checked = isOn,
+                onCheckedChange = onChange,
                 colors = SwitchDefaults.colors(
                     checkedTrackColor = MaterialTheme.colors.secondary,
                     uncheckedTrackColor = MaterialTheme.colors.primary,

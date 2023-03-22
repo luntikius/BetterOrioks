@@ -85,6 +85,20 @@ fun dayOfWeekToInt(day: LocalDate):Int{
     }
 }
 
+fun minutesToText(minutes: Int):String{
+    return if (minutes < 60) "Окно $minutes минут"
+    else{
+        val hours:Int = minutes/60
+        val finalMinutes = minutes - hours * 60
+        val hoursSpelling = when(hours){
+            1 -> "час"
+            in 2..4 -> "часа"
+            else -> "часов"
+        }
+        "Окно $hours $hoursSpelling $finalMinutes минут"
+    }
+}
+
 @Composable
 fun DatePickerElement(
     date: LocalDate = LocalDate.now(),
@@ -256,20 +270,13 @@ fun ScheduleItem(it: SimpleScheduleElement){
                 Spacer(modifier = Modifier.size(8.dp))
             }
         } else
-        Card(
-            shape = RoundedCornerShape(16.dp),
-            elevation = 0.dp,
-            backgroundColor = MaterialTheme.colors.background,
-            modifier = Modifier
-                .fillMaxWidth()
-                .wrapContentHeight()
-                .padding(horizontal = 16.dp, vertical = 3.dp)
-                .defaultMinSize(minHeight = 72.dp)
-        )
-        {
             Row(
-                modifier = Modifier.wrapContentSize(Alignment.Center),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 3.dp)
+                    .defaultMinSize(minHeight = 72.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
             ) {
                 Icon(
                     painter = painterResource(
@@ -281,10 +288,9 @@ fun ScheduleItem(it: SimpleScheduleElement){
                 )
                 Spacer(modifier = Modifier.size(8.dp))
                 Text(
-                    "Окно ${it.windowDuration} минут",
+                    minutesToText(it.windowDuration.toInt()),
                 )
             }
-        }
 }
 
 @Composable
@@ -349,7 +355,7 @@ fun Schedule(
     ) {
         val screenWidth = LocalConfiguration.current.screenWidthDp
         val lazyListState: LazyListState = rememberLazyListState()
-        Column() {
+        Column {
             DatePicker(
                 uiState = uiState,
                 lazyListState = lazyListState,
