@@ -8,8 +8,7 @@ import android.widget.Toast
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.StringRes
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Divider
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
@@ -18,10 +17,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.app.ActivityCompat
 import com.studentapp.betterorioks.R
+import com.studentapp.betterorioks.data.AppDetails
 import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.BetterOrioksViewModel
 import com.studentapp.betterorioks.ui.components.SwitchButton
@@ -67,7 +68,7 @@ fun SettingsScreen(uiState: AppUiState, viewModel: BetterOrioksViewModel, onBack
         Column(
             modifier = Modifier.padding(paddingValues = paddingValues)
         ) {
-            Text(stringResource(R.string.notifications_text), fontSize = 14.sp, color = MaterialTheme.colors.secondary, modifier = Modifier.padding(8.dp))
+            Text(stringResource(R.string.notifications_text), fontSize = 14.sp, color = MaterialTheme.colors.secondary, modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp))
             NotificationSwitch(
                 context = context,
                 onClick = {viewModel.changeNotificationState(it)},
@@ -84,13 +85,21 @@ fun SettingsScreen(uiState: AppUiState, viewModel: BetterOrioksViewModel, onBack
                 text = R.string.news_notifications
             )
             Divider()
-            Text(stringResource(R.string.other), fontSize = 14.sp, color = MaterialTheme.colors.secondary, modifier = Modifier.padding(8.dp))
+            Text(stringResource(R.string.other), fontSize = 14.sp, color = MaterialTheme.colors.secondary, modifier = Modifier.padding(vertical = 8.dp, horizontal = 16.dp))
             ThemeSelectorButton(
                 onChange = {viewModel.setTheme(it)},
                 items = themeItems,
                 currentSelectedId = uiState.theme
             )
             Divider()
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = "${AppDetails.appName}, версия приложения ${AppDetails.version}",
+                modifier = Modifier.padding(16.dp).fillMaxWidth(),
+                fontSize = 14.sp,
+                color = MaterialTheme.colors.primary,
+                textAlign = TextAlign.Center
+            )
         }
     }
 }

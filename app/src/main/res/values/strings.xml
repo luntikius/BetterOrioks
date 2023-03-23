@@ -81,4 +81,5 @@
     <string name="other">Прочее</string>
     <string name="sp">layout_preferences</string>
     <string name="news_notifications">Уведомления о выходе новостей</string>
+    <string name="change_lesson_time">изменить время пары</string>
 </resources>

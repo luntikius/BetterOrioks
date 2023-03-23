@@ -25,6 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.studentapp.betterorioks.R
+import com.studentapp.betterorioks.data.AppDetails.changeable
 import com.studentapp.betterorioks.model.scheduleFromSite.SimpleScheduleElement
 import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.BetterOrioksViewModel
@@ -37,6 +38,7 @@ import dev.chrisbanes.snapper.rememberSnapperFlingBehavior
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit.DAYS
 import kotlin.math.abs
 
@@ -113,7 +115,7 @@ fun DatePickerElement(
         modifier = Modifier
             .clickable { onClick(date) }
             .width(width = elementWidth.dp)
-            .padding(vertical = 16.dp, horizontal = 4.dp)
+            .padding(vertical = 16.dp,horizontal = 4.dp)
     ) {
         Text(
             text = dayOfWeekToString(date, LocalContext.current)
@@ -204,8 +206,10 @@ fun DatePicker(
     }
 }
 
+
+
 @Composable
-fun ScheduleItem(it: SimpleScheduleElement){
+fun ScheduleItem(it: SimpleScheduleElement, recalculateWindows: (Int,Int) -> Unit){
     if (!it.isWindow)
         Card(
             shape = RoundedCornerShape(16.dp),
@@ -213,67 +217,82 @@ fun ScheduleItem(it: SimpleScheduleElement){
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .padding(horizontal = 16.dp, vertical = 3.dp)
+                .padding(horizontal = 16.dp,vertical = 3.dp)
                 .defaultMinSize(minHeight = 72.dp)
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(horizontal = 16.dp, vertical = 8.dp)
-            ) {
-                Row(
-                    modifier = Modifier.padding(),
-                    verticalAlignment = Alignment.CenterVertically
+            Box {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 16.dp,vertical = 8.dp)
                 ) {
-                    Surface(
-                        shape = CircleShape,
-                        color = MaterialTheme.colors.primaryVariant,
-                        modifier = Modifier.size(26.dp)
+                    Row(
+                        modifier = Modifier.padding(),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
+                        Surface(
+                            shape = CircleShape,
+                            color = MaterialTheme.colors.primaryVariant,
+                            modifier = Modifier.size(26.dp)
+                        ) {
+                            Text(
+                                text = it.number.toString(),
+                                fontSize = 14.sp,
+                                modifier = Modifier
+                                    .padding(4.dp)
+                                    .wrapContentSize(Alignment.Center)
+                            )
+                        }
+                        Spacer(modifier = Modifier.size(4.dp))
                         Text(
-                            text = it.number.toString(),
+                            text = it.type,
                             fontSize = 14.sp,
                             modifier = Modifier
                                 .padding(4.dp)
                                 .wrapContentSize(Alignment.Center)
                         )
+                        Spacer(modifier = Modifier.weight(1f))
+                        val timeFrom = LocalDateTime.parse(it.from).toLocalTime()
+                        val timeTo = LocalDateTime.parse(it.to).toLocalTime()
+                        Text(text = "$timeFrom - $timeTo")
                     }
-                    Spacer(modifier = Modifier.size(4.dp))
+                    Spacer(modifier = Modifier.size(8.dp))
                     Text(
-                        text = it.type,
-                        fontSize = 14.sp,
-                        modifier = Modifier
-                            .padding(4.dp)
-                            .wrapContentSize(Alignment.Center)
+                        text = it.name,
+                        modifier = Modifier.padding(horizontal = 8.dp)
                     )
-                    Spacer(modifier = Modifier.weight(1f))
-                    Text(text = it.times)
+                    Text(
+                        text = it.teacher,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colors.primary,
+                        modifier = Modifier.padding(horizontal = 8.dp)
+                    )
+                    Spacer(modifier = Modifier.size(10.dp))
+                    Text(
+                        text = stringResource(id = R.string.room_number,it.room),
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colors.primary,
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .fillMaxWidth()
+                            .weight(1f)
+                    )
+                    Spacer(modifier = Modifier.size(8.dp))
                 }
-                Spacer(modifier = Modifier.size(8.dp))
-                Text(
-                    text = it.name,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
-                Text(
-                    text = it.teacher,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colors.primary,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
-                Spacer(modifier = Modifier.size(10.dp))
-                Text(
-                    text = stringResource(id = R.string.room_number, it.room),
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colors.primary,
-                    modifier = Modifier.padding(horizontal = 8.dp)
-                )
-                Spacer(modifier = Modifier.size(8.dp))
+                if(it.number in changeable)
+                    IconButton(onClick = { recalculateWindows(it.day,it.number) }, modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp)) {
+                        Icon(
+                            painterResource(id = R.drawable.swap_vert),
+                            contentDescription = stringResource(R.string.change_lesson_time),
+                            modifier = Modifier.size(28.dp)
+                        )
+                    }
             }
         } else
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 3.dp)
+                    .padding(horizontal = 16.dp,vertical = 3.dp)
                     .defaultMinSize(minHeight = 72.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
@@ -300,6 +319,7 @@ fun ScheduleList(viewModel: BetterOrioksViewModel, modifier: Modifier = Modifier
             items(viewModel.getTodaysSchedule(date)) {
                 ScheduleItem(
                     it = it,
+                    recalculateWindows = {day, number -> viewModel.recalculateWindows(day = day, number = number)}
                 )
             }
             item{ Spacer(modifier = Modifier.size(8.dp))}

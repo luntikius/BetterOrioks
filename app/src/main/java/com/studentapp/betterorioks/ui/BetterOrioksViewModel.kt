@@ -51,7 +51,7 @@ class BetterOrioksViewModel(
     private val _uiState = MutableStateFlow(AppUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun test(context: Context) {
+    fun test() {
         val tag = "test"
         viewModelScope.launch {
             try {
@@ -446,7 +446,8 @@ class BetterOrioksViewModel(
                     SimpleScheduleElement(
                         day = week*7 + day,
                         number = element.time.dayOrder,
-                        times = element.time.timeString,
+                        from = element.time.timeFrom,
+                        to = element.time.timeTo,
                         type = element.subject.formFromString,
                         name = element.subject.nameFromString,
                         teacher = element.subject.teacherFull,
@@ -471,6 +472,65 @@ class BetterOrioksViewModel(
         }
         return result
     }
+
+    fun recalculateWindows(day: Int, number: Int){
+        try {
+            viewModelScope.launch {
+                Log.d("RECALCULATE_WINDOWS","started")
+                val sampleTime = listOf(LocalDateTime.parse("0001-01-01T12:20:00"))
+                val fullSchedule =
+                    (uiState.value.fullScheduleUiState as FullScheduleUiState.Success).schedule.toMutableList()
+                val week = fullSchedule[day - 1]
+                val weekWithoutWindows = week.filter { !it.isWindow }
+                weekWithoutWindows.forEach {
+                    if (LocalDateTime.parse(it.from) in sampleTime && it.number == number) {
+                        it.from = LocalDateTime.parse(it.from).plusMinutes(30).toString()
+                        it.to = LocalDateTime.parse(it.to).plusMinutes(30).toString()
+                    }
+                    else if (it.number == number) {
+                        it.from = LocalDateTime.parse(it.from).minusMinutes(30).toString()
+                        it.to = LocalDateTime.parse(it.to).minusMinutes(30).toString()
+                    }
+                }
+                val resultElement = weekWithoutWindows.toMutableList()
+                Log.d("RECALCULATE_WINDOWS",resultElement.toString())
+                for (j in 0..weekWithoutWindows.size - 2) {
+                    val timeBetweenPairs = abs(
+                        ChronoUnit.MINUTES.between(
+                            LocalDateTime.parse(weekWithoutWindows[j + 1].from),
+                            LocalDateTime.parse(weekWithoutWindows[j].to)
+                        )
+                    )
+                    if (timeBetweenPairs > 10) {
+                        resultElement.add(
+                            SimpleScheduleElement(
+                                day = day,
+                                number = weekWithoutWindows[j].number,
+                                isWindow = true,
+                                windowDuration = timeBetweenPairs.toString()
+                            )
+                        )
+                    }
+                }
+                fullSchedule[day - 1] = resultElement.sortedBy { it.number }
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        fullScheduleUiState = FullScheduleUiState.Success(
+                            fullSchedule
+                        )
+                    )
+                }
+                scheduleOfflineRepository.dump()
+                for(list in fullSchedule) {
+                    for (item in list)
+                        scheduleOfflineRepository.insertItem(item)
+                }
+            }
+        }catch(e:Throwable){
+            Log.d("RECALCULATE_WINDOWS", e.message.toString())
+        }
+    }
+
 
     private fun errorToast(context: Context){
         Toast.makeText(context, context.getString(R.string.error_while_loading_data), Toast.LENGTH_SHORT).show()
@@ -500,12 +560,13 @@ class BetterOrioksViewModel(
                     _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Success(res)) }
                 }else{
                     for(i in 0..27){
-                        res.add(scheduleOfflineRepository.getAllItemsStream(i+1).first())
+                        res.add(scheduleOfflineRepository.getAllItemsStream(i+1).first().sortedBy { it.number })
                     }
                     _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Success(res)) }
                 }
                 Log.d("TEST", "getFullSchedule ended")
             }catch (e: HttpException){
+                Log.d("TEST", e.message.toString())
                 if (previousState is FullScheduleUiState.Success) {
                     _uiState.update { currentState -> currentState.copy(fullScheduleUiState = previousState) }
                     errorToast(context = context)
@@ -513,6 +574,7 @@ class BetterOrioksViewModel(
                 else
                     _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Error) }
             }catch (e: java.lang.Exception){
+                Log.d("TEST", e.message.toString())
                 if (previousState is FullScheduleUiState.Success) {
                     _uiState.update { currentState -> currentState.copy(fullScheduleUiState = previousState) }
                     errorToast(context = context)

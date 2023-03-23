@@ -337,7 +337,7 @@ fun ProfileScreen(
                     AnyButton(
                         text = R.string.run_test,
                         icon = R.drawable.admin_button,
-                        onClick = { viewModel.test(context) })
+                        onClick = { viewModel.test() })
                 }
                 Spacer(modifier = Modifier.size(8.dp))
                 News(uiState = uiState)
