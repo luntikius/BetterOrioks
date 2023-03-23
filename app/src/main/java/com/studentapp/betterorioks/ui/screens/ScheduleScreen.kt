@@ -274,8 +274,6 @@ fun ScheduleItem(it: SimpleScheduleElement, recalculateWindows: (Int,Int) -> Uni
                         color = MaterialTheme.colors.primary,
                         modifier = Modifier
                             .padding(horizontal = 8.dp)
-                            .fillMaxWidth()
-                            .weight(1f)
                     )
                     Spacer(modifier = Modifier.size(8.dp))
                 }
