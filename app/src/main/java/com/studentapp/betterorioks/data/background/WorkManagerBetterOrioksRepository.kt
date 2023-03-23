@@ -2,8 +2,6 @@ package com.studentapp.betterorioks.data.background
 
 import android.content.Context
 import androidx.work.*
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.concurrent.TimeUnit
 
 class WorkManagerBetterOrioksRepository(context: Context) {
@@ -29,8 +27,29 @@ class WorkManagerBetterOrioksRepository(context: Context) {
         )
     }
 
+    fun CheckForNews(
+        cookies: String
+    ){
+        val cookiesData = createInputCookies(cookies = cookies)
+        val differenceBuilder =
+            PeriodicWorkRequestBuilder<FindNewsDifferenceWorker>(2,TimeUnit.HOURS)
+                .setInputData(cookiesData)
+                .setConstraints(constraints = Constraints(NetworkType.CONNECTED))
+                .addTag("CheckForNews")
+                .build()
+        workManager.enqueueUniquePeriodicWork(
+            "CheckForNews",
+            ExistingPeriodicWorkPolicy.UPDATE,
+            differenceBuilder
+        )
+    }
+
     fun cancelChecks() {
         workManager.cancelUniqueWork("CheckForAcademicPerformance")
+    }
+
+    fun cancelNewsChecks(){
+        workManager.cancelUniqueWork("CheckForNews")
     }
 
 

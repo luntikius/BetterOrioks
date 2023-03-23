@@ -1,12 +1,8 @@
 package com.studentapp.betterorioks.ui.screens
 
+import android.annotation.SuppressLint
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
-import android.os.Build
-import android.widget.Toast
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -29,7 +25,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.app.ActivityCompat
+import androidx.compose.ui.window.DialogProperties
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.data.AdminIds
 import com.studentapp.betterorioks.model.News
@@ -210,6 +206,8 @@ fun NewsContent(news: List<News>){
     }
 }
 
+@SuppressLint("SuspiciousIndentation")
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ThemeSelectorButton(
     onChange: (Int) -> Unit = {},
@@ -218,68 +216,93 @@ fun ThemeSelectorButton(
     items: List<String>,
     currentSelectedId: Int
 ){
-    Card(
-        shape = RoundedCornerShape(size = 16.dp),
-        backgroundColor = MaterialTheme.colors.surface,
-        elevation = 5.dp,
-        modifier = Modifier
-            .wrapContentHeight()
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp,vertical = 3.dp)
-            .defaultMinSize(minHeight = 72.dp)
-    ) {
-        var expanded by rememberSaveable { mutableStateOf(false) }
-        Row(verticalAlignment = Alignment.CenterVertically){
-            Spacer(modifier = Modifier.size(16.dp))
-            Icon(
-                painter = painterResource(icon),
-                contentDescription = null,
-                tint = MaterialTheme.colors.secondary,
-                modifier = Modifier.size(32.dp)
-            )
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.clickable { expanded = !expanded }){
+        Spacer(modifier = Modifier.size(16.dp))
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            tint = MaterialTheme.colors.secondary,
+            modifier = Modifier.size(32.dp)
+        )
+        Text(
+            text = stringResource(text),
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+                .weight(1f)
+        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
             Text(
-                text = stringResource(text),
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-                    .weight(1f),
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
+                items[currentSelectedId],
+                color = MaterialTheme.colors.secondary,
             )
-            Row(modifier = Modifier.clickable { expanded = true }, verticalAlignment = Alignment.CenterVertically) {
-                Text(
-                    items[currentSelectedId],
-                )
-                Icon(
-                    painterResource(
-                        id = R.drawable.expand_more
-                    ),
-                    contentDescription = null,
-                    modifier = Modifier.size(30.dp),
-                    tint = MaterialTheme.colors.primary
-                )
-                DropdownMenu(
-                    expanded = expanded,
+            if(expanded) {
+                AlertDialog(
                     onDismissRequest = { expanded = false },
-
-                    ){
-                    items.forEachIndexed { index,s ->
-                        DropdownMenuItem(onClick = {
-                            onChange(index)
-                            expanded = false
-                        }) {
+                    text = {
+                        Column() {
                             Text(
-                                s,
-                                modifier = Modifier
-                                    .padding(horizontal = 8.dp,vertical = 4.dp)
-                                    .wrapContentSize(Alignment.Center)
+                                stringResource(id = R.string.theme),
+                                fontSize = 18.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colors.onSurface
                             )
+                            Spacer(modifier = Modifier.size(16.dp))
+                            items.forEachIndexed { index,s ->
+                                Row(verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.clickable {
+                                        onChange(index)
+                                        expanded = false
+                                    }
+                                ) {
+                                    RadioButton(
+                                        selected = currentSelectedId == index,
+                                        onClick = {
+                                            onChange(index)
+                                            expanded = false
+                                        }
+                                    )
+                                    Text(
+                                        text = s,
+                                        modifier = Modifier
+                                            .padding(horizontal = 8.dp,vertical = 4.dp)
+                                            .fillMaxWidth(),
+                                        fontSize = 16.sp,
+                                        color = MaterialTheme.colors.onSurface
+                                    )
+                                }
+                            }
                         }
-                    }
-                }
+                    },
+                    buttons = {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.BottomEnd
+                        ) {
+                            TextButton(
+                                onClick = { expanded = false },
+                                shape = RoundedCornerShape(16.dp),
+                                modifier = Modifier.padding(end = 8.dp,bottom = 8.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.cancel),
+                                    color = MaterialTheme.colors.secondary,
+                                )
+                            }
+                        }
+                    },
+                    properties = DialogProperties(
+                        dismissOnClickOutside = true
+                    ),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                )
             }
-            Spacer(modifier = Modifier.size(16.dp))
         }
+        Spacer(modifier = Modifier.size(16.dp))
     }
 }
 
@@ -292,7 +315,8 @@ val themeItems = listOf(
 fun ProfileScreen(
     onExitClick: () -> Unit = {},
     uiState: AppUiState = AppUiState(),
-    viewModel: BetterOrioksViewModel
+    viewModel: BetterOrioksViewModel,
+    onSettingsClick: () -> Unit
 ){
     val context = LocalContext.current
     val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/+YQD5-csbrqk4ZjEy")) }
@@ -318,36 +342,7 @@ fun ProfileScreen(
                 Spacer(modifier = Modifier.size(8.dp))
                 News(uiState = uiState)
                 Spacer(modifier = Modifier.size(8.dp))
-                val launcher = rememberLauncherForActivityResult(
-                    ActivityResultContracts.RequestPermission()
-                ) { isGranted: Boolean ->
-                    if (isGranted) {
-                        viewModel.changeNotificationState(switchValue = true)
-                    } else {
-                        Toast.makeText(context, R.string.notifications_permission_required, Toast.LENGTH_SHORT).show()
-                    }
-                }
-                SwitchButton(
-                    isOn = uiState.sendNotifications,
-                    onChange = {
-                        if(ActivityCompat.checkSelfPermission(context, android.Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                                launcher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-                            }else{
-                                Toast.makeText(context,"Приложению необходим доступ к уведомлениям",Toast.LENGTH_SHORT).show()
-                            }
-                        }else {
-                            viewModel.changeNotificationState(switchValue = it)
-                        } },
-                    text = R.string.notifications,
-                    icon = R.drawable.notifications,
-                )
-                Spacer(modifier = Modifier.size(8.dp))
-                ThemeSelectorButton(
-                    onChange = {viewModel.setTheme(it)},
-                    items = themeItems,
-                    currentSelectedId = uiState.theme
-                )
+                AnyButton(text = R.string.settings,icon = R.drawable.setting, onClick = onSettingsClick)
             }
             item{
                 Spacer(modifier = Modifier.size(8.dp))

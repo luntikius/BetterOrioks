@@ -75,6 +75,18 @@ class BetterOrioksViewModel(
         _uiState.update { currentState -> currentState.copy(sendNotifications = switchValue) }
     }
 
+    fun changeNewsNotificationState(switchValue:Boolean){
+        if(switchValue) {
+            workManagerBetterOrioksRepository.CheckForNews(cookies = uiState.value.authCookies)
+        } else{
+            workManagerBetterOrioksRepository.cancelNewsChecks()
+        }
+        viewModelScope.launch {
+            userPreferencesRepository.setSendNewsNotifications(switchValue)
+        }
+        _uiState.update { currentState -> currentState.copy(sendNewsNotifications = switchValue) }
+    }
+
     private fun setCookies(cookies: String, csrf: String){
         _uiState.update { currentState -> currentState.copy(authCookies = cookies.ifBlank { uiState.value.authCookies }, csrf = csrf) }
         viewModelScope.launch {
@@ -89,8 +101,9 @@ class BetterOrioksViewModel(
             val cookies = userPreferencesRepository.authCookies.first()
             val csrf = userPreferencesRepository.csrf.first()
             val sendNotifications = userPreferencesRepository.sendNotifications.first()
+            val sendNewsNotifications = userPreferencesRepository.sendNewsNotifications.first()
             val theme = userPreferencesRepository.theme.first()
-            _uiState.update { currentUiState -> currentUiState.copy(token = token, authCookies = cookies, csrf = csrf, sendNotifications = sendNotifications, theme = theme) }
+            _uiState.update { currentUiState -> currentUiState.copy(token = token, authCookies = cookies, csrf = csrf, sendNotifications = sendNotifications, theme = theme, sendNewsNotifications = sendNewsNotifications) }
             if (uiState.value.token != "" && uiState.value.authCookies != "") {
                 _uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.LoggedIn, updateState = false) }
             }else if(uiState.value.token != "" && uiState.value.authCookies == ""){
@@ -102,7 +115,10 @@ class BetterOrioksViewModel(
     }
 
     fun setTheme(themeId: Int){
-        _uiState.update { currentState -> currentState.copy(theme = themeId) }
+        viewModelScope.launch {
+            _uiState.update { currentState -> currentState.copy(theme = themeId) }
+            userPreferencesRepository.setTheme(themeId)
+        }
     }
 
     fun exit(context: Context, navController: NavController) {

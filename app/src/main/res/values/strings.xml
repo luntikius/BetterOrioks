@@ -75,4 +75,10 @@
     <string name="latest_news">Последние новости</string>
     <string name="theme">Тема</string>
     <string name="menu">меню</string>
+    <string name="cancel">Отмена</string>
+    <string name="settings">Настройки</string>
+    <string name="notifications_text">Уведомления</string>
+    <string name="other">Прочее</string>
+    <string name="sp">layout_preferences</string>
+    <string name="news_notifications">Уведомления о выходе новостей</string>
 </resources>

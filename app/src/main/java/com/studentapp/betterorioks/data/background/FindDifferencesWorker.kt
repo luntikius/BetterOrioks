@@ -118,7 +118,7 @@ class FindDifferencesWorker(
                     it.value.forEach {simpleSubject ->
                         makeStatusNotification(
                             message = "Балл за ${simpleSubject.name} изменен: ${simpleSubject.userScore}",
-                            head = head,
+                            head = "Изменение баллов по предмету $head",
                             context = applicationContext)
                     }
                 }

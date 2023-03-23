@@ -14,7 +14,7 @@ android {
         minSdk 26
         targetSdk 33
         compileSdk 33
-        versionCode 34
+        versionCode 35
         versionName "1.8"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -59,6 +59,7 @@ dependencies {
     implementation "org.jsoup:jsoup:1.14.3"
     implementation "androidx.work:work-runtime-ktx:2.8.0"
     implementation "com.google.accompanist:accompanist-webview:0.29.2-rc"
+    implementation "com.google.accompanist:accompanist-systemuicontroller:0.27.0"
 
     implementation "androidx.room:room-runtime:$room_version"
     ksp "androidx.room:room-compiler:$room_version"

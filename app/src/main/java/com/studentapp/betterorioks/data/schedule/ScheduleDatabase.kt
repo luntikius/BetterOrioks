@@ -6,7 +6,7 @@ import androidx.room.Room
 import androidx.room.RoomDatabase
 import com.studentapp.betterorioks.model.scheduleFromSite.SimpleScheduleElement
 
-@Database(entities = [SimpleScheduleElement::class], version = 2, exportSchema = false)
+@Database(entities = [SimpleScheduleElement::class], version = 3, exportSchema = false)
 abstract class ScheduleDatabase: RoomDatabase() {
     abstract fun itemDao(): ScheduleDao
     companion object{

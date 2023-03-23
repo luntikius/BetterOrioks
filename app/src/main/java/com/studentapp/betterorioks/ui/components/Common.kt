@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -239,46 +238,33 @@ fun SwitchButton(
     @StringRes text: Int = R.string.not_specified,
     icon: Int = R.drawable.admin_button,
 ){
-    Card(
-        shape = RoundedCornerShape(size = 16.dp),
-        backgroundColor = MaterialTheme.colors.surface,
-        elevation = 5.dp,
-        modifier = modifier
-            .wrapContentHeight()
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp,vertical = 3.dp)
-            .defaultMinSize(minHeight = 72.dp)
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Spacer(modifier = Modifier.size(16.dp))
-            Icon(
-                painter = painterResource(icon),
-                contentDescription = null,
-                tint = MaterialTheme.colors.secondary,
-                modifier = Modifier.size(32.dp)
+    Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.defaultMinSize(minHeight = 72.dp)) {
+        Spacer(modifier = Modifier.size(16.dp))
+        Icon(
+            painter = painterResource(icon),
+            contentDescription = null,
+            tint = MaterialTheme.colors.secondary,
+            modifier = Modifier.size(32.dp)
+        )
+        Text(
+            text = stringResource(text),
+            modifier = Modifier
+                .padding(16.dp)
+                .fillMaxWidth()
+                .weight(1f),
+            fontSize = 16.sp
+        )
+        Switch(
+            checked = isOn,
+            onCheckedChange = onChange,
+            colors = SwitchDefaults.colors(
+                checkedTrackColor = MaterialTheme.colors.secondary,
+                uncheckedTrackColor = MaterialTheme.colors.primary,
+                checkedThumbColor = MaterialTheme.colors.secondary,
+                uncheckedThumbColor = MaterialTheme.colors.secondary
             )
-            Text(
-                text = stringResource(text),
-                modifier = Modifier
-                    .padding(16.dp)
-                    .fillMaxWidth()
-                    .weight(1f),
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp
-            )
-            Switch(
-                checked = isOn,
-                onCheckedChange = onChange,
-                colors = SwitchDefaults.colors(
-                    checkedTrackColor = MaterialTheme.colors.secondary,
-                    uncheckedTrackColor = MaterialTheme.colors.primary,
-                    checkedThumbColor = MaterialTheme.colors.secondary,
-                    uncheckedThumbColor = MaterialTheme.colors.secondary
-                ),
-                modifier = Modifier.scale(1.2f)
-            )
-            Spacer(modifier = Modifier.width(16.dp))
-        }
+        )
+        Spacer(modifier = Modifier.width(16.dp))
     }
 }
 
@@ -309,7 +295,7 @@ fun makeStatusNotification(message: String, head: String, context: Context) {
 
     val builder = NotificationCompat.Builder(context, CHANNEL_ID)
         .setSmallIcon(R.drawable.ic_launcher_foreground)
-        .setContentTitle("Изменение баллов по предмету $head")
+        .setContentTitle(head)
         .setContentIntent(resultPendingIntent)
         .setContentText(message)
         .setPriority(NotificationCompat.PRIORITY_HIGH)

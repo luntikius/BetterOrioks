@@ -131,6 +131,7 @@ fun BetterOrioksApp(){
                                 },
                                 uiState = uiState,
                                 viewModel = viewModel,
+                                onSettingsClick = {navController.navigate(BetterOrioksScreens.Settings.name)}
                             )
                         }
                         composable(
@@ -153,6 +154,31 @@ fun BetterOrioksApp(){
                                 },
                                 onRefresh = { viewModel.getResources() },
                                 subjectName = uiState.currentSubject.name
+                            )
+                        }
+                        composable(
+                            route = BetterOrioksScreens.Settings.name,
+                            enterTransition = {
+                                slideIntoContainer(
+                                    AnimatedContentScope.SlideDirection.Left,
+                                    animationSpec = tween(700)
+                                )
+                            },
+                            exitTransition = {
+                                slideOutOfContainer(
+                                    AnimatedContentScope.SlideDirection.Right,
+                                    animationSpec = tween(700)
+                                )
+                            }
+                        ){
+                            SettingsScreen(uiState = uiState,
+                                viewModel = viewModel,
+                                onBackButtonPress = {
+                                    navController.popBackStack(
+                                        route = BetterOrioksScreens.Profile.name,
+                                        inclusive = false
+                                    )
+                                }
                             )
                         }
                     }

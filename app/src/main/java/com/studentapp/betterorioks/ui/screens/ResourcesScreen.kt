@@ -46,7 +46,7 @@ fun ResourcesScreen(
     Scaffold(
         topBar = {
             TopBar(
-                name = subjectName,
+                name = "Ресурсы по дисциплине: $subjectName",
                 onClick = onBackButtonClick
             )
         }
@@ -104,7 +104,7 @@ fun TopBar(name: String, onClick: () -> Unit){
             }
             Spacer(modifier = Modifier.size(2.dp))
             Text(
-                text = "Ресурсы по предмету $name",
+                text = name,
                 modifier = Modifier,
                 fontSize = 16.sp,
             )
@@ -127,7 +127,7 @@ fun Category(category: ResourceCategory){
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(vertical = 8.dp)
                 .animateContentSize(
                     animationSpec = spring(
                         dampingRatio = Spring.DampingRatioNoBouncy,
@@ -142,6 +142,7 @@ fun Category(category: ResourceCategory){
                 verticalAlignment = Alignment.CenterVertically
             )
             {
+                Spacer(modifier = Modifier.padding(8.dp))
                 Text(
                     text = category.name,
                     modifier = Modifier
@@ -164,12 +165,13 @@ fun Category(category: ResourceCategory){
                 category.resources.forEach {
                     val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(it.link)) }
 
-                    Divider()
+                    Divider(modifier = Modifier.padding(horizontal = 16.dp))
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .padding(
-                                vertical = 8.dp
+                                vertical = 8.dp,
+                                horizontal = 16.dp
                             )
                             .clickable {
                                 try {
@@ -187,18 +189,11 @@ fun Category(category: ResourceCategory){
                             Text(
                                 text = it.type,
                                 color = MaterialTheme.colors.primary,
-                                fontSize = 14.sp
+                                fontSize = 14.sp,
                             )
                             Spacer(modifier = Modifier.size(4.dp))
-                            Text(text = it.name)
+                            Text(text = it.name, color = MaterialTheme.colors.secondary)
                         }
-                        Spacer(modifier = Modifier.size(8.dp))
-                        Icon(
-                            painter = painterResource(id = R.drawable.arrow_forward),
-                            contentDescription = stringResource(id = R.string.move_next),
-                            tint = MaterialTheme.colors.primary,
-                            modifier = Modifier.size(20.dp)
-                        )
                     }
                 }
             }

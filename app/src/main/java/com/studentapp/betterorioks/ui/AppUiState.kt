@@ -10,6 +10,7 @@ data class AppUiState (
     var updateState: Boolean = false,
     //const
     var sendNotifications: Boolean = false,
+    var sendNewsNotifications: Boolean = false,
     var currentSubject: SubjectFromSite = SubjectFromSite(),
     var currentControlEvent: ControlEvent = ControlEvent(),
     var cookiesErrorCount: Int = 0,
