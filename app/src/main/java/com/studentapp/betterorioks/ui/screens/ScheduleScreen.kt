@@ -205,7 +205,57 @@ fun DatePicker(
         }
     }
 }
+@Composable
+fun RefreshAlert(isAlert: Boolean, onDismiss: () -> Unit, onRefresh: () -> Unit){
+    if(isAlert)
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        text = {
+            Column() {
+                Text(
+                    stringResource(R.string.attention),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(bottom = 16.dp),
+                    color = MaterialTheme.colors.onSurface
+                )
+                Text(
+                    stringResource(id = R.string.refresh_alert_text),
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colors.onSurface
+                )
+            } },
+        buttons = {
+            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End){
+                TextButton(
+                    onClick = {
+                        onRefresh()
+                        onDismiss()
+                              },
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.padding(end = 8.dp,bottom = 8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.Refresh),
+                        color = MaterialTheme.colors.secondary,
+                    )
+                }
+                TextButton(
+                    onClick = onDismiss,
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.padding(end = 16.dp,bottom = 8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.cancel),
+                        color = MaterialTheme.colors.secondary,
+                    )
+                }
+            }
+        },
+        modifier = Modifier.fillMaxWidth()
 
+    )
+}
 
 
 @Composable
@@ -278,7 +328,9 @@ fun ScheduleItem(it: SimpleScheduleElement, recalculateWindows: (Int,Int) -> Uni
                     Spacer(modifier = Modifier.size(8.dp))
                 }
                 if(it.number in changeable)
-                    IconButton(onClick = { recalculateWindows(it.day,it.number) }, modifier = Modifier.align(Alignment.BottomEnd).padding(4.dp)) {
+                    IconButton(onClick = { recalculateWindows(it.day,it.number) }, modifier = Modifier
+                        .align(Alignment.BottomEnd)
+                        .padding(4.dp)) {
                         Icon(
                             painterResource(id = R.drawable.swap_vert),
                             contentDescription = stringResource(R.string.change_lesson_time),
@@ -359,12 +411,20 @@ fun Schedule(
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
+
+    var expanded by remember {
+        mutableStateOf(false)
+    }
+
     val pullRefreshState = rememberPullRefreshState(
         (uiState.fullScheduleUiState == FullScheduleUiState.Loading),
-        { viewModel.getFullSchedule(refresh = true, context = context) }
+        { expanded = true }
     )
+
     val startDate = LocalDate.now().minusDays(BACK_ITEMS.toLong())
     val lazyRowState = rememberLazyListState()
+
+    RefreshAlert(isAlert = expanded, onDismiss = { expanded = false }, onRefresh = { viewModel.getFullSchedule(refresh = true, context = context) })
 
     BoxWithConstraints(
         modifier = modifier

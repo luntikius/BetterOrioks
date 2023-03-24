@@ -207,7 +207,6 @@ fun NewsContent(news: List<News>){
 }
 
 @SuppressLint("SuspiciousIndentation")
-@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ThemeSelectorButton(
     onChange: (Int) -> Unit = {},
@@ -268,7 +267,7 @@ fun ThemeSelectorButton(
                                     Text(
                                         text = s,
                                         modifier = Modifier
-                                            .padding(horizontal = 8.dp,vertical = 4.dp)
+                                            .padding(horizontal = 8.dp)
                                             .fillMaxWidth(),
                                         fontSize = 16.sp,
                                         color = MaterialTheme.colors.onSurface
@@ -285,7 +284,7 @@ fun ThemeSelectorButton(
                             TextButton(
                                 onClick = { expanded = false },
                                 shape = RoundedCornerShape(16.dp),
-                                modifier = Modifier.padding(end = 8.dp,bottom = 8.dp)
+                                modifier = Modifier.padding(end = 16.dp,bottom = 8.dp)
                             ) {
                                 Text(
                                     text = stringResource(R.string.cancel),
