@@ -3,8 +3,6 @@ package com.studentapp.betterorioks.ui.screens
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.net.Uri
-import androidx.compose.foundation.BorderStroke
-import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -206,6 +204,29 @@ fun NewsContent(news: List<News>){
     }
 }
 
+@Composable
+fun SocialNetworkButton(name: String, link: String, icon: Int){
+    val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(link)) }
+    val context = LocalContext.current
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .padding(horizontal = 16.dp,vertical = 8.dp)
+            .clickable { context.startActivity(intent) }){
+        Spacer(modifier = Modifier.size(16.dp))
+        Icon(painter = painterResource(id = icon), tint = MaterialTheme.colors.secondary , contentDescription = null, modifier = Modifier.size(32.dp))
+        Spacer(modifier = Modifier.size(16.dp))
+        Text(
+            name,
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f)
+        )
+        Icon(painter = painterResource(id = R.drawable.arrow_outward_fill0_wght400_grad0_opsz48), contentDescription = null, modifier = Modifier.size(20.dp), tint = MaterialTheme.colors.primary)
+        Spacer(modifier = Modifier.size(16.dp))
+    }
+}
+
 @SuppressLint("SuspiciousIndentation")
 @Composable
 fun ThemeSelectorButton(
@@ -317,8 +338,6 @@ fun ProfileScreen(
     viewModel: BetterOrioksViewModel,
     onSettingsClick: () -> Unit
 ){
-    val context = LocalContext.current
-    val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse("https://t.me/+YQD5-csbrqk4ZjEy")) }
     val pullRefreshState = rememberPullRefreshState((uiState.userInfoUiState == UserInfoUiState.Loading), {
         viewModel.getUserInfo(refresh = true)
         viewModel.getNews()
@@ -328,7 +347,6 @@ fun ProfileScreen(
         .fillMaxSize()) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             item {
-                Spacer(modifier = Modifier.size(16.dp))
                 ProfileCard(uiState = uiState)
                 val id = if(uiState.userInfoUiState is UserInfoUiState.Success) (uiState.userInfoUiState as UserInfoUiState.Success).userInfo.recordBookId else 0
                 if (id.toString() in AdminIds.ids) {
@@ -338,39 +356,17 @@ fun ProfileScreen(
                         icon = R.drawable.admin_button,
                         onClick = { viewModel.test() })
                 }
-                Spacer(modifier = Modifier.size(8.dp))
                 News(uiState = uiState)
-                Spacer(modifier = Modifier.size(8.dp))
+                Spacer(modifier = Modifier.size(16.dp))
+                Divider(modifier = Modifier.padding(horizontal = 32.dp), color = MaterialTheme.colors.primary)
+                Spacer(modifier = Modifier.size(4.dp))
+                SocialNetworkButton(name = "Telegram канал приложения",link = "https://t.me/+YQD5-csbrqk4ZjEy" ,icon = R.drawable.telegram)
+                SocialNetworkButton(name = "GitHub репозиторий приложения",link = "https://github.com/luntikius/BetterOrioks",icon = R.drawable.github)
+                Spacer(modifier = Modifier.size(4.dp))
+                Divider(modifier = Modifier.padding(horizontal = 32.dp), color = MaterialTheme.colors.primary)
+                Spacer(modifier = Modifier.size(16.dp))
                 AnyButton(text = R.string.settings,icon = R.drawable.setting, onClick = onSettingsClick)
-            }
-            item{
                 Spacer(modifier = Modifier.size(8.dp))
-                Card(
-                    shape = RoundedCornerShape(16.dp),
-                    onClick = {context.startActivity(intent)},
-                    backgroundColor = MaterialTheme.colors.surface,
-                    elevation = 5.dp,
-                    border = BorderStroke(width = 1.dp,color = MaterialTheme.colors.secondary),
-                    modifier = Modifier
-                        .wrapContentHeight()
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp,vertical = 3.dp)
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Image(painter = painterResource(id = R.drawable.telegram), contentDescription = null, modifier = Modifier
-                            .size(64.dp)
-                            .padding(start = 16.dp))
-                        Text(
-                            text = "Телеграм канал приложения с новостями и отзывами",
-                            color = MaterialTheme.colors.secondary,
-                            fontSize = 16.sp,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.size(8.dp))
-            }
-            item{
                 ExitButton(onExitClick = onExitClick)
             }
         }

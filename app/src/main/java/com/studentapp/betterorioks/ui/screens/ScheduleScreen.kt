@@ -208,53 +208,53 @@ fun DatePicker(
 @Composable
 fun RefreshAlert(isAlert: Boolean, onDismiss: () -> Unit, onRefresh: () -> Unit){
     if(isAlert)
-    AlertDialog(
-        onDismissRequest = onDismiss,
-        text = {
-            Column() {
-                Text(
-                    stringResource(R.string.attention),
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    color = MaterialTheme.colors.onSurface
-                )
-                Text(
-                    stringResource(id = R.string.refresh_alert_text),
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colors.onSurface
-                )
-            } },
-        buttons = {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End){
-                TextButton(
-                    onClick = {
-                        onRefresh()
-                        onDismiss()
-                              },
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.padding(end = 8.dp,bottom = 8.dp)
-                ) {
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            text = {
+                Column() {
                     Text(
-                        text = stringResource(R.string.Refresh),
-                        color = MaterialTheme.colors.secondary,
+                        stringResource(R.string.attention),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        color = MaterialTheme.colors.onSurface
                     )
-                }
-                TextButton(
-                    onClick = onDismiss,
-                    shape = RoundedCornerShape(16.dp),
-                    modifier = Modifier.padding(end = 16.dp,bottom = 8.dp)
-                ) {
                     Text(
-                        text = stringResource(R.string.cancel),
-                        color = MaterialTheme.colors.secondary,
+                        stringResource(id = R.string.refresh_alert_text),
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colors.onSurface
                     )
+                } },
+            buttons = {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End){
+                    TextButton(
+                        onClick = {
+                            onRefresh()
+                            onDismiss()
+                                  },
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.padding(end = 8.dp,bottom = 8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.Refresh),
+                            color = MaterialTheme.colors.secondary,
+                        )
+                    }
+                    TextButton(
+                        onClick = onDismiss,
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.padding(end = 16.dp,bottom = 8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.cancel),
+                            color = MaterialTheme.colors.secondary,
+                        )
+                    }
                 }
-            }
-        },
-        modifier = Modifier.fillMaxWidth()
+            },
+            modifier = Modifier.fillMaxWidth()
 
-    )
+        )
 }
 
 
@@ -334,7 +334,8 @@ fun ScheduleItem(it: SimpleScheduleElement, recalculateWindows: (Int,Int) -> Uni
                         Icon(
                             painterResource(id = R.drawable.swap_vert),
                             contentDescription = stringResource(R.string.change_lesson_time),
-                            modifier = Modifier.size(28.dp)
+                            modifier = Modifier.size(28.dp),
+                            tint = MaterialTheme.colors.primary
                         )
                     }
             }
