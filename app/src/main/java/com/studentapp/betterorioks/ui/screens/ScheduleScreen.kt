@@ -211,7 +211,7 @@ fun RefreshAlert(isAlert: Boolean, onDismiss: () -> Unit, onRefresh: () -> Unit)
         AlertDialog(
             onDismissRequest = onDismiss,
             text = {
-                Column() {
+                Column {
                     Text(
                         stringResource(R.string.attention),
                         fontSize = 18.sp,
@@ -402,7 +402,6 @@ fun ScheduleList(viewModel: BetterOrioksViewModel, modifier: Modifier = Modifier
     }
 }
 
-@SuppressLint("FrequentlyChangedStateReadInComposition")
 @OptIn(ExperimentalMaterialApi::class, ExperimentalSnapperApi::class)
 @Composable
 fun Schedule(
@@ -413,19 +412,19 @@ fun Schedule(
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
-    var expanded by remember {
+    var isAlert by remember {
         mutableStateOf(false)
     }
 
     val pullRefreshState = rememberPullRefreshState(
         (uiState.fullScheduleUiState == FullScheduleUiState.Loading),
-        { expanded = true }
+        { isAlert = true }
     )
 
     val startDate = LocalDate.now().minusDays(BACK_ITEMS.toLong())
     val lazyRowState = rememberLazyListState()
 
-    RefreshAlert(isAlert = expanded, onDismiss = { expanded = false }, onRefresh = { viewModel.getFullSchedule(refresh = true, context = context) })
+    RefreshAlert(isAlert = isAlert, onDismiss = { isAlert = false }, onRefresh = { viewModel.getFullSchedule(refresh = true, context = context) })
 
     BoxWithConstraints(
         modifier = modifier
@@ -440,17 +439,21 @@ fun Schedule(
                 lazyListState = lazyListState,
                 coroutineScope = coroutineScope,
                 lazyRowState = lazyRowState
-
             )
             if (uiState.fullScheduleUiState is FullScheduleUiState.Success
                 && uiState.importantDatesUiState is ImportantDatesUiState.Success
                 && uiState.userInfoUiState is UserInfoUiState.Success
             ) {
-                viewModel.setCurrentDateWithMovingTopBar(
-                    date = startDate.plusDays(lazyListState.firstVisibleItemIndex.toLong()),
-                    lazyRowState = lazyRowState,
-                    coroutineScope = coroutineScope,
-                    startDate = startDate)
+                LaunchedEffect(lazyListState.isScrollInProgress) {
+                    if (!lazyListState.isScrollInProgress) {
+                        viewModel.setCurrentDateWithMovingTopBar(
+                            date = startDate.plusDays(lazyListState.firstVisibleItemIndex.toLong()),
+                            lazyRowState = lazyRowState,
+                            coroutineScope = coroutineScope,
+                            startDate = startDate
+                        )
+                    }
+                }
                 Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                     if(!uiState.scheduleInitUiState) {
                         LoadingScreen(
