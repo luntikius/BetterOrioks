@@ -398,9 +398,9 @@ fun DebtControlEventElement(debtControlEvent: DebtControlEvent){
             )
             Spacer(modifier = Modifier.size(16.dp))
             Column {
-                Text(text = stringResource(id = R.string.date_of_resit,debtControlEvent.date1), modifier = Modifier.padding(vertical = 2.dp))
-                Text(text = stringResource(id = R.string.time_of_resit,debtControlEvent.time1), modifier = Modifier.padding(vertical = 2.dp))
-                Text(text = stringResource(id = R.string.room_number, debtControlEvent.room1), modifier = Modifier.padding(vertical = 2.dp))
+                Text(text = stringResource(id = R.string.date_of_resit,debtControlEvent.date2), modifier = Modifier.padding(vertical = 2.dp))
+                Text(text = stringResource(id = R.string.time_of_resit,debtControlEvent.time2), modifier = Modifier.padding(vertical = 2.dp))
+                Text(text = stringResource(id = R.string.room_number, debtControlEvent.room2), modifier = Modifier.padding(vertical = 2.dp))
             }
         }
         Divider(color = MaterialTheme.colors.onBackground)

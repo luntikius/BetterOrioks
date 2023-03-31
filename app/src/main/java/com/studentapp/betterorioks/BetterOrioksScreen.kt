@@ -12,6 +12,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.navDeepLink
 import com.studentapp.betterorioks.ui.screens.AcademicPerformanceScreen
 import com.studentapp.betterorioks.ui.components.BottomNavigationBar
 import com.studentapp.betterorioks.model.BetterOrioksScreens
@@ -55,6 +56,7 @@ fun BetterOrioksApp(){
                         )
                     }
                 ) { padding ->
+                    val uri = "https://BetterOrioks.com"
                     AnimatedNavHost(
                         navController = navController,
                         startDestination = BetterOrioksScreens.Schedule.name,
@@ -74,7 +76,8 @@ fun BetterOrioksApp(){
                             exitTransition = { fadeOut() },
                             enterTransition = { fadeIn() },
                             popEnterTransition = { fadeIn(animationSpec = tween(800)) },
-                            popExitTransition = { fadeOut() }
+                            popExitTransition = { fadeOut() },
+                            deepLinks = listOf(navDeepLink { uriPattern = "$uri/AcademicPerformance"})
                         ) {
                             if (uiState.subjectsFromSiteUiState is SubjectsFromSiteUiState.NotStarted) viewModel.getAcademicPerformanceFromSite()
                             AcademicPerformanceScreen(

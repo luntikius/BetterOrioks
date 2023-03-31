@@ -8,6 +8,7 @@ import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
 import androidx.annotation.StringRes
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Image
@@ -139,12 +140,6 @@ fun BottomNavigationBar(navController: NavHostController) {
                 selected = currentRoute == scheduleItem.screen_route,
                 onClick = {
                     navController.navigate(scheduleItem.screen_route) {
-
-                        navController.graph.startDestinationRoute?.let { screen_route ->
-                            popUpTo(screen_route) {
-                                saveState = true
-                            }
-                        }
                         launchSingleTop = true
                         restoreState = true
                     }
@@ -171,12 +166,6 @@ fun BottomNavigationBar(navController: NavHostController) {
                     selected = currentRoute == item.screen_route,
                     onClick = {
                         navController.navigate(item.screen_route) {
-
-                            navController.graph.startDestinationRoute?.let { screen_route ->
-                                popUpTo(screen_route) {
-                                    saveState = true
-                                }
-                            }
                             launchSingleTop = true
                             restoreState = false
                         }
@@ -273,7 +262,7 @@ const val VERBOSE_NOTIFICATION_CHANNEL_DESCRIPTION = "Показывает ув�
 const val CHANNEL_ID = "VERBOSE_NOTIFICATION"
 const val NOTIFICATION_ID = 1
 
-fun makeStatusNotification(message: String, head: String, context: Context) {
+fun makeStatusNotification(message: String, head: String, context: Context, link: String = "") {
 
     val name = VERBOSE_NOTIFICATION_CHANNEL_NAME
     val description = VERBOSE_NOTIFICATION_CHANNEL_DESCRIPTION
@@ -281,7 +270,7 @@ fun makeStatusNotification(message: String, head: String, context: Context) {
     val channel = NotificationChannel(CHANNEL_ID, name, importance)
     channel.description = description
 
-    val resultIntent = Intent(context, MainActivity::class.java)
+    val resultIntent = if(link.isBlank()) Intent(Intent.ACTION_VIEW, Uri.parse("https://BetterOrioks.com/AcademicPerformance"), context, MainActivity::class.java) else Intent(Intent.ACTION_VIEW, Uri.parse(link))
 
     val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(context).run {
         addNextIntentWithParentStack(resultIntent)
@@ -299,6 +288,7 @@ fun makeStatusNotification(message: String, head: String, context: Context) {
         .setContentText(message)
         .setPriority(NotificationCompat.PRIORITY_HIGH)
         .setVibrate(LongArray(1) { it.toLong() })
+        .setAutoCancel(true)
 
     // Show the notification
     if (ActivityCompat.checkSelfPermission(

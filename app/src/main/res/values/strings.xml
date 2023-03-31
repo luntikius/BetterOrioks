@@ -87,4 +87,6 @@
         Если вы перезагрузите расписание все ваши заметки и изменения в расписании будут удалены. Вы уверены, что хотите перезагрузить расписание?
     </string>
     <string name="attention">Внимание!</string>
+    <string name="exit_alert_text">Вы уверены, что хотите выйти?</string>
+    <string name="continue_string">Продолжить</string>
 </resources>

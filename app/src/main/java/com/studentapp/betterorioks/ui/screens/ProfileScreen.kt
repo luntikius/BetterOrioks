@@ -326,6 +326,58 @@ fun ThemeSelectorButton(
     }
 }
 
+@Composable
+fun ExitAlert(isAlert: Boolean, onDismiss: () -> Unit, onExit: () -> Unit){
+    if(isAlert)
+        AlertDialog(
+            onDismissRequest = onDismiss,
+            text = {
+                Column {
+                    Text(
+                        stringResource(R.string.attention),
+                        fontSize = 18.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.padding(bottom = 16.dp),
+                        color = MaterialTheme.colors.onSurface
+                    )
+                    Text(
+                        stringResource(R.string.exit_alert_text),
+                        fontSize = 16.sp,
+                        color = MaterialTheme.colors.onSurface
+                    )
+                } },
+            buttons = {
+                Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.End){
+                    TextButton(
+                        onClick = {
+                            onExit()
+                            onDismiss()
+                        },
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.padding(end = 8.dp,bottom = 8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.continue_string),
+                            color = MaterialTheme.colors.secondary,
+                        )
+                    }
+                    TextButton(
+                        onClick = onDismiss,
+                        shape = RoundedCornerShape(16.dp),
+                        modifier = Modifier.padding(end = 16.dp,bottom = 8.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.cancel),
+                            color = MaterialTheme.colors.secondary,
+                        )
+                    }
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+
+        )
+}
+
 val themeItems = listOf(
     "Системная","Светлая", "Тёмная"
 )
@@ -338,36 +390,67 @@ fun ProfileScreen(
     viewModel: BetterOrioksViewModel,
     onSettingsClick: () -> Unit
 ){
+    val context = LocalContext.current
+
     val pullRefreshState = rememberPullRefreshState((uiState.userInfoUiState == UserInfoUiState.Loading), {
         viewModel.getUserInfo(refresh = true)
         viewModel.getNews()
     })
+
+    var isAlert by remember {
+        mutableStateOf(false)
+    }
+
     Box (modifier = Modifier
         .pullRefresh(pullRefreshState)
         .fillMaxSize()) {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             item {
+
                 ProfileCard(uiState = uiState)
+
                 val id = if(uiState.userInfoUiState is UserInfoUiState.Success) (uiState.userInfoUiState as UserInfoUiState.Success).userInfo.recordBookId else 0
+
                 if (id.toString() in AdminIds.ids) {
                     Spacer(modifier = Modifier.size(8.dp))
                     AnyButton(
                         text = R.string.run_test,
                         icon = R.drawable.admin_button,
-                        onClick = { viewModel.test() })
+                        onClick = { viewModel.test(context = context) })
                 }
+                
+                Spacer(modifier = Modifier.size(16.dp))
+                
+                ExitAlert(
+                    isAlert = isAlert,
+                    onDismiss = { isAlert = false },
+                    onExit = onExitClick
+                )
+
                 News(uiState = uiState)
+
                 Spacer(modifier = Modifier.size(16.dp))
+
                 Divider(modifier = Modifier.padding(horizontal = 32.dp), color = MaterialTheme.colors.primary)
+
                 Spacer(modifier = Modifier.size(4.dp))
+
                 SocialNetworkButton(name = "Telegram канал приложения",link = "https://t.me/+YQD5-csbrqk4ZjEy" ,icon = R.drawable.telegram)
+
                 SocialNetworkButton(name = "GitHub репозиторий приложения",link = "https://github.com/luntikius/BetterOrioks",icon = R.drawable.github)
+
                 Spacer(modifier = Modifier.size(4.dp))
+
                 Divider(modifier = Modifier.padding(horizontal = 32.dp), color = MaterialTheme.colors.primary)
+
                 Spacer(modifier = Modifier.size(16.dp))
+
                 AnyButton(text = R.string.settings,icon = R.drawable.setting, onClick = onSettingsClick)
+
                 Spacer(modifier = Modifier.size(8.dp))
-                ExitButton(onExitClick = onExitClick)
+
+                ExitButton(onExitClick = {isAlert = true})
+
             }
         }
         PullRefreshIndicator(

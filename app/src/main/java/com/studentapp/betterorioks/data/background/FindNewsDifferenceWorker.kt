@@ -19,7 +19,7 @@ class FindNewsDifferenceWorker (
     params: WorkerParameters,
     ): CoroutineWorker(appContext = context, params = params){
 
-    val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "layout_preferences")
+    private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(name = "layout_preferences")
 
     override suspend fun doWork(): Result {
         return withContext(Dispatchers.IO) {
@@ -42,7 +42,8 @@ class FindNewsDifferenceWorker (
                     makeStatusNotification(
                         head = "Обновление новостей",
                         message = newData.name,
-                        context = applicationContext
+                        context = applicationContext,
+                        link = newData.link
                     )
                 }
                 Result.success()

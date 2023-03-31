@@ -24,6 +24,7 @@ import com.studentapp.betterorioks.model.subjectsFromSite.ControlEvent
 import com.studentapp.betterorioks.model.subjectsFromSite.SimpleSubject
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectFromSite
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectsData
+import com.studentapp.betterorioks.ui.components.makeStatusNotification
 import com.studentapp.betterorioks.ui.screens.dayOfWeekToInt
 import java.time.temporal.ChronoUnit.DAYS
 import com.studentapp.betterorioks.ui.states.*
@@ -51,15 +52,14 @@ class BetterOrioksViewModel(
     private val _uiState = MutableStateFlow(AppUiState())
     val uiState = _uiState.asStateFlow()
 
-    fun test() {
-        val tag = "test"
+    fun test(context: Context) {
         viewModelScope.launch {
-            try {
-                _uiState.update { it.copy(theme = 2) }
-                userPreferencesRepository.setTheme(2)
-            }catch (e:Throwable){
-                Log.d(tag,e.message.toString())
-            }
+            makeStatusNotification(
+                head = "test",
+                message = "this is a test message",
+                context = context,
+                //link = "https://google.com"
+            )
         }
     }
 
