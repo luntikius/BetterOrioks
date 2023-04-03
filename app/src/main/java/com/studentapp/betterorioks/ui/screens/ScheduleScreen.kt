@@ -146,7 +146,8 @@ fun DatePicker(
     modifier: Modifier = Modifier,
     lazyListState: LazyListState,
     coroutineScope: CoroutineScope,
-    lazyRowState: LazyListState
+    lazyRowState: LazyListState,
+    setDate: (date:LocalDate) -> Unit
 ){
     val startDate = LocalDate.now().minusDays(BACK_ITEMS.toLong())
     var isInitialComposition by remember{ mutableStateOf(false) }
@@ -168,9 +169,7 @@ fun DatePicker(
                         ).toInt()
                     )
                 }
-                coroutineScope.launch {
-                    lazyRowState.scrollToItem(BACK_ITEMS - dayOfWeekToInt(LocalDate.now()))
-                }
+                setDate(LocalDate.now())
             }
         ) {
             Text(
@@ -198,7 +197,17 @@ fun DatePicker(
                     date = date,
                     isSelected = (uiState.currentSelectedDate == date),
                     onClick = {
-                        coroutineScope.launch { lazyListState.scrollToItem(abs(DAYS.between(startDate,date)).toInt()) }
+                        setDate(date)
+                        coroutineScope.launch {
+                            lazyListState.scrollToItem(
+                                abs(
+                                    DAYS.between(
+                                        startDate,
+                                        date
+                                    )
+                                ).toInt()
+                            )
+                        }
                     }
                 )
             }
@@ -438,7 +447,8 @@ fun Schedule(
                 uiState = uiState,
                 lazyListState = lazyListState,
                 coroutineScope = coroutineScope,
-                lazyRowState = lazyRowState
+                lazyRowState = lazyRowState,
+                setDate = {date -> viewModel.setCurrentDateWithMovingTopBar(date = date, lazyRowState = lazyRowState, coroutineScope = coroutineScope, startDate = startDate )}
             )
             if (uiState.fullScheduleUiState is FullScheduleUiState.Success
                 && uiState.importantDatesUiState is ImportantDatesUiState.Success
