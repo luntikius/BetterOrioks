@@ -101,6 +101,7 @@ fun BetterOrioksApp(){
                                 )
                             }
                         ) {
+                            if (uiState.subjectsFromSiteUiState is SubjectsFromSiteUiState.NotStarted) viewModel.getAcademicPerformanceFromSite()
                             AcademicPerformanceMoreScreen(
                                 uiState = uiState,
                                 onButtonClick = {

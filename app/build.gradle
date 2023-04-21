@@ -14,7 +14,7 @@ android {
         minSdk 26
         targetSdk 33
         compileSdk 33
-        versionCode 42
+        versionCode 43
         versionName "1.8"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
@@ -72,13 +72,13 @@ dependencies {
     implementation 'org.jetbrains.kotlinx:kotlinx-serialization-json:1.5.0'
     implementation "com.jakewharton.retrofit:retrofit2-kotlinx-serialization-converter:0.8.0"
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
-    implementation 'androidx.core:core-ktx:1.9.0'
+    implementation 'androidx.core:core-ktx:1.10.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
-    implementation 'androidx.activity:activity-compose:1.7.0'
+    implementation 'androidx.activity:activity-compose:1.7.1'
     implementation  "androidx.compose.ui:ui:$compose_ui_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_ui_version"
-    implementation 'androidx.compose.material:material:1.4.0'
-    implementation "androidx.navigation:navigation-compose:2.6.0-alpha09"
+    implementation "androidx.compose.material:material:$compose_ui_version"
+    implementation "androidx.navigation:navigation-compose:2.6.0-beta01"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1"
     implementation 'dev.chrisbanes.snapper:snapper:0.3.0'
     testImplementation 'junit:junit:4.13.2'

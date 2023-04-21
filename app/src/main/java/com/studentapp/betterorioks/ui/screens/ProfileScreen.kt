@@ -451,6 +451,8 @@ fun ProfileScreen(
 
                 ExitButton(onExitClick = {isAlert = true})
 
+                Spacer(modifier = Modifier.size(8.dp))
+
             }
         }
         PullRefreshIndicator(

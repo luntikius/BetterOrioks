@@ -233,13 +233,12 @@ fun AcademicPerformanceMoreScreen(uiState: AppUiState, onButtonClick: () -> Unit
             ?.getControlEvents() ?: listOf(),
         uiState = uiState,
         onButtonClick = onButtonClick,
-        isLoading = false,
-        isError = false,
         controlForm = uiState.currentSubject.formOfControl.name,
         setCurrentControlEvent = onControlEventClick,
         scienceId = uiState.currentSubject.scienceId,
         onResourceClick = onResourceClick,
-        debtControlEvents = uiState.currentSubject.debtControlEvents
+        debtControlEvents = uiState.currentSubject.debtControlEvents,
+        subjectsFromSiteUiState = uiState.subjectsFromSiteUiState
     )
 }
 @Composable
@@ -453,77 +452,83 @@ fun AcademicPerformanceMore (
     disciplines: List<ControlEvent> = listOf(),
     controlForm: String = "",
     scienceId: Int,
-    isLoading: Boolean,
-    isError: Boolean,
     setCurrentControlEvent: (ControlEvent) -> Unit = {},
     onResourceClick: () -> Unit,
-    debtControlEvents: List<DebtControlEvent> = listOf()
-){
+    debtControlEvents: List<DebtControlEvent> = listOf(),
+    subjectsFromSiteUiState: SubjectsFromSiteUiState
+) {
 
     Scaffold(
-        topBar = { TopPerformanceMoreBar(uiState = uiState, onClick = onButtonClick) },
+        topBar = { TopPerformanceMoreBar(uiState = uiState,onClick = onButtonClick) },
         backgroundColor = MaterialTheme.colors.surface,
         modifier = modifier
     ) { innerPadding ->
-        if (!isLoading && !isError) {
-            var popupIsVisible by remember { mutableStateOf(false) }
-            if(popupIsVisible){
-                ResourcesPopup(uiState.currentControlEvent, onDismiss = {popupIsVisible = false}, controlForm = controlForm)
-            }
-            val mod = if(popupIsVisible) Modifier.blur(4.dp) else Modifier
-            LazyColumn(
-                mod
-                    .padding(innerPadding)
-                    .padding(start = 16.dp, end = 16.dp, bottom = 8.dp)
-            ) {
-                if(disciplines.isNotEmpty())
-                    item{
-                        Text(
-                            stringResource(R.string.control_events),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(vertical =  16.dp)
-                        )
-                        Divider(color = MaterialTheme.colors.onBackground)
-                    }
-                items(disciplines) {
-                    AcademicPerformanceMoreElement(
-                        subjectName = it.type.name.ifBlank { controlForm },
-                        userPoints = if (it.grade.score == "-") -2.0 else if (it.grade.score == "н") -1.0 else it.grade.score.toDouble(),
-                        systemPoints = it.maxScore,
-                        subjectShort = it.shortName,
-                        weeks = calculateWeeks(it.week, uiState),
-                        resources = it.resources,
-                        onClick = {
-                            setCurrentControlEvent(it)
-                            popupIsVisible = true
+        when (subjectsFromSiteUiState) {
+            is SubjectsFromSiteUiState.Success -> {
+                var popupIsVisible by remember { mutableStateOf(false) }
+                if (popupIsVisible) {
+                    ResourcesPopup(
+                        uiState.currentControlEvent,
+                        onDismiss = { popupIsVisible = false },
+                        controlForm = controlForm
+                    )
+                }
+                val mod = if (popupIsVisible) Modifier.blur(4.dp) else Modifier
+                LazyColumn(
+                    mod
+                        .padding(innerPadding)
+                        .padding(start = 16.dp,end = 16.dp,bottom = 8.dp)
+                ) {
+                    if (disciplines.isNotEmpty())
+                        item {
+                            Text(
+                                stringResource(R.string.control_events),
+                                fontSize = 20.sp,
+                                fontWeight = FontWeight.Bold,
+                                modifier = Modifier.padding(vertical = 16.dp)
+                            )
+                            Divider(color = MaterialTheme.colors.onBackground)
                         }
-                    )
-                }
-                items(debtControlEvents){
-                    DebtControlEventElement(debtControlEvent = it)
-                }
-                item { BottomButtons(scienceId = scienceId, onResourceClick = onResourceClick) }
-                item { AboutElement(uiState = uiState) }
-                item{
-                    val teacherStringId = if(uiState.currentSubject.teachers.size == 1){
-                        R.string.teacher
-                    }else{R.string.teachers}    
-                    Text(
-                        stringResource(id = teacherStringId),
-                        modifier = Modifier.padding(start = 16.dp,end = 16.dp, bottom = 8.dp),
-                        color = MaterialTheme.colors.primary,
-                        fontSize = 16.sp
-                    )
-                }
-                items(uiState.currentSubject.teachers){
-                    TeacherElement(teacher = it)
+                    items(disciplines) {
+                        AcademicPerformanceMoreElement(
+                            subjectName = it.type.name.ifBlank { controlForm },
+                            userPoints = if (it.grade.score == "-") -2.0 else if (it.grade.score == "н") -1.0 else it.grade.score.toDouble(),
+                            systemPoints = it.maxScore,
+                            subjectShort = it.shortName,
+                            weeks = calculateWeeks(it.week,uiState),
+                            resources = it.resources,
+                            onClick = {
+                                setCurrentControlEvent(it)
+                                popupIsVisible = true
+                            }
+                        )
+                    }
+                    items(debtControlEvents) {
+                        DebtControlEventElement(debtControlEvent = it)
+                    }
+                    item { BottomButtons(scienceId = scienceId,onResourceClick = onResourceClick) }
+                    item { AboutElement(uiState = uiState) }
+                    item {
+                        val teacherStringId = if (uiState.currentSubject.teachers.size == 1) {
+                            R.string.teacher
+                        }
+                        else {
+                            R.string.teachers
+                        }
+                        Text(
+                            stringResource(id = teacherStringId),
+                            modifier = Modifier.padding(start = 16.dp,end = 16.dp,bottom = 8.dp),
+                            color = MaterialTheme.colors.primary,
+                            fontSize = 16.sp
+                        )
+                    }
+                    items(uiState.currentSubject.teachers) {
+                        TeacherElement(teacher = it)
+                    }
                 }
             }
-        }else if(isLoading){
-            LoadingScreen(modifier = Modifier.fillMaxSize())
-        }else{
-            ErrorScreen(modifier = Modifier.fillMaxSize())
+            is SubjectsFromSiteUiState.Loading -> LoadingScreen(modifier = Modifier.fillMaxSize())
+            else -> ErrorScreen(modifier = Modifier.fillMaxSize())
         }
     }
 }
