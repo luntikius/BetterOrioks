@@ -2,6 +2,7 @@ package com.studentapp.betterorioks.ui.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -484,7 +485,8 @@ fun Schedule(
                                     startIndex + 1
                                 )
                             },
-                            snapOffsetForItem = SnapOffsets.Start
+                            snapOffsetForItem = SnapOffsets.Start,
+                            decayAnimationSpec = rememberSplineBasedDecay()
                         ),
                         verticalAlignment = Alignment.CenterVertically
                     ) {

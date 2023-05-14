@@ -89,7 +89,7 @@ fun AcademicPerformanceMoreElement(
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = mod
-            .padding(horizontal = 8.dp, vertical = 16.dp)
+            .padding(horizontal = 8.dp,vertical = 16.dp)
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
     ) {
@@ -109,7 +109,7 @@ fun AcademicPerformanceMoreElement(
         Column(modifier = Modifier
             .weight(1f)
             .fillMaxWidth()
-            .padding(start = 4.dp, end = 16.dp)) {
+            .padding(start = 4.dp,end = 16.dp)) {
             Text(
                 text = "$subjectName$finalSubjectShort",
                 modifier = modifier.padding(start = 4.dp)
@@ -228,18 +228,28 @@ fun TopPerformanceMoreBar(onClick: () -> Unit = {}, uiState: AppUiState){
 }
 @Composable
 fun AcademicPerformanceMoreScreen(uiState: AppUiState, onButtonClick: () -> Unit, onControlEventClick: (ControlEvent) -> Unit, onResourceClick: () -> Unit){
-    AcademicPerformanceMore(
-        disciplines = (uiState.subjectsFromSiteUiState as SubjectsFromSiteUiState.Success).subjects.subjects.firstOrNull { it.id == uiState.currentSubject.id }
-            ?.getControlEvents() ?: listOf(),
-        uiState = uiState,
-        onButtonClick = onButtonClick,
-        controlForm = uiState.currentSubject.formOfControl.name,
-        setCurrentControlEvent = onControlEventClick,
-        scienceId = uiState.currentSubject.scienceId,
-        onResourceClick = onResourceClick,
-        debtControlEvents = uiState.currentSubject.debtControlEvents,
-        subjectsFromSiteUiState = uiState.subjectsFromSiteUiState
-    )
+    when(uiState.subjectsFromSiteUiState) {
+        is SubjectsFromSiteUiState.Success -> {
+            AcademicPerformanceMore(
+                disciplines = (uiState.subjectsFromSiteUiState as SubjectsFromSiteUiState.Success).subjects.subjects.firstOrNull { it.id == uiState.currentSubject.id }
+                    ?.getControlEvents() ?: listOf(),
+                uiState = uiState,
+                onButtonClick = onButtonClick,
+                controlForm = uiState.currentSubject.formOfControl.name,
+                setCurrentControlEvent = onControlEventClick,
+                scienceId = uiState.currentSubject.scienceId,
+                onResourceClick = onResourceClick,
+                debtControlEvents = uiState.currentSubject.debtControlEvents,
+                subjectsFromSiteUiState = uiState.subjectsFromSiteUiState
+            )
+        }
+        is SubjectsFromSiteUiState.Error ->{
+            onButtonClick()
+        }
+        else -> {
+            LoadingScreen(modifier = Modifier.fillMaxSize())
+        }
+    }
 }
 @Composable
 fun ResourcesPopup(controlEvent: ControlEvent, onDismiss: () -> Unit, controlForm: String){
@@ -303,8 +313,14 @@ fun ResourcesPopup(controlEvent: ControlEvent, onDismiss: () -> Unit, controlFor
                                 .clickable {
                                     try {
                                         context.startActivity(intent)
-                                    }catch(_:Throwable){
-                                        Toast.makeText(context, context.getString(R.string.toast_unsupported_file_format), Toast.LENGTH_LONG).show()
+                                    } catch (_: Throwable) {
+                                        Toast
+                                            .makeText(
+                                                context,
+                                                context.getString(R.string.toast_unsupported_file_format),
+                                                Toast.LENGTH_LONG
+                                            )
+                                            .show()
                                     }
                                 }
                         ) {
