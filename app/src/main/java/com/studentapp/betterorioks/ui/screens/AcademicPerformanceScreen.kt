@@ -1,7 +1,9 @@
 package com.studentapp.betterorioks.ui.screens
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
@@ -11,6 +13,7 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -93,12 +96,12 @@ fun AcademicPerformanceElement(
 
     Card(
         shape = RoundedCornerShape(16.dp),
-        elevation = 5.dp,
+        elevation = if (MaterialTheme.colors.surface == Color.White) 4.dp else 0.dp,
         onClick = onClick,
         modifier = modifier
             .fillMaxWidth()
             .wrapContentHeight()
-            .padding(horizontal = 16.dp, vertical = 3.dp)
+            .padding(horizontal = 16.dp,vertical = 3.dp)
             .defaultMinSize(minHeight = 72.dp)
     ) {
         Row(
@@ -133,6 +136,76 @@ fun AcademicPerformanceElement(
             }
         }
     }
+
+fun groupOfSubjects(
+    scope:LazyListScope,subjects: List<SubjectFromSite>,
+    onComponentClicked: () -> Unit,
+    setCurrentSubject: (SubjectFromSite) -> Unit,
+    @StringRes text:Int
+){
+    scope.item {
+        Spacer(modifier = Modifier.size(8.dp))
+        Text(
+            text = stringResource(id = text),
+            modifier = Modifier.padding(horizontal = 24.dp, vertical = 8.dp),
+            fontWeight = FontWeight.Bold,
+            fontSize = 18.sp
+        )
+    }
+    scope.items(subjects) {
+        AcademicPerformanceElement(
+            subjectName = it.name,
+            userPoints = it.grade.fullScore,
+            systemPoints = it.getMaxScore(),
+            onClick = {
+                onComponentClicked()
+                setCurrentSubject(it)
+            }
+        )
+    }
+}
+fun groupedSubjects(subjects:SubjectsData,scope:LazyListScope, onComponentClicked: () -> Unit, setCurrentSubject: (SubjectFromSite) -> Unit){
+    val unfinishedSubjects = subjects.subjects.filter { it.grade.fullScore.toIntOrNull() == null || (it.grade.fullScore.toIntOrNull() !== null&& it.grade.fullScore.toInt() < 50)}
+    val normalSubjects = subjects.subjects.filter { it.grade.fullScore.toIntOrNull() != null && it.grade.fullScore.toInt() >= 50 && it.grade.fullScore.toInt() < 70 }
+    val goodSubjects = subjects.subjects.filter { it.grade.fullScore.toIntOrNull() != null && it.grade.fullScore.toInt() >= 70 && it.grade.fullScore.toInt() < 86 }
+    val excellentSubjects = subjects.subjects.filter { it.grade.fullScore.toIntOrNull() != null && it.grade.fullScore.toInt() >= 86}
+    if(unfinishedSubjects.isNotEmpty()) {
+        groupOfSubjects(
+            scope = scope,
+            subjects = unfinishedSubjects,
+            onComponentClicked = onComponentClicked,
+            setCurrentSubject = setCurrentSubject,
+            text = R.string.bad_mark
+        )
+    }
+    if(normalSubjects.isNotEmpty()) {
+        groupOfSubjects(
+            scope = scope,
+            subjects = normalSubjects,
+            onComponentClicked = onComponentClicked,
+            setCurrentSubject = setCurrentSubject,
+            text = R.string.ok_mark
+        )
+    }
+    if(goodSubjects.isNotEmpty()) {
+        groupOfSubjects(
+            scope = scope,
+            subjects = goodSubjects,
+            onComponentClicked = onComponentClicked,
+            setCurrentSubject = setCurrentSubject,
+            text = R.string.good_mark
+        )
+    }
+    if(excellentSubjects.isNotEmpty()) {
+        groupOfSubjects(
+            scope = scope,
+            subjects = excellentSubjects,
+            onComponentClicked = onComponentClicked,
+            setCurrentSubject = setCurrentSubject,
+            text = R.string.excellent_mark
+        )
+    }
+}
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -177,17 +250,25 @@ fun AcademicPerformance(
                         fontSize = 22.sp
                     )
                 }
-                items(subjects.subjects) {
-                    AcademicPerformanceElement(
-                        subjectName = it.name,
-                        userPoints = it.grade.fullScore,
-                        systemPoints = it.getMaxScore(),
-                        onClick = {
-                            onComponentClicked()
-                            setCurrentSubject(it)
-                        }
+                if(uiState.disciplineGrouping){
+                    groupedSubjects(
+                        subjects = subjects,
+                        scope = this,
+                        onComponentClicked = onComponentClicked,
+                        setCurrentSubject = setCurrentSubject
                     )
-                }
+                }else
+                    items(subjects.subjects) {
+                        AcademicPerformanceElement(
+                            subjectName = it.name,
+                            userPoints = it.grade.fullScore,
+                            systemPoints = it.getMaxScore(),
+                            onClick = {
+                                onComponentClicked()
+                                setCurrentSubject(it)
+                            }
+                        )
+                    }
                 if(subjects.debts.isNotEmpty()) {
                     item {
                         Spacer(modifier = Modifier.size(16.dp))

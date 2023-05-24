@@ -14,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -307,7 +308,8 @@ fun ResourcesPopup(controlEvent: ControlEvent, onDismiss: () -> Unit, controlFor
                         val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(it.link)) }
                         Card(
                             shape = RoundedCornerShape(16.dp),
-                            elevation = 4.dp,
+                            elevation = if (MaterialTheme.colors.surface == Color.White) 4.dp else 0.dp,
+                            backgroundColor = MaterialTheme.colors.surface,
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
@@ -436,7 +438,7 @@ fun BottomButtons(
             onClick = onResourceClick,
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.outlinedButtonColors(
-                backgroundColor = MaterialTheme.colors.surface,
+                backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.secondary,
                 disabledContentColor = MaterialTheme.colors.primary
             ),
@@ -450,7 +452,7 @@ fun BottomButtons(
             onClick = { context.startActivity(intent) },
             shape = RoundedCornerShape(16.dp),
             colors = ButtonDefaults.outlinedButtonColors(
-                backgroundColor = MaterialTheme.colors.surface,
+                backgroundColor = MaterialTheme.colors.background,
                 contentColor = MaterialTheme.colors.secondary
             ),
             modifier = Modifier.weight(1f)
@@ -476,7 +478,7 @@ fun AcademicPerformanceMore (
 
     Scaffold(
         topBar = { TopPerformanceMoreBar(uiState = uiState,onClick = onButtonClick) },
-        backgroundColor = MaterialTheme.colors.surface,
+        backgroundColor = MaterialTheme.colors.background,
         modifier = modifier
     ) { innerPadding ->
         when (subjectsFromSiteUiState) {

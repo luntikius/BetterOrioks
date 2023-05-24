@@ -17,6 +17,7 @@ import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
@@ -247,7 +248,7 @@ fun RefreshAlert(isAlert: Boolean, onDismiss: () -> Unit, onRefresh: () -> Unit)
                     ) {
                         Text(
                             text = stringResource(R.string.Refresh),
-                            color = MaterialTheme.colors.secondary,
+                            color = MaterialTheme.colors.error,
                         )
                     }
                     TextButton(
@@ -273,12 +274,12 @@ fun ScheduleItem(it: SimpleScheduleElement, recalculateWindows: (Int,Int) -> Uni
     if (!it.isWindow)
         Card(
             shape = RoundedCornerShape(16.dp),
-            elevation = 5.dp,
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
                 .padding(horizontal = 16.dp,vertical = 3.dp)
-                .defaultMinSize(minHeight = 72.dp)
+                .defaultMinSize(minHeight = 72.dp),
+            elevation = if (MaterialTheme.colors.surface == Color.White) 4.dp else 0.dp
         ) {
             Box {
                 Column(

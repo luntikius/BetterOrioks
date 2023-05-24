@@ -135,7 +135,7 @@ fun BetterOrioksApp(){
                                 },
                                 uiState = uiState,
                                 viewModel = viewModel,
-                                onSettingsClick = {navController.navigate(BetterOrioksScreens.Settings.name)}
+                                onSettingsClick = {navController.navigate(BetterOrioksScreens.Settings.name){launchSingleTop = true} }
                             )
                         }
                         composable(

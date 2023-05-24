@@ -20,6 +20,7 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -117,7 +118,7 @@ fun Category(category: ResourceCategory){
     val context = LocalContext.current
     Card(
         shape = RoundedCornerShape(16.dp),
-        elevation = 4.dp,
+        elevation = if (MaterialTheme.colors.surface == Color.White) 4.dp else 0.dp,
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 2.dp)
             .fillMaxWidth()

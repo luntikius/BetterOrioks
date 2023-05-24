@@ -187,7 +187,7 @@ fun AnyButton (
     Card(
         shape = RoundedCornerShape(16.dp),
         backgroundColor = MaterialTheme.colors.surface,
-        elevation = 5.dp,
+        elevation = if (MaterialTheme.colors.surface == Color.White) 4.dp else 0.dp,
         onClick = onClick,
         modifier = modifier
             .wrapContentHeight()

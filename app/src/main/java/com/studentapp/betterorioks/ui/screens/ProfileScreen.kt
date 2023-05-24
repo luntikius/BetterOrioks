@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -91,7 +92,7 @@ fun ExitButton(onExitClick: () -> Unit){
         shape = RoundedCornerShape(16.dp),
         backgroundColor = MaterialTheme.colors.surface,
         contentColor = MaterialTheme.colors.error,
-        elevation = 5.dp,
+        elevation = if (MaterialTheme.colors.surface == Color.White) 4.dp else 0.dp,
         onClick = onExitClick,
         modifier = Modifier
             .wrapContentHeight()
@@ -125,7 +126,7 @@ fun News(
     Card(
         shape = RoundedCornerShape(16.dp),
         backgroundColor = MaterialTheme.colors.surface,
-        elevation = 5.dp,
+        elevation = if (MaterialTheme.colors.surface == Color.White) 4.dp else 0.dp,
         modifier = Modifier
             .wrapContentHeight()
             .fillMaxWidth()
@@ -358,7 +359,7 @@ fun ExitAlert(isAlert: Boolean, onDismiss: () -> Unit, onExit: () -> Unit){
                     ) {
                         Text(
                             text = stringResource(R.string.continue_string),
-                            color = MaterialTheme.colors.secondary,
+                            color = MaterialTheme.colors.error,
                         )
                     }
                     TextButton(

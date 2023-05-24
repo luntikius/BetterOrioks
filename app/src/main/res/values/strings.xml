@@ -89,4 +89,8 @@
     <string name="attention">Внимание!</string>
     <string name="exit_alert_text">Вы уверены, что хотите выйти?</string>
     <string name="continue_string">Продолжить</string>
+    <string name="bad_mark">Неудовлетворительно</string>
+    <string name="ok_mark">Удовлетворительно</string>
+    <string name="good_mark">Хорошо</string>
+    <string name="excellent_mark">Отлично</string>
 </resources>
