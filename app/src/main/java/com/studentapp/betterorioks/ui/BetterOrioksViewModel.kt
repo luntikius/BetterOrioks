@@ -54,6 +54,7 @@ class BetterOrioksViewModel(
 
     fun test(context: Context) {
         viewModelScope.launch {
+            _uiState.update{ th -> th.copy(disciplineGrouping = !uiState.value.disciplineGrouping) }
             makeStatusNotification(
                 head = "test",
                 message = "this is a test message",
@@ -103,7 +104,8 @@ class BetterOrioksViewModel(
             val sendNotifications = userPreferencesRepository.sendNotifications.first()
             val sendNewsNotifications = userPreferencesRepository.sendNewsNotifications.first()
             val theme = userPreferencesRepository.theme.first()
-            _uiState.update { currentUiState -> currentUiState.copy(token = token, authCookies = cookies, csrf = csrf, sendNotifications = sendNotifications, theme = theme, sendNewsNotifications = sendNewsNotifications) }
+            val disciplineGrouping = userPreferencesRepository.sortDisciplines.first()
+            _uiState.update { currentUiState -> currentUiState.copy(token = token, authCookies = cookies, csrf = csrf, sendNotifications = sendNotifications, theme = theme, sendNewsNotifications = sendNewsNotifications, disciplineGrouping = disciplineGrouping) }
             if (uiState.value.token != "" && uiState.value.authCookies != "") {
                 _uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.LoggedIn, updateState = false) }
             }else if(uiState.value.token != "" && uiState.value.authCookies == ""){
@@ -582,6 +584,14 @@ class BetterOrioksViewModel(
                 else
                     _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Error) }
             }
+        }
+    }
+
+    fun changeSortedState(){
+        val currentGroupingState = uiState.value.disciplineGrouping
+        viewModelScope.launch {
+            _uiState.update { currentState -> currentState.copy(disciplineGrouping = !currentGroupingState) }
+            userPreferencesRepository.setSortDisciplines(!currentGroupingState)
         }
     }
 }

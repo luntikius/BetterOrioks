@@ -28,6 +28,7 @@ class UserPreferencesRepository(
         val LAST_NEWS_LINK = stringPreferencesKey("lastNewsLink")
         val THEME = intPreferencesKey("theme")
         val SEND_NEWS_NOTIFICATIONS = booleanPreferencesKey("sendNewsNotifications")
+        val SORT_DISCIPLINES = booleanPreferencesKey("sortDisciplines")
     }
 
     suspend fun setToken(token: String) {
@@ -110,6 +111,13 @@ class UserPreferencesRepository(
             preferences[LAST_NEWS_LINK] = ""
             preferences[THEME] = 0
             preferences[SEND_NEWS_NOTIFICATIONS] = false
+            preferences[SORT_DISCIPLINES] = false
+        }
+    }
+
+    suspend fun setSortDisciplines(b:Boolean){
+        dataStore.edit {preferences ->
+            preferences[SORT_DISCIPLINES] = b
         }
     }
 
@@ -140,4 +148,5 @@ class UserPreferencesRepository(
     val sendNotifications: Flow<Boolean> = dataStore.data.catch {  }.map { preferences -> preferences[SEND_NOTIFICATIONS] ?: false }
     val theme: Flow<Int> = dataStore.data.catch {  }.map { preferences -> preferences[THEME] ?: 0 }
     val sendNewsNotifications: Flow<Boolean> = dataStore.data.catch {  }.map { preferences -> preferences[SEND_NEWS_NOTIFICATIONS] ?: false }
+    val sortDisciplines: Flow<Boolean> = dataStore.data.catch {  }.map { preferences -> preferences[SORT_DISCIPLINES] ?: false }
 }

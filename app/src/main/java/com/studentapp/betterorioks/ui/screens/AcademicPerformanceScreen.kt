@@ -67,7 +67,8 @@ fun AcademicPerformanceScreen(uiState: AppUiState, navController: NavHostControl
                     navController.navigate(BetterOrioksScreens.AcademicPerformanceMore.name)
                 },
                 viewModel = viewModel,
-                uiState = uiState
+                uiState = uiState,
+                changeSortedState = {viewModel.changeSortedState()}
             )
         is SubjectsFromSiteUiState.Error ->
             AcademicPerformance(
@@ -218,7 +219,8 @@ fun AcademicPerformance(
     viewModel: BetterOrioksViewModel,
     uiState: AppUiState,
     isLoading: Boolean = false,
-    isError: Boolean = false
+    isError: Boolean = false,
+    changeSortedState: () -> Unit = {}
 ){
     val pullRefreshState =
         rememberPullRefreshState(uiState.subjectsFromSiteUiState == SubjectsFromSiteUiState.Loading, {
@@ -243,12 +245,27 @@ fun AcademicPerformance(
                 .fillMaxSize()) {
                 item {Spacer(modifier = Modifier.size(16.dp))}
                 item {
-                    Text(
-                        text = stringResource(R.string.academic_performance_caps),
-                        modifier = Modifier.padding(horizontal = 16.dp,vertical = 8.dp),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 22.sp
-                    )
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Spacer(modifier = modifier.size(16.dp))
+                        Text(
+                            text = stringResource(R.string.academic_performance_caps),
+                            modifier = Modifier.padding(vertical = 8.dp),
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 22.sp
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        IconButton(
+                            onClick = { changeSortedState() },
+                            modifier = Modifier.size(28.dp)
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.sort),
+                                contentDescription = "Switch display mode",
+                                modifier = Modifier.size(28.dp)
+                            )
+                        }
+                        Spacer(modifier = modifier.size(16.dp))
+                    }
                 }
                 if(uiState.disciplineGrouping){
                     groupedSubjects(
