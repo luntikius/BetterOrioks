@@ -434,7 +434,6 @@ class BetterOrioksViewModel(
             (uiState.value.fullScheduleUiState as FullScheduleUiState.Success).schedule[abs(diff % 28)]
         }else listOf()
     }
-
     private fun parseFromFullSchedule(fullSchedule: FullSchedule): List<List<SimpleScheduleElement>>{
         val data = fullSchedule.schedule
         val result = mutableListOf<List<SimpleScheduleElement>>()

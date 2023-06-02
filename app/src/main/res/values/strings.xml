@@ -44,7 +44,7 @@
     <string name="july">Июль</string>
     <string name="august">Август</string>
     <string name="september">Сентябрь</string>
-    <string name="october">Октябрь</string>
+    <string name="october">октября</string>
     <string name="november">Ноябрь</string>
     <string name="december">Декабрь</string>
     <string name="january_short">янв</string>
@@ -105,4 +105,8 @@
     <string name="ok_mark">Удовлетворительно</string>
     <string name="good_mark">Хорошо</string>
     <string name="excellent_mark">Отлично</string>
+    <string name="type1">Числитель - 1</string>
+    <string name="type2">Знаменатель - 1</string>
+    <string name="type3">Числитель - 2</string>
+    <string name="type4">Знаменатель - 2</string>
 </resources>

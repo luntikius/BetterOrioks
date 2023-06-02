@@ -76,24 +76,6 @@ private fun monthToString(day: LocalDate, context: Context):String{
     }
 }
 
-private fun monthToShortString(day: LocalDate, context: Context):String{
-    return when(day.month.toString()){
-        "JANUARY" -> context.getString(R.string.january_short)
-        "FEBRUARY" -> context.getString(R.string.february_short)
-        "MARCH" -> context.getString(R.string.march_short)
-        "APRIL" -> context.getString(R.string.april_short)
-        "MAY" -> context.getString(R.string.may_short)
-        "JUNE" -> context.getString(R.string.june_short)
-        "JULY" -> context.getString(R.string.july_short)
-        "AUGUST" -> context.getString(R.string.august_short)
-        "SEPTEMBER" -> context.getString(R.string.september_short)
-        "OCTOBER" -> context.getString(R.string.october_short)
-        "NOVEMBER" -> context.getString(R.string.november_short)
-        "DECEMBER" -> context.getString(R.string.december_short)
-        else -> context.getString(R.string.error_short)
-    }
-}
-
 fun dayOfWeekToInt(day: LocalDate):Int{
     return when(day.dayOfWeek.toString()){
         "MONDAY" -> 0
@@ -104,6 +86,16 @@ fun dayOfWeekToInt(day: LocalDate):Int{
         "SATURDAY" -> 5
         "SUNDAY" -> 6
         else -> 0
+    }
+}
+
+fun dateToWeekType(day:LocalDate,context: Context,semesterStart:LocalDate): String{
+    return when((DAYS.between(semesterStart,day)%28).toInt()/7){
+        0 -> context.getString(R.string.type1)
+        1 -> context.getString(R.string.type2)
+        2 -> context.getString(R.string.type3)
+        else -> context.getString(R.string.type4)
+
     }
 }
 
@@ -135,12 +127,11 @@ fun DatePickerElement(
         modifier = Modifier
             .clickable { onClick(date) }
             .width(width = elementWidth.dp)
-            .padding(vertical = 16.dp,horizontal = 4.dp)
+            .padding(start = 4.dp, end = 4.dp, bottom = 16.dp, top = 8.dp)
     ) {
         Text(
             text = dayOfWeekToString(date, LocalContext.current)
         )
-
         Spacer(modifier = Modifier.size(4.dp))
         Card(elevation = 0.dp,
             shape = RoundedCornerShape(50),
@@ -203,6 +194,33 @@ fun DatePicker(
                 fontWeight = FontWeight.Bold
             )
         }
+        Row(
+            modifier = Modifier.padding(start = 16.dp, end = 16.dp, top = 8.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ){
+            Text(
+                if (uiState.importantDatesUiState is ImportantDatesUiState.Success) dateToWeekType(
+                    uiState.currentSelectedDate,
+                    LocalContext.current,
+                    LocalDate.parse((uiState.importantDatesUiState as ImportantDatesUiState.Success).dates.semesterStart)
+                )
+                else "...",
+                fontSize = 14.sp,
+                textAlign = TextAlign.End,
+                modifier = Modifier.weight(1f)
+            )
+            Text("", modifier = Modifier.padding(horizontal = 8.dp))
+            Text(
+                if (uiState.importantDatesUiState is ImportantDatesUiState.Success)
+                    "${abs(DAYS.between(uiState.currentSelectedDate,LocalDate.parse((uiState.importantDatesUiState as ImportantDatesUiState.Success).dates.semesterStart)))/7+1} - неделя"
+                else "...",
+                fontSize = 14.sp,
+
+                textAlign = TextAlign.Start,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
         LazyRow(state = lazyRowState) {
             if (!isInitialComposition) {
                 coroutineScope.launch {

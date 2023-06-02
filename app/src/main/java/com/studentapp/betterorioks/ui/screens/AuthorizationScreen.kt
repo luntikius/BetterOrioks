@@ -30,7 +30,7 @@ import com.studentapp.betterorioks.ui.states.AuthState
 @Preview
 @Composable
 fun AuthPreview(){
-    AuthorizationScreen(onLogin = {s1,s2 -> }, uiState = AppUiState(updateState = true))
+    AuthorizationScreen(onLogin = {_,_ -> }, uiState = AppUiState(updateState = true))
 }
 
 @Composable

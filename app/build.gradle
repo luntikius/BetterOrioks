@@ -74,11 +74,11 @@ dependencies {
     implementation "com.squareup.retrofit2:retrofit:2.9.0"
     implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'
-    implementation 'androidx.activity:activity-compose:1.7.2'
+    implementation 'androidx.activity:activity-compose:1.7.1'
     implementation  "androidx.compose.ui:ui:$compose_ui_version"
     implementation "androidx.compose.ui:ui-tooling-preview:$compose_ui_version"
     implementation "androidx.compose.material:material:$compose_ui_version"
-    implementation "androidx.navigation:navigation-compose:2.7.0-alpha01"
+    implementation "androidx.navigation:navigation-compose:2.6.0-rc01"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:2.6.1"
     implementation 'dev.chrisbanes.snapper:snapper:0.3.0'
     testImplementation 'junit:junit:4.13.2'
