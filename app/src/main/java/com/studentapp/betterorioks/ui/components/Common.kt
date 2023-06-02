@@ -270,7 +270,10 @@ fun makeStatusNotification(message: String, head: String, context: Context, link
     val channel = NotificationChannel(CHANNEL_ID, name, importance)
     channel.description = description
 
-    val resultIntent = if(link.isBlank()) Intent(Intent.ACTION_VIEW, Uri.parse("https://BetterOrioks.com/AcademicPerformance"), context, MainActivity::class.java) else Intent(Intent.ACTION_VIEW, Uri.parse(link))
+    val resultIntent =
+        if(link.isBlank()) Intent(Intent.ACTION_VIEW, Uri.parse("https://BetterOrioks.com/AcademicPerformance"), context, MainActivity::class.java)
+    else if(link == "schedule") Intent(Intent.ACTION_VIEW,Uri.parse("https://BetterOrioks.com"),context,MainActivity::class.java)
+    else Intent(Intent.ACTION_VIEW, Uri.parse(link))
 
     val resultPendingIntent: PendingIntent? = TaskStackBuilder.create(context).run {
         addNextIntentWithParentStack(resultIntent)

@@ -76,6 +76,24 @@ private fun monthToString(day: LocalDate, context: Context):String{
     }
 }
 
+private fun monthToShortString(day: LocalDate, context: Context):String{
+    return when(day.month.toString()){
+        "JANUARY" -> context.getString(R.string.january_short)
+        "FEBRUARY" -> context.getString(R.string.february_short)
+        "MARCH" -> context.getString(R.string.march_short)
+        "APRIL" -> context.getString(R.string.april_short)
+        "MAY" -> context.getString(R.string.may_short)
+        "JUNE" -> context.getString(R.string.june_short)
+        "JULY" -> context.getString(R.string.july_short)
+        "AUGUST" -> context.getString(R.string.august_short)
+        "SEPTEMBER" -> context.getString(R.string.september_short)
+        "OCTOBER" -> context.getString(R.string.october_short)
+        "NOVEMBER" -> context.getString(R.string.november_short)
+        "DECEMBER" -> context.getString(R.string.december_short)
+        else -> context.getString(R.string.error_short)
+    }
+}
+
 fun dayOfWeekToInt(day: LocalDate):Int{
     return when(day.dayOfWeek.toString()){
         "MONDAY" -> 0

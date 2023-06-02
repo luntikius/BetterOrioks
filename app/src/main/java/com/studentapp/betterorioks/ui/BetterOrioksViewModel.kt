@@ -562,7 +562,11 @@ class BetterOrioksViewModel(
                     _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Success(res)) }
                 }else{
                     for(i in 0..27){
-                        res.add(scheduleOfflineRepository.getAllItemsStream(i+1).first().sortedBy { it.number })
+                        val sched = scheduleOfflineRepository.getAllItemsStream(i+1).firstOrNull()
+                        if(sched != null) {
+                            res.add(
+                                sched.sortedBy { it.number })
+                        }
                     }
                     _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Success(res)) }
                 }
