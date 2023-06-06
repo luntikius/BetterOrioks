@@ -56,11 +56,9 @@ class BetterOrioksViewModel(
         viewModelScope.launch {
             _uiState.update{ th -> th.copy(disciplineGrouping = !uiState.value.disciplineGrouping) }
             makeStatusNotification(
-                head = "test",
-                message = "this is a test message",
-                context = context,
-                //link = "https://google.com"
-            )
+                message = "Балл за Экзамен изменен: с \"0\" на \"40\"",
+                head = "Изменение баллов по предмету Математический анализ",
+                context = context)
         }
     }
 
@@ -264,7 +262,15 @@ class BetterOrioksViewModel(
     fun setCurrentDateWithMovingTopBar(date: LocalDate, lazyRowState: LazyListState, coroutineScope: CoroutineScope, startDate: LocalDate) {
         _uiState.update { currentState -> currentState.copy(currentSelectedDate = date) }
         coroutineScope.launch {
-            lazyRowState.animateScrollToItem(abs(DAYS.between(startDate,date).toInt() - dayOfWeekToInt(date)))
+            try {
+                lazyRowState.animateScrollToItem(
+                    abs(
+                        DAYS.between(startDate,date).toInt() - dayOfWeekToInt(date)
+                    )
+                )
+            }catch (e: Exception){
+                Log.e("InitialisingError",e.toString())
+            }
             if (!uiState.value.scheduleInitUiState) _uiState.update { currentState -> currentState.copy(scheduleInitUiState = true) }
         }
     }

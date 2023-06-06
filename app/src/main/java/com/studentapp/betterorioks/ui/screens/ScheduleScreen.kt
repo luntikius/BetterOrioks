@@ -2,6 +2,7 @@ package com.studentapp.betterorioks.ui.screens
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.util.Log
 import androidx.compose.animation.rememberSplineBasedDecay
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -171,16 +172,17 @@ fun DatePicker(
             backgroundColor = MaterialTheme.colors.primaryVariant,
             modifier = Modifier.clickable {
                 coroutineScope.launch {
-                    lazyListState.scrollToItem(
-                        abs(
-                            DAYS.between(
-                                startDate,
-                                LocalDate.now()
-                            )
-                        ).toInt()
-                    )
+                    if(abs(abs(DAYS.between(startDate,LocalDate.now())).toInt()) in (0 until lazyListState.layoutInfo.totalItemsCount))
+                        lazyListState.scrollToItem(
+                            abs(
+                                DAYS.between(
+                                    startDate,
+                                    LocalDate.now()
+                                )
+                            ).toInt()
+                        )
+                    setDate(LocalDate.now())
                 }
-                setDate(LocalDate.now())
             }
         ) {
             Text(
@@ -224,9 +226,21 @@ fun DatePicker(
         LazyRow(state = lazyRowState) {
             if (!isInitialComposition) {
                 coroutineScope.launch {
-                    lazyRowState.scrollToItem(initialIndex.toInt() - dayOfWeekToInt(LocalDate.now()))
-                    lazyListState.scrollToItem(abs(DAYS.between(startDate,LocalDate.now())).toInt())
-                    isInitialComposition = true
+                    try {
+                        lazyRowState.scrollToItem(initialIndex.toInt() - dayOfWeekToInt(LocalDate.now()))
+                        lazyListState.scrollToItem(
+                            abs(
+                                DAYS.between(
+                                    startDate,
+                                    LocalDate.now()
+                                )
+                            ).toInt()
+                        )
+                        isInitialComposition = true
+                    }catch (e:Exception){
+                        Log.e("InitializeSchedule",e.toString())
+                    }
+
                 }
             }
             items(300) {
@@ -235,17 +249,18 @@ fun DatePicker(
                     date = date,
                     isSelected = (uiState.currentSelectedDate == date),
                     onClick = {
-                        setDate(date)
-                        coroutineScope.launch {
-                            lazyListState.scrollToItem(
-                                abs(
-                                    DAYS.between(
-                                        startDate,
-                                        date
-                                    )
-                                ).toInt()
-                            )
-                        }
+                        if(abs(DAYS.between(startDate,date)).toInt() in (0 until lazyListState.layoutInfo.totalItemsCount))
+                            coroutineScope.launch {
+                                setDate(date)
+                                lazyListState.scrollToItem(
+                                    abs(
+                                        DAYS.between(
+                                            startDate,
+                                            date
+                                        )
+                                    ).toInt()
+                                )
+                            }
                     }
                 )
             }

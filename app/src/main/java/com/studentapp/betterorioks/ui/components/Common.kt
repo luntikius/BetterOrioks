@@ -62,7 +62,7 @@ fun RoundedMark(userPoints: Double, systemPoints: Int,modifier: Modifier = Modif
     ){
         Text(
             text =
-            if (userPoints.toInt() >= 0) if(userPoints.toInt().toDouble() == userPoints) userPoints.toInt().toString() else ((userPoints*10)/10).toString()
+            if (userPoints.toInt() >= 0) if(userPoints.toInt().toDouble() == userPoints) userPoints.toInt().toString() else ((userPoints*10.0).toInt()/10.0).toString()
             else if(userPoints.toInt() == -2) "-"
             else "Н",
             modifier = Modifier.wrapContentSize(),
