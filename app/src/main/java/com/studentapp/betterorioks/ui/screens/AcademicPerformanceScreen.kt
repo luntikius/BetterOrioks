@@ -166,10 +166,10 @@ fun groupOfSubjects(
     }
 }
 fun groupedSubjects(subjects:SubjectsData,scope:LazyListScope, onComponentClicked: () -> Unit, setCurrentSubject: (SubjectFromSite) -> Unit){
-    val unfinishedSubjects = subjects.subjects.filter { it.grade.fullScore.toIntOrNull() == null || (it.grade.fullScore.toIntOrNull() !== null&& it.grade.fullScore.toInt() < 50)}
-    val normalSubjects = subjects.subjects.filter { it.grade.fullScore.toIntOrNull() != null && it.grade.fullScore.toInt() >= 50 && it.grade.fullScore.toInt() < 70 }
-    val goodSubjects = subjects.subjects.filter { it.grade.fullScore.toIntOrNull() != null && it.grade.fullScore.toInt() >= 70 && it.grade.fullScore.toInt() < 86 }
-    val excellentSubjects = subjects.subjects.filter { it.grade.fullScore.toIntOrNull() != null && it.grade.fullScore.toInt() >= 86}
+    val unfinishedSubjects = subjects.subjects.filter { it.grade.fullScore.toDoubleOrNull() == null || (it.grade.fullScore.toDoubleOrNull() !== null && it.grade.fullScore.toDouble() < 50)}
+    val normalSubjects = subjects.subjects.filter { it.grade.fullScore.toDoubleOrNull() != null && it.grade.fullScore.toDouble() >= 50 && it.grade.fullScore.toDouble() < 70 }
+    val goodSubjects = subjects.subjects.filter { it.grade.fullScore.toDoubleOrNull() != null && it.grade.fullScore.toDouble() >= 70 && it.grade.fullScore.toDouble() < 86 }
+    val excellentSubjects = subjects.subjects.filter { it.grade.fullScore.toDoubleOrNull() != null && it.grade.fullScore.toDouble() >= 86}
     if(unfinishedSubjects.isNotEmpty()) {
         groupOfSubjects(
             scope = scope,
