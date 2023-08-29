@@ -13,6 +13,8 @@ import androidx.navigation.NavController
 import com.studentapp.betterorioks.BetterOrioksApplication
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.data.*
+import com.studentapp.betterorioks.data.AppDetails.BIG_WINDOW_TIME
+import com.studentapp.betterorioks.data.AppDetails.SAMPLE_TIME
 import com.studentapp.betterorioks.data.background.WorkManagerBetterOrioksRepository
 import com.studentapp.betterorioks.data.schedule.NetworkScheduleFromSiteRepository
 import com.studentapp.betterorioks.data.schedule.ScheduleOfflineRepository
@@ -484,19 +486,18 @@ class BetterOrioksViewModel(
         try {
             viewModelScope.launch {
                 Log.d("RECALCULATE_WINDOWS","started")
-                val sampleTime = listOf(LocalDateTime.parse("0001-01-01T12:20:00"))
                 val fullSchedule =
                     (uiState.value.fullScheduleUiState as FullScheduleUiState.Success).schedule.toMutableList()
                 val week = fullSchedule[day - 1]
                 val weekWithoutWindows = week.filter { !it.isWindow }
                 weekWithoutWindows.forEach {
-                    if (LocalDateTime.parse(it.from) in sampleTime && it.number == number) {
-                        it.from = LocalDateTime.parse(it.from).plusMinutes(30).toString()
-                        it.to = LocalDateTime.parse(it.to).plusMinutes(30).toString()
+                    if (LocalDateTime.parse(it.from) in SAMPLE_TIME && it.number == number) {
+                        it.from = LocalDateTime.parse(it.from).plusMinutes(BIG_WINDOW_TIME).toString()
+                        it.to = LocalDateTime.parse(it.to).plusMinutes(BIG_WINDOW_TIME).toString()
                     }
                     else if (it.number == number) {
-                        it.from = LocalDateTime.parse(it.from).minusMinutes(30).toString()
-                        it.to = LocalDateTime.parse(it.to).minusMinutes(30).toString()
+                        it.from = LocalDateTime.parse(it.from).minusMinutes(BIG_WINDOW_TIME).toString()
+                        it.to = LocalDateTime.parse(it.to).minusMinutes(BIG_WINDOW_TIME).toString()
                     }
                 }
                 val resultElement = weekWithoutWindows.toMutableList()
@@ -550,8 +551,8 @@ class BetterOrioksViewModel(
             _uiState.update { currentState -> currentState.copy(fullScheduleUiState = FullScheduleUiState.Loading) }
             try {
                 Log.d("TEST", "getFullSchedule started")
-                if (uiState.value.importantDatesUiState is ImportantDatesUiState.NotStarted || uiState.value.importantDatesUiState is ImportantDatesUiState.Error) suspendGetImportantDates(refresh)
-                if (uiState.value.userInfoUiState is UserInfoUiState.NotStarted || uiState.value.userInfoUiState is UserInfoUiState.Error)suspendGetUserInfo(refresh)
+                suspendGetImportantDates(refresh)
+                suspendGetUserInfo(refresh)
                 val res = mutableListOf<List<SimpleScheduleElement>>()
                 if(scheduleOfflineRepository.count() == 0 || refresh) {
                     if(refresh) scheduleOfflineRepository.dump()
