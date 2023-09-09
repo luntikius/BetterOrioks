@@ -60,7 +60,8 @@ class BetterOrioksViewModel(
             makeStatusNotification(
                 message = "Балл за Экзамен изменен: с \"0\" на \"40\"",
                 head = "Изменение баллов по предмету Математический анализ",
-                context = context)
+                context = context,
+                link = "https://orioks.miet.ru/main/view-news?id=563")
         }
     }
 

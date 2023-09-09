@@ -26,11 +26,14 @@ import androidx.compose.ui.unit.sp
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.states.AuthState
+import com.studentapp.betterorioks.ui.theme.BetterOrioksTheme
 
 @Preview
 @Composable
 fun AuthPreview(){
-    AuthorizationScreen(onLogin = {_,_ -> }, uiState = AppUiState(updateState = true))
+    BetterOrioksTheme() {
+        AuthorizationScreen(onLogin = {_,_ -> }, uiState = AppUiState(updateState = false))
+    }
 }
 
 @Composable

@@ -24,6 +24,7 @@ import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -253,6 +254,18 @@ fun SwitchButton(
             )
         )
         Spacer(modifier = Modifier.width(16.dp))
+    }
+}
+
+@Composable
+fun ErrorDisplayText(errorMessage:String, modifier: Modifier = Modifier){
+    Column(modifier = modifier, horizontalAlignment = Alignment.CenterHorizontally){
+        Text(
+            stringResource(R.string.error_message),
+            color = MaterialTheme.colors.error,
+            fontWeight = FontWeight.Bold
+        )
+        Text(errorMessage, textAlign = TextAlign.Center)
     }
 }
 

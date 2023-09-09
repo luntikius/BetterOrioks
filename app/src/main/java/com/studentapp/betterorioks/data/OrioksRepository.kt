@@ -179,7 +179,7 @@ class NetworkOrioksRepository
                     News(
                         date = date,
                         name = name,
-                        link = link
+                        link = "https://orioks.miet.ru/$link"
                     )
                 )
             }

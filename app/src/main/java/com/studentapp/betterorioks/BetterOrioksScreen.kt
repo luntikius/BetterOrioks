@@ -17,9 +17,9 @@ import com.studentapp.betterorioks.ui.screens.AcademicPerformanceScreen
 import com.studentapp.betterorioks.ui.components.BottomNavigationBar
 import com.studentapp.betterorioks.model.BetterOrioksScreens
 import com.studentapp.betterorioks.ui.components.LoadingScreen
-import com.google.accompanist.navigation.animation.AnimatedNavHost
-import com.google.accompanist.navigation.animation.composable
-import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.rememberNavController
+import androidx.navigation.compose.composable
 import com.studentapp.betterorioks.ui.BetterOrioksViewModel
 import com.studentapp.betterorioks.ui.screens.*
 import com.studentapp.betterorioks.ui.states.*
@@ -34,7 +34,7 @@ fun BetterOrioksApp(){
     //declarations
     val viewModel: BetterOrioksViewModel = viewModel(factory = BetterOrioksViewModel.Factory)
     val uiState by viewModel.uiState.collectAsState()
-    val navController = rememberAnimatedNavController()
+    val navController = rememberNavController()
     val context = LocalContext.current
 
     if (uiState.authState == AuthState.NotLoggedIn)
@@ -57,7 +57,7 @@ fun BetterOrioksApp(){
                     }
                 ) { padding ->
                     val uri = "https://BetterOrioks.com"
-                    AnimatedNavHost(
+                    NavHost(
                         navController = navController,
                         startDestination = BetterOrioksScreens.Schedule.name,
                         modifier = Modifier.padding(padding)
@@ -90,13 +90,13 @@ fun BetterOrioksApp(){
                             route = BetterOrioksScreens.AcademicPerformanceMore.name,
                             enterTransition = {
                                 slideIntoContainer(
-                                    AnimatedContentScope.SlideDirection.Left,
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
                                     animationSpec = tween(700)
                                 )
                             },
                             exitTransition = {
                                 slideOutOfContainer(
-                                    AnimatedContentScope.SlideDirection.Right,
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
                                     animationSpec = tween(700)
                                 )
                             }
@@ -164,13 +164,13 @@ fun BetterOrioksApp(){
                             route = BetterOrioksScreens.Settings.name,
                             enterTransition = {
                                 slideIntoContainer(
-                                    AnimatedContentScope.SlideDirection.Left,
+                                    AnimatedContentTransitionScope.SlideDirection.Left,
                                     animationSpec = tween(700)
                                 )
                             },
                             exitTransition = {
                                 slideOutOfContainer(
-                                    AnimatedContentScope.SlideDirection.Right,
+                                    AnimatedContentTransitionScope.SlideDirection.Right,
                                     animationSpec = tween(700)
                                 )
                             }

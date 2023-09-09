@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import com.studentapp.betterorioks.R
+import com.studentapp.betterorioks.data.AppDetails
 import com.studentapp.betterorioks.model.BetterOrioksScreens
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectFromSite
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectsData
@@ -31,7 +32,9 @@ import com.studentapp.betterorioks.ui.components.LoadingScreen
 import com.studentapp.betterorioks.ui.components.RoundedMark
 import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.BetterOrioksViewModel
+import com.studentapp.betterorioks.ui.components.ErrorDisplayText
 import com.studentapp.betterorioks.ui.states.SubjectsFromSiteUiState
+import com.studentapp.betterorioks.ui.states.UserInfoUiState
 import com.studentapp.betterorioks.ui.theme.BetterOrioksTheme
 
 @Preview(showSystemUi = true, showBackground = true)
@@ -74,7 +77,9 @@ fun AcademicPerformanceScreen(uiState: AppUiState, navController: NavHostControl
             AcademicPerformance(
                 viewModel = viewModel,
                 uiState = uiState,
-                isError = true
+                isError = true,
+                errorMessage = (uiState.subjectsFromSiteUiState as SubjectsFromSiteUiState.Error).err
+
             )
         else ->
             AcademicPerformance(
@@ -220,6 +225,7 @@ fun AcademicPerformance(
     uiState: AppUiState,
     isLoading: Boolean = false,
     isError: Boolean = false,
+    errorMessage: String = "",
     changeSortedState: () -> Unit = {}
 ){
     val pullRefreshState =
@@ -237,6 +243,15 @@ fun AcademicPerformance(
                     ErrorScreen(modifier = Modifier
                         .wrapContentSize(Alignment.Center)
                         .fillMaxWidth())
+
+                }
+                if(uiState.userInfoUiState is UserInfoUiState.Success &&
+                    (uiState.userInfoUiState as UserInfoUiState.Success).userInfo.recordBookId.toString()
+                    in AppDetails.debugUsers
+                    ){
+                    item{
+                        ErrorDisplayText(errorMessage = errorMessage)
+                    }
                 }
             }
         } else {
