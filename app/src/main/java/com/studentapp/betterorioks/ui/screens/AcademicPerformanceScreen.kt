@@ -46,12 +46,12 @@ fun MyPreview(){
                 AcademicPerformanceElement(
                     subjectName = "Изучение картофельных наук с добавлением перца чили и прочих",
                     userPoints = "10.0",
-                    systemPoints = 12,
+                    systemPoints = 12.0,
                 )
                 AcademicPerformanceElement(
                     subjectName = "Математика для квадратика",
                     userPoints = "50.0",
-                    systemPoints = 100,
+                    systemPoints = 100.0,
                 )
                 AcademicPerformanceElement()
             }
@@ -67,7 +67,9 @@ fun AcademicPerformanceScreen(uiState: AppUiState, navController: NavHostControl
                 subjects = (uiState.subjectsFromSiteUiState as SubjectsFromSiteUiState.Success).subjects,
                 setCurrentSubject = {viewModel.setCurrentSubject(it)},
                 onComponentClicked = {
-                    navController.navigate(BetterOrioksScreens.AcademicPerformanceMore.name)
+                    navController.navigate(BetterOrioksScreens.AcademicPerformanceMore.name){
+                        launchSingleTop = true
+                    }
                 },
                 viewModel = viewModel,
                 uiState = uiState,
@@ -96,7 +98,7 @@ fun AcademicPerformanceElement(
     modifier: Modifier = Modifier,
     subjectName: String = stringResource(R.string.blank),
     userPoints: String = "-",
-    systemPoints: Int = 10,
+    systemPoints: Double = 10.0,
     onClick: () -> Unit = {}
 ){
 
@@ -123,8 +125,9 @@ fun AcademicPerformanceElement(
                     .fillMaxWidth()
                     .padding(end = 16.dp),
             )
+            val parsedSystemPoints = if(systemPoints.toInt().toDouble() == systemPoints) systemPoints.toInt() else systemPoints
             Text(
-                text = stringResource(id = R.string.of,systemPoints),
+                text = stringResource(id = R.string.of,parsedSystemPoints),
                 fontSize = 14.sp,
                 color = MaterialTheme.colors.primary,
                 textAlign = TextAlign.End,

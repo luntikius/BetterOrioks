@@ -32,7 +32,7 @@ class SubjectFromSite(
     @SerialName("debt")
     val isDebt: Boolean = false,
     @SerialName("mvb")
-    val maxAvailableScore: Int = 0,
+    val maxAvailableScore: Double = 0.0,
     @SerialName("is_exam_time")
     val isExamTime: Boolean = false,
     @SerialName("debtKms")
@@ -43,9 +43,9 @@ class SubjectFromSite(
         segments.forEach { controlEvents.addAll(it.allControlEvents) }
         return controlEvents
     }
-    fun getMaxScore():Int{
+    fun getMaxScore():Double{
         val controlEvents = getControlEvents()
-        var maxScore = 0
+        var maxScore = 0.0
         controlEvents.forEach {
             if (it.grade.score != "-") maxScore += it.maxScore
         }

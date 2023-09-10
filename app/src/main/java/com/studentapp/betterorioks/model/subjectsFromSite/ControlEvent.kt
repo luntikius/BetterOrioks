@@ -10,7 +10,7 @@ data class ControlEvent(
     @SerialName("name")
     val name: String = "",
     @SerialName("max_ball")
-    val maxScore: Int = 0,
+    val maxScore: Double = 0.0,
     @SerialName("sort")
     val sort: Int = 0,
     @SerialName("id_type")

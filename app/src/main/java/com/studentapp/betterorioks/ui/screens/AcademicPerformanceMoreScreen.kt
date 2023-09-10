@@ -68,7 +68,7 @@ fun AcademicPerformanceMoreElement(
     subjectName: String = stringResource(R.string.blank),
     subjectShort:String = "",
     userPoints: Double = 0.0,
-    systemPoints: Int = 10,
+    systemPoints: Double = 10.0,
     weeks: Int = 0,
     resources: List<Resource> = listOf(),
     onClick: () -> Unit = {}
@@ -86,6 +86,8 @@ fun AcademicPerformanceMoreElement(
         }
     else
         modifier
+
+    val parsedSystemPoints = if(systemPoints.toInt().toDouble() == systemPoints) systemPoints.toInt() else systemPoints
 
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -117,7 +119,7 @@ fun AcademicPerformanceMoreElement(
             )
         }
         Text(
-            text = stringResource(id = R.string.of, systemPoints),
+            text = stringResource(id = R.string.of, parsedSystemPoints),
             fontSize = 14.sp,
             color = MaterialTheme.colors.primary,
             textAlign = TextAlign.End,
