@@ -99,21 +99,41 @@ class BetterOrioksViewModel(
     fun retrieveToken(context: Context, navController: NavController) {
         viewModelScope.launch {
             _uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.Loading) }
-            val token = userPreferencesRepository.token.first()
-            val cookies = userPreferencesRepository.authCookies.first()
-            val csrf = userPreferencesRepository.csrf.first()
-            val sendNotifications = userPreferencesRepository.sendNotifications.first()
-            val sendNewsNotifications = userPreferencesRepository.sendNewsNotifications.first()
-            val theme = userPreferencesRepository.theme.first()
-            val disciplineGrouping = userPreferencesRepository.sortDisciplines.first()
-            _uiState.update { currentUiState -> currentUiState.copy(token = token, authCookies = cookies, csrf = csrf, sendNotifications = sendNotifications, theme = theme, sendNewsNotifications = sendNewsNotifications, disciplineGrouping = disciplineGrouping) }
-            if (uiState.value.token != "" && uiState.value.authCookies != "") {
-                _uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.LoggedIn, updateState = false) }
-            }else if(uiState.value.token != "" && uiState.value.authCookies == ""){
-                _uiState.update { currentState -> currentState.copy(updateState = true) }
-                exit(context = context, navController = navController)
+            val token = userPreferencesRepository.token.firstOrNull()
+            val cookies = userPreferencesRepository.authCookies.firstOrNull()
+            val csrf = userPreferencesRepository.csrf.firstOrNull()
+            val sendNotifications = userPreferencesRepository.sendNotifications.firstOrNull()
+            val sendNewsNotifications = userPreferencesRepository.sendNewsNotifications.firstOrNull()
+            val theme = userPreferencesRepository.theme.firstOrNull()
+            val disciplineGrouping = userPreferencesRepository.sortDisciplines.firstOrNull()
+            if(token != null && cookies != null && csrf != null && sendNewsNotifications != null && sendNotifications != null && theme != null && disciplineGrouping != null) {
+                _uiState.update { currentUiState ->
+                    currentUiState.copy(
+                        token = token,
+                        authCookies = cookies,
+                        csrf = csrf,
+                        sendNotifications = sendNotifications,
+                        theme = theme,
+                        sendNewsNotifications = sendNewsNotifications,
+                        disciplineGrouping = disciplineGrouping
+                    )
+                }
+                if (uiState.value.token != "" && uiState.value.authCookies != "") {
+                    _uiState.update { currentUiState ->
+                        currentUiState.copy(
+                            authState = AuthState.LoggedIn,
+                            updateState = false
+                        )
+                    }
+                }
+                else if (uiState.value.token != "" && uiState.value.authCookies == "") {
+                    _uiState.update { currentState -> currentState.copy(updateState = true) }
+                    exit(context = context,navController = navController)
+                }
+                else (_uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.NotLoggedIn) })
+            }else{
+                retrieveToken(context = context, navController = navController)
             }
-            else (_uiState.update { currentUiState -> currentUiState.copy(authState = AuthState.NotLoggedIn) })
         }
     }
 
@@ -346,35 +366,41 @@ class BetterOrioksViewModel(
         _uiState.update { currentState -> currentState.copy(userInfoUiState = UserInfoUiState.Loading) }
             try {
                 Log.d("TEST", "getUserInfo started")
-                val group = userPreferencesRepository.group.first()
-                val studyDirection = userPreferencesRepository.studyDirection.first()
-                val studentId = userPreferencesRepository.studentId.first()
-                val fullName = userPreferencesRepository.fullName.first()
-                val department = userPreferencesRepository.department.first()
-                if (group.isBlank() || refresh){
-                    val userInfo = mainRepository.getUserInfo()
-                    _uiState.update { currentState ->
-                        currentState.copy(
-                            userInfoUiState = UserInfoUiState.Success(
-                                userInfo
-                            )
-                        )
-                    }
-                    userPreferencesRepository.setUserInfo(userInfo)
-                }else{
-                    _uiState.update { currentState ->
-                        currentState.copy(userInfoUiState =
-                            UserInfoUiState.Success(
-                                UserInfo(
-                                    group = group,
-                                    studyDirection = studyDirection,
-                                    recordBookId = studentId,
-                                    fullName = fullName,
-                                    department = department
+                val group = userPreferencesRepository.group.firstOrNull()
+                val studyDirection = userPreferencesRepository.studyDirection.firstOrNull()
+                val studentId = userPreferencesRepository.studentId.firstOrNull()
+                val fullName = userPreferencesRepository.fullName.firstOrNull()
+                val department = userPreferencesRepository.department.firstOrNull()
+                if(group != null && studyDirection != null && studentId != null && fullName != null && department != null) {
+                    if (group.isBlank() || refresh) {
+                        val userInfo = mainRepository.getUserInfo()
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                userInfoUiState = UserInfoUiState.Success(
+                                    userInfo
                                 )
                             )
-                        )
+                        }
+                        userPreferencesRepository.setUserInfo(userInfo)
                     }
+                    else {
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                userInfoUiState =
+                                UserInfoUiState.Success(
+                                    UserInfo(
+                                        group = group,
+                                        studyDirection = studyDirection,
+                                        recordBookId = studentId,
+                                        fullName = fullName,
+                                        department = department
+                                    )
+                                )
+                            )
+                        }
+                    }
+                }else{
+                    throw java.lang.Exception("Can't get user information")
                 }
                 Log.d("TEST", "getUserInfo ended")
             } catch (e: HttpException) {
@@ -392,9 +418,9 @@ class BetterOrioksViewModel(
         val previousState = uiState.value.importantDatesUiState
         _uiState.update { currentState -> currentState.copy(importantDatesUiState = ImportantDatesUiState.Loading) }
         try {
-            val semesterStart = userPreferencesRepository.semesterStart.first()
-            val sessionStart = userPreferencesRepository.sessionStart.first()
-            if (semesterStart == "" || refresh) {
+            val semesterStart = userPreferencesRepository.semesterStart.firstOrNull()
+            val sessionStart = userPreferencesRepository.sessionStart.firstOrNull()
+            if (semesterStart == "" || refresh || semesterStart == null) {
                 val importantDates = mainRepository.getImportantDates()
                 _uiState.update { currentState ->
                     currentState.copy(
@@ -411,7 +437,7 @@ class BetterOrioksViewModel(
                         importantDatesUiState = ImportantDatesUiState.Success(
                             ImportantDates(
                                 semesterStart = semesterStart,
-                                sessionStart = sessionStart
+                                sessionStart = sessionStart ?: ""
                             )
                         )
                     )
