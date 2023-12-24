@@ -174,10 +174,11 @@ fun groupOfSubjects(
     }
 }
 fun groupedSubjects(subjects:SubjectsData,scope:LazyListScope, onComponentClicked: () -> Unit, setCurrentSubject: (SubjectFromSite) -> Unit){
-    val unfinishedSubjects = subjects.subjects.filter { it.grade.fullScore.toDoubleOrNull() == null || (it.grade.fullScore.toDoubleOrNull() !== null && it.grade.fullScore.toDouble() < 50)}
-    val normalSubjects = subjects.subjects.filter { it.grade.fullScore.toDoubleOrNull() != null && it.grade.fullScore.toDouble() >= 50 && it.grade.fullScore.toDouble() < 70 }
-    val goodSubjects = subjects.subjects.filter { it.grade.fullScore.toDoubleOrNull() != null && it.grade.fullScore.toDouble() >= 70 && it.grade.fullScore.toDouble() < 86 }
-    val excellentSubjects = subjects.subjects.filter { it.grade.fullScore.toDoubleOrNull() != null && it.grade.fullScore.toDouble() >= 86}
+    val unfinishedSubjects = subjects.subjects.filter {it.grade.fullScore.toDoubleOrNull() == null || (it.grade.fullScore.toDoubleOrNull() !== null && it.grade.fullScore.toDouble() < 50)}
+    val normalSubjects = subjects.subjects.filter { it.formOfControlId != 1 && it.grade.fullScore.toDoubleOrNull() != null && it.grade.fullScore.toDouble() >= 50 && it.grade.fullScore.toDouble() < 70 }
+    val goodSubjects = subjects.subjects.filter { it.formOfControlId != 1 && it.grade.fullScore.toDoubleOrNull() != null && it.grade.fullScore.toDouble() >= 70 && it.grade.fullScore.toDouble() < 86 }
+    val excellentSubjects = subjects.subjects.filter { it.formOfControlId != 1 && it.grade.fullScore.toDoubleOrNull() != null && it.grade.fullScore.toDouble() >= 86}
+    val creditSubjects = subjects.subjects.filter { it.formOfControlId == 1 && it.grade.fullScore.toDoubleOrNull() != null && it.grade.fullScore.toDouble() >= 50}
     if(unfinishedSubjects.isNotEmpty()) {
         groupOfSubjects(
             scope = scope,
@@ -212,6 +213,15 @@ fun groupedSubjects(subjects:SubjectsData,scope:LazyListScope, onComponentClicke
             onComponentClicked = onComponentClicked,
             setCurrentSubject = setCurrentSubject,
             text = R.string.excellent_mark
+        )
+    }
+    if(creditSubjects.isNotEmpty()){
+        groupOfSubjects(
+            scope = scope,
+            subjects = creditSubjects,
+            onComponentClicked = onComponentClicked,
+            setCurrentSubject = setCurrentSubject,
+            text = R.string.Credit
         )
     }
 }
