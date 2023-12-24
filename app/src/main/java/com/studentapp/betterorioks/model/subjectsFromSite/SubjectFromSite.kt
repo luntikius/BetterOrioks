@@ -47,7 +47,7 @@ class SubjectFromSite(
         val controlEvents = getControlEvents()
         var maxScore = 0.0
         controlEvents.forEach {
-            if (it.grade.score != "-") maxScore += it.maxScore
+            if (it.grade.score != "-" && it.bonus == 0) maxScore += it.maxScore
         }
         return maxScore
     }

@@ -36,5 +36,7 @@ data class ControlEvent(
     @SerialName("grade")
     val grade: Grade = Grade(),
     @SerialName("irs")
-    val resources: List<Resource> = listOf()
+    val resources: List<Resource> = listOf(),
+    @SerialName("bonus")
+    val bonus: Int = 0
 )

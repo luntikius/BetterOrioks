@@ -67,6 +67,7 @@ fun AcademicPerformanceMoreElement(
     modifier: Modifier = Modifier,
     subjectName: String = stringResource(R.string.blank),
     subjectShort:String = "",
+    subjectDescription:String = "",
     userPoints: Double = 0.0,
     systemPoints: Double = 10.0,
     weeks: Int = 0,
@@ -117,6 +118,14 @@ fun AcademicPerformanceMoreElement(
                 text = "$subjectName$finalSubjectShort",
                 modifier = modifier.padding(start = 4.dp)
             )
+            if(subjectDescription.isNotBlank()) {
+                Text(
+                    text = subjectDescription,
+                    modifier = modifier.padding(start = 4.dp),
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colors.primary
+                )
+            }
         }
         Text(
             text = stringResource(id = R.string.of, parsedSystemPoints),
@@ -307,7 +316,15 @@ fun ResourcesPopup(controlEvent: ControlEvent, onDismiss: () -> Unit, controlFor
                 ){
                     item{ Spacer(modifier = Modifier.size(8.dp))}
                     items(controlEvent.resources){
-                        val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(it.link)) }
+                        //Case ORIOKS Test
+                        val uriString = if(it.isTest) "https://orioks.miet.ru${it.link}&idKM=${it.idKm}&debt=0"
+                        //Case Moodle Test
+                        else if(it.link.firstOrNull() == '/') "https://orioks.miet.ru${it.link}"
+                        //Case isn't test
+                        else it.link
+
+                        val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(uriString)) }
+
                         Card(
                             shape = RoundedCornerShape(16.dp),
                             elevation = if (MaterialTheme.colors.surface == Color.White) 4.dp else 0.dp,
@@ -515,6 +532,7 @@ fun AcademicPerformanceMore (
                             userPoints = if (it.grade.score == "-") -2.0 else if (it.grade.score == "н") -1.0 else it.grade.score.toDouble(),
                             systemPoints = it.maxScore,
                             subjectShort = it.shortName,
+                            subjectDescription = it.name,
                             weeks = calculateWeeks(it.week,uiState),
                             resources = it.resources,
                             onClick = {

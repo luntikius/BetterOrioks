@@ -47,10 +47,10 @@ fun CommonPreview(){
 @Composable
 fun RoundedMark(userPoints: Double, systemPoints: Double,modifier: Modifier = Modifier){
     val outlineColor = when((userPoints/systemPoints*100).toInt()){
+        in 0..49 -> Color.Red
         in 50..69 -> Color.Yellow
         in 70..85 -> colorResource(id = R.color.light_green)
-        in 86..100 -> Color.Green
-        else -> Color.Red
+        else -> Color.Green
     }
     Card(
         shape = RoundedCornerShape(50),
