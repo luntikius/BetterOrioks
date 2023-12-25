@@ -1,12 +1,12 @@
 package com.studentapp.betterorioks.data
 
+import android.util.Log
 import com.studentapp.betterorioks.model.News
 import com.studentapp.betterorioks.model.subjectsFromSite.ResourceCategory
 import com.studentapp.betterorioks.model.subjectsFromSite.Resource
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectsData
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectsData2
 import com.studentapp.betterorioks.network.*
-import kotlinx.serialization.decodeFromString
 import kotlinx.serialization.json.Json
 import okhttp3.Interceptor
 import okhttp3.OkHttpClient
@@ -20,6 +20,7 @@ private const val BASE_URL =
     "https://orioks.miet.ru"
 
 private const val NEWS_COUNT = 3
+private const val TAG = "ORIOKS_REPOSITORY"
 
 class NetworkOrioksRepository
 {
@@ -118,18 +119,22 @@ class NetworkOrioksRepository
     private fun parseString(s: String): SubjectsData{
         return if (s[s.indexOf(":")+1] == "{".toCharArray()[0]){
             val temp = json.decodeFromString<SubjectsData2>(s)
-            SubjectsData(subjects = temp.subjects.values.toList(), debts = temp.debts)
+            SubjectsData(subjects = temp.subjects.values.toList(), debts = temp.debts, semesters = temp.semesters)
         } else json.decodeFromString(s)
     }
 
-    suspend fun getSubjects(cookies: String, setCookies: (String, String) -> Unit = { _: String, _: String -> } ):SubjectsData{
-        val response = orioksSubjectsRetrofitService.getSubjects(cookies = cookies)
+    suspend fun getSubjects(cookies: String, setCookies: (String, String) -> Unit = { _: String, _: String -> }, semesterId: Int? = null ):SubjectsData{
+        val response = orioksSubjectsRetrofitService.getSubjects(
+            cookies = cookies,
+            query = if(semesterId != null) mapOf("id_semester" to semesterId.toString()) else mapOf()
+        )
         val subjectsHtml = response.body()?.string() ?: ""
         if("{\"dises\":" !in subjectsHtml) throw Throwable("Auth Error")
         val start = subjectsHtml.indexOf("{\"dises\":")
         val end = subjectsHtml.indexOf(string = "</",startIndex = start)
         val subjectsString = subjectsHtml.slice(start until end)
         val subjects = parseString(subjectsString)
+        Log.d(TAG,subjects.semesters.toString())
         val newCookies = getCookies(response)
         val csrf = findCsrf(subjectsHtml)
         setCookies(newCookies, csrf)

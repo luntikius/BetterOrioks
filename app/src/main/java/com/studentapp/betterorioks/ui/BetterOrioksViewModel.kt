@@ -243,14 +243,15 @@ class BetterOrioksViewModel(
         return result
     }
 
-    fun getAcademicPerformanceFromSite() {
+    fun getAcademicPerformanceFromSite(semesterId: Int? = null) {
         println("GET_ACADEMIC_PERFORMANCE_FROM_SITE")
         _uiState.update { currentState -> currentState.copy(subjectsFromSiteUiState = SubjectsFromSiteUiState.Loading) }
         viewModelScope.launch {
             try {
                 val subjects = orioksRepository.getSubjects(
                     cookies = _uiState.value.authCookies,
-                    setCookies = {s1,s2 -> setCookies(s1,s2)}
+                    setCookies = {s1,s2 -> setCookies(s1,s2)},
+                    semesterId = semesterId
                 )
                 Log.d("GET_ACADEMIC_PERFORMANCE_FROM_SITE", uiState.value.csrf)
                 _uiState.update { currentState ->

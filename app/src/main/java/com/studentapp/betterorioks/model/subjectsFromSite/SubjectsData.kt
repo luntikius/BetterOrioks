@@ -9,6 +9,8 @@ class SubjectsData (
     @SerialName("dises")
     val subjects: List<SubjectFromSite> = listOf(),
     @SerialName("dolg_dises")
-    val debts: List<SubjectFromSite> = listOf()
+    val debts: List<SubjectFromSite> = listOf(),
+    @SerialName("sems")
+    val semesters: List<Semester> = listOf()
 )
 

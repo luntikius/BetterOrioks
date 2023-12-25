@@ -10,4 +10,6 @@ class SubjectsData2 {
     val subjects: Map<String,SubjectFromSite> = mapOf()
     @SerialName("dolg_dises")
     val debts: List<SubjectFromSite> = listOf()
+    @SerialName("sems")
+    val semesters: List<Semester> = listOf()
 }
