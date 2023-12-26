@@ -26,7 +26,7 @@ data class AppUiState (
     var scheduleInitUiState: Boolean = false,
     val resourcesUiState: ResourcesUiState = ResourcesUiState.NotStarted,
     val newsUiState: NewsUiState = NewsUiState.NotStarted,
-    val theme: Int = 0, // 0 - тема системы, 1 - светлая тема, иначе темная тема
+    val theme: Int = ThemeUiState.SYSTEM,
     val disciplineGrouping: Boolean = true,
     val selectedSemesterId: Int = 0
     )
