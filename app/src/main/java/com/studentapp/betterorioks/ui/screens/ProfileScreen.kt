@@ -40,7 +40,7 @@ fun ProfileCardContent(userInfo: UserInfo) {
     Row(modifier = Modifier.padding(16.dp)) {
         Column(verticalArrangement = Arrangement.spacedBy(4.dp), horizontalAlignment = Alignment.CenterHorizontally) {
             Icon(
-                painter = painterResource(id = R.drawable.profile),
+                painter = painterResource(id = R.drawable.snowman),
                 contentDescription = null,
                 tint = MaterialTheme.colors.secondary,
                 modifier = Modifier.size(64.dp)

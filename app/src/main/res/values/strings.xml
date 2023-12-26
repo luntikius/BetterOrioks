@@ -111,4 +111,5 @@
     <string name="type4">Знаменатель - 2</string>
     <string name="error_message">текст ошибки</string>
     <string name="Credit">Зачёт</string>
+    <string name="Semester">Семестр</string>
 </resources>

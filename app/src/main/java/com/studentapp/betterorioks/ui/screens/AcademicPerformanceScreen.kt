@@ -1,6 +1,7 @@
 package com.studentapp.betterorioks.ui.screens
 
 import androidx.annotation.StringRes
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
@@ -11,6 +12,10 @@ import androidx.compose.material.pullrefresh.PullRefreshIndicator
 import androidx.compose.material.pullrefresh.pullRefresh
 import androidx.compose.material.pullrefresh.rememberPullRefreshState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,6 +30,7 @@ import androidx.navigation.NavHostController
 import com.studentapp.betterorioks.R
 import com.studentapp.betterorioks.data.AppDetails
 import com.studentapp.betterorioks.model.BetterOrioksScreens
+import com.studentapp.betterorioks.model.subjectsFromSite.Semester
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectFromSite
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectsData
 import com.studentapp.betterorioks.ui.components.ErrorScreen
@@ -60,7 +66,11 @@ fun MyPreview(){
 }
 
 @Composable
-fun AcademicPerformanceScreen(uiState: AppUiState, navController: NavHostController, viewModel: BetterOrioksViewModel){
+fun AcademicPerformanceScreen(
+    uiState: AppUiState,
+    navController: NavHostController,
+    viewModel: BetterOrioksViewModel
+){
     when(uiState.subjectsFromSiteUiState){
         is SubjectsFromSiteUiState.Success ->
             AcademicPerformance(
@@ -73,7 +83,8 @@ fun AcademicPerformanceScreen(uiState: AppUiState, navController: NavHostControl
                 },
                 viewModel = viewModel,
                 uiState = uiState,
-                changeSortedState = {viewModel.changeSortedState()}
+                changeSortedState = {viewModel.changeSortedState()},
+                onSelectSemester = {i -> viewModel.getAcademicPerformanceFromSite(semesterId = i)}
             )
         is SubjectsFromSiteUiState.Error ->
             AcademicPerformance(
@@ -225,6 +236,123 @@ fun groupedSubjects(subjects:SubjectsData,scope:LazyListScope, onComponentClicke
         )
     }
 }
+@Composable
+fun ChangeSemesterPopup(
+    semesters: List<Semester>,
+    onDismiss: () -> Unit,
+    onChange: (index:Int) -> Unit,
+    currentSelectedId: Int
+){
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        text = {
+            Column() {
+                Text(
+                    stringResource(R.string.Semester),
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colors.onSurface
+                )
+                Spacer(modifier = Modifier.size(16.dp))
+                semesters.forEachIndexed { index,s ->
+                    Row(verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.clickable {
+                            onChange(s.id)
+                            onDismiss()
+                        }
+                    ) {
+                        RadioButton(
+                            selected = currentSelectedId == s.id,
+                            onClick = {
+                                onChange(s.id)
+                                onDismiss()
+                            }
+                        )
+                        Text(
+                            text = s.name,
+                            modifier = Modifier
+                                .padding(horizontal = 8.dp)
+                                .fillMaxWidth(),
+                            fontSize = 16.sp,
+                            color = MaterialTheme.colors.onSurface
+                        )
+                    }
+                }
+            }
+        },
+        buttons = {
+            Box(
+                modifier = Modifier.fillMaxWidth(),
+                contentAlignment = Alignment.BottomEnd
+            ) {
+                TextButton(
+                    onClick = { onDismiss() },
+                    shape = RoundedCornerShape(16.dp),
+                    modifier = Modifier.padding(end = 16.dp,bottom = 8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.cancel),
+                        color = MaterialTheme.colors.secondary,
+                    )
+                }
+            }
+        }
+    )
+
+}
+
+@Composable
+fun AcademicPerformanceTopBar(
+    modifier: Modifier,
+    semesters: List<Semester>,
+    changeSortedState: () -> Unit,
+    selectedSemesterId: Int,
+    onSelectSemester: (i:Int) -> Unit,
+){
+    var popupIsVisible by remember { mutableStateOf(false) }
+
+    if(popupIsVisible){
+        ChangeSemesterPopup(
+            semesters = semesters,
+            onChange = {i -> onSelectSemester(i)},
+            onDismiss = {popupIsVisible = false},
+            currentSelectedId = selectedSemesterId
+        )
+    }
+
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Spacer(modifier = modifier.size(16.dp))
+        Text(
+            text = stringResource(R.string.academic_performance_caps),
+            modifier = Modifier.padding(vertical = 8.dp),
+            fontWeight = FontWeight.Bold,
+            fontSize = 22.sp
+        )
+        Spacer(modifier = Modifier.weight(1f))
+        IconButton(
+            onClick = { popupIsVisible = true },
+            modifier = Modifier.size(28.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.change_semester),
+                contentDescription = "Switch semester",
+                modifier = Modifier.size(28.dp)
+            )
+        }
+        Spacer(modifier = Modifier.size(16.dp))
+        IconButton(
+            onClick = { changeSortedState() },
+            modifier = Modifier.size(28.dp)
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.sort),
+                contentDescription = "Switch display mode",
+                modifier = Modifier.size(28.dp)
+            )
+        }
+        Spacer(modifier = modifier.size(16.dp))
+    }
+}
 
 
 @OptIn(ExperimentalMaterialApi::class)
@@ -239,7 +367,9 @@ fun AcademicPerformance(
     isLoading: Boolean = false,
     isError: Boolean = false,
     errorMessage: String = "",
-    changeSortedState: () -> Unit = {}
+    changeSortedState: () -> Unit = {},
+    onSelectSemester: (i: Int) -> Unit = {}
+
 ){
     val pullRefreshState =
         rememberPullRefreshState(uiState.subjectsFromSiteUiState == SubjectsFromSiteUiState.Loading, {
@@ -273,27 +403,13 @@ fun AcademicPerformance(
                 .fillMaxSize()) {
                 item {Spacer(modifier = Modifier.size(16.dp))}
                 item {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Spacer(modifier = modifier.size(16.dp))
-                        Text(
-                            text = stringResource(R.string.academic_performance_caps),
-                            modifier = Modifier.padding(vertical = 8.dp),
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 22.sp
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                        IconButton(
-                            onClick = { changeSortedState() },
-                            modifier = Modifier.size(28.dp)
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.sort),
-                                contentDescription = "Switch display mode",
-                                modifier = Modifier.size(28.dp)
-                            )
-                        }
-                        Spacer(modifier = modifier.size(16.dp))
-                    }
+                    AcademicPerformanceTopBar(
+                        modifier = modifier,
+                        semesters = subjects.semesters,
+                        changeSortedState = changeSortedState,
+                        selectedSemesterId = uiState.selectedSemesterId,
+                        onSelectSemester = onSelectSemester
+                    )
                 }
                 if(uiState.disciplineGrouping){
                     groupedSubjects(

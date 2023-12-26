@@ -27,5 +27,6 @@ data class AppUiState (
     val resourcesUiState: ResourcesUiState = ResourcesUiState.NotStarted,
     val newsUiState: NewsUiState = NewsUiState.NotStarted,
     val theme: Int = 0, // 0 - тема системы, 1 - светлая тема, иначе темная тема
-    val disciplineGrouping: Boolean = true
+    val disciplineGrouping: Boolean = true,
+    val selectedSemesterId: Int = 0
     )

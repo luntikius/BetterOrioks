@@ -124,6 +124,7 @@ class NetworkOrioksRepository
     }
 
     suspend fun getSubjects(cookies: String, setCookies: (String, String) -> Unit = { _: String, _: String -> }, semesterId: Int? = null ):SubjectsData{
+        Log.d(TAG, "GETTING SUBJECTS FOR $semesterId SEMESTER")
         val response = orioksSubjectsRetrofitService.getSubjects(
             cookies = cookies,
             query = if(semesterId != null) mapOf("id_semester" to semesterId.toString()) else mapOf()

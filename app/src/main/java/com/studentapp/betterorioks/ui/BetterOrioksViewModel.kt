@@ -12,14 +12,19 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.navigation.NavController
 import com.studentapp.betterorioks.BetterOrioksApplication
 import com.studentapp.betterorioks.R
-import com.studentapp.betterorioks.data.*
 import com.studentapp.betterorioks.data.AppDetails.BIG_WINDOW_TIME
 import com.studentapp.betterorioks.data.AppDetails.SAMPLE_TIME
+import com.studentapp.betterorioks.data.NetworkExitRepository
+import com.studentapp.betterorioks.data.NetworkMainRepository
+import com.studentapp.betterorioks.data.NetworkOrioksRepository
+import com.studentapp.betterorioks.data.NetworkTokenRepository
+import com.studentapp.betterorioks.data.UserPreferencesRepository
 import com.studentapp.betterorioks.data.background.WorkManagerBetterOrioksRepository
 import com.studentapp.betterorioks.data.schedule.NetworkScheduleFromSiteRepository
 import com.studentapp.betterorioks.data.schedule.ScheduleOfflineRepository
 import com.studentapp.betterorioks.data.subjects.SimpleSubjectsOfflineRepository
-import com.studentapp.betterorioks.model.*
+import com.studentapp.betterorioks.model.ImportantDates
+import com.studentapp.betterorioks.model.UserInfo
 import com.studentapp.betterorioks.model.scheduleFromSite.FullSchedule
 import com.studentapp.betterorioks.model.scheduleFromSite.SimpleScheduleElement
 import com.studentapp.betterorioks.model.subjectsFromSite.ControlEvent
@@ -28,18 +33,29 @@ import com.studentapp.betterorioks.model.subjectsFromSite.SubjectFromSite
 import com.studentapp.betterorioks.model.subjectsFromSite.SubjectsData
 import com.studentapp.betterorioks.ui.components.makeStatusNotification
 import com.studentapp.betterorioks.ui.screens.dayOfWeekToInt
-import java.time.temporal.ChronoUnit.DAYS
-import com.studentapp.betterorioks.ui.states.*
+import com.studentapp.betterorioks.ui.states.AuthState
+import com.studentapp.betterorioks.ui.states.FullScheduleUiState
+import com.studentapp.betterorioks.ui.states.ImportantDatesUiState
+import com.studentapp.betterorioks.ui.states.NewsUiState
+import com.studentapp.betterorioks.ui.states.ResourcesUiState
+import com.studentapp.betterorioks.ui.states.SubjectsFromSiteUiState
+import com.studentapp.betterorioks.ui.states.UserInfoUiState
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import retrofit2.HttpException
 import java.io.IOException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.temporal.ChronoUnit
-import java.util.*
+import java.time.temporal.ChronoUnit.DAYS
+import java.util.Base64
 import kotlin.math.abs
+
 
 class BetterOrioksViewModel(
     private val userPreferencesRepository: UserPreferencesRepository,
@@ -254,14 +270,19 @@ class BetterOrioksViewModel(
                     semesterId = semesterId
                 )
                 Log.d("GET_ACADEMIC_PERFORMANCE_FROM_SITE", uiState.value.csrf)
+
+                val position = subjects.semesters.indexOfFirst{it.dateStart == ""}
+                val currentSemesterPosition = if(position > 0) position - 1 else 0
+
                 _uiState.update { currentState ->
                     currentState.copy(
                         subjectsFromSiteUiState = SubjectsFromSiteUiState.Success(
                             subjects
-                        )
+                        ),
+                        selectedSemesterId = semesterId ?: subjects.semesters[currentSemesterPosition].id
                     )
                 }
-                if(subjects.subjects.isNotEmpty()) {
+                if(subjects.subjects.isNotEmpty() && semesterId == null) {
                     val parsed = parseAcademicPerformance(subjects)
                     simpleSubjectsOfflineRepository.insertItems(parsed)
                 }
