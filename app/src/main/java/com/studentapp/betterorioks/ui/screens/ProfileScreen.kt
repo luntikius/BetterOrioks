@@ -181,7 +181,7 @@ fun NewsContent(news: List<News>){
         modifier = Modifier.padding(bottom = 4.dp)
     ){
         news.forEach{
-            val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse("https://orioks.miet.ru/${it.link}")) }
+            val intent = remember { Intent(Intent.ACTION_VIEW, Uri.parse(it.link)) }
             Divider()
             Row(modifier = Modifier
                 .clickable { context.startActivity(intent) },
