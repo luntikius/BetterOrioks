@@ -45,7 +45,7 @@ fun CommonPreview(){
 }
 
 @Composable
-fun RoundedMark(userPoints: Double, systemPoints: Double,modifier: Modifier = Modifier){
+fun RoundedMark(userPoints: Double, systemPoints: Double,modifier: Modifier = Modifier, isBonus: Boolean = false){
     val outlineColor = when((userPoints/systemPoints*100).toInt()){
         in -10000..49 -> Color.Red
         in 50..69 -> Color.Yellow
@@ -58,7 +58,7 @@ fun RoundedMark(userPoints: Double, systemPoints: Double,modifier: Modifier = Mo
         modifier = modifier.size(35.dp),
         border = BorderStroke(
             width = 2.dp,
-            color = if(userPoints.toInt() == -2 || systemPoints == 0.0) MaterialTheme.colors.secondary else outlineColor
+            color = if(userPoints.toInt() == -2 || systemPoints == 0.0 || isBonus) MaterialTheme.colors.secondary else outlineColor
         )
     ){
         Text(

@@ -72,7 +72,8 @@ fun AcademicPerformanceMoreElement(
     systemPoints: Double = 10.0,
     weeks: Int = 0,
     resources: List<Resource> = listOf(),
-    onClick: () -> Unit = {}
+    onClick: () -> Unit = {},
+    isBonus: Boolean = false
 ){
     val finalSubjectShort = if(subjectShort != "-" && subjectShort != " "){" ($subjectShort)"}else{""}
     val weeksLeft = when(weeks) {
@@ -136,7 +137,7 @@ fun AcademicPerformanceMoreElement(
                 .wrapContentSize()
                 .padding(end = 8.dp)
         )
-        RoundedMark(userPoints = userPoints, systemPoints = systemPoints)
+        RoundedMark(userPoints = userPoints, systemPoints = systemPoints, isBonus = isBonus)
         Spacer(modifier = Modifier.size(8.dp))
         if(resources.isNotEmpty())
             Icon(
@@ -538,7 +539,8 @@ fun AcademicPerformanceMore (
                             onClick = {
                                 setCurrentControlEvent(it)
                                 popupIsVisible = true
-                            }
+                            },
+                            isBonus = it.bonus != 0
                         )
                     }
                     items(debtControlEvents) {
