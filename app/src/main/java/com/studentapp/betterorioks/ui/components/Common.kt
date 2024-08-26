@@ -73,6 +73,24 @@ fun RoundedMark(userPoints: Double, systemPoints: Double,modifier: Modifier = Mo
 }
 
 @Composable
+fun ScheduleEndScreen(modifier: Modifier = Modifier) {
+    Box(modifier = modifier.padding(64.dp), contentAlignment = Alignment.Center) {
+        Column(modifier = Modifier.padding(16.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+            Image(
+                painter = painterResource(id = R.drawable.done_img),
+                contentDescription = null,
+                modifier = Modifier.size(150.dp)
+            )
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                "Семестр закончился, поэтому сейчас расписание недоступно, пожалуйста, попробуйте обновить его в начале следующего семестра.",
+                textAlign = TextAlign.Center
+            )
+        }
+    }
+}
+
+@Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {
     Box(
         contentAlignment = Alignment.Center,
@@ -193,7 +211,7 @@ fun AnyButton (
         modifier = modifier
             .wrapContentHeight()
             .fillMaxWidth()
-            .padding(horizontal = 16.dp,vertical = 3.dp)
+            .padding(horizontal = 16.dp, vertical = 3.dp)
             .defaultMinSize(minHeight = 72.dp)
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {

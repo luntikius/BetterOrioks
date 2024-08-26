@@ -34,6 +34,7 @@ import com.studentapp.betterorioks.ui.AppUiState
 import com.studentapp.betterorioks.ui.BetterOrioksViewModel
 import com.studentapp.betterorioks.ui.components.ErrorScreen
 import com.studentapp.betterorioks.ui.components.LoadingScreen
+import com.studentapp.betterorioks.ui.components.ScheduleEndScreen
 import com.studentapp.betterorioks.ui.states.*
 import dev.chrisbanes.snapper.ExperimentalSnapperApi
 import dev.chrisbanes.snapper.SnapOffsets
@@ -328,7 +329,7 @@ fun ScheduleItem(it: SimpleScheduleElement, recalculateWindows: (Int,Int) -> Uni
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .padding(horizontal = 16.dp,vertical = 3.dp)
+                .padding(horizontal = 16.dp, vertical = 3.dp)
                 .defaultMinSize(minHeight = 72.dp),
             elevation = if (MaterialTheme.colors.surface == Color.White) 4.dp else 0.dp
         ) {
@@ -336,7 +337,7 @@ fun ScheduleItem(it: SimpleScheduleElement, recalculateWindows: (Int,Int) -> Uni
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(horizontal = 16.dp,vertical = 8.dp)
+                        .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Row(
                         modifier = Modifier.padding(),
@@ -405,7 +406,7 @@ fun ScheduleItem(it: SimpleScheduleElement, recalculateWindows: (Int,Int) -> Uni
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp,vertical = 3.dp)
+                    .padding(horizontal = 16.dp, vertical = 3.dp)
                     .defaultMinSize(minHeight = 72.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
@@ -488,7 +489,7 @@ fun Schedule(
 
     RefreshAlert(isAlert = isAlert, onDismiss = { isAlert = false }, onRefresh = { viewModel.getFullSchedule(refresh = true, context = context) })
 
-    BoxWithConstraints(
+    Box(
         modifier = modifier
             .pullRefresh(pullRefreshState)
             .fillMaxSize()
@@ -503,7 +504,16 @@ fun Schedule(
                 lazyRowState = lazyRowState,
                 setDate = {date -> viewModel.setCurrentDateWithMovingTopBar(date = date, lazyRowState = lazyRowState, coroutineScope = coroutineScope, startDate = startDate )}
             )
-            if (uiState.fullScheduleUiState is FullScheduleUiState.Success
+            if(uiState.importantDatesUiState is ImportantDatesUiState.Success && DAYS.between(LocalDate.parse((uiState.importantDatesUiState as ImportantDatesUiState.Success).dates.semesterStart), LocalDate.now()) >= 7 * 20) {
+                LazyColumn(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    item {
+                        ScheduleEndScreen()
+                    }
+                }
+            } else if (uiState.fullScheduleUiState is FullScheduleUiState.Success
                 && uiState.importantDatesUiState is ImportantDatesUiState.Success
                 && uiState.userInfoUiState is UserInfoUiState.Success
             ) {
