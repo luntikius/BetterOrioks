@@ -8,6 +8,11 @@ import retrofit2.Retrofit
 
 class NetworkScheduleFromSiteRepository
 {
+    private val json = Json {
+        ignoreUnknownKeys = true
+        coerceInputValues = true
+    }
+
     private val BASE_URL =
         "https://www.miet.ru"
 
@@ -26,7 +31,7 @@ class NetworkScheduleFromSiteRepository
         val start = response.indexOf('"')
         val end = response.indexOf(";")
         val cookie = response.slice(start+1 until end)
-        val fullSchedule = Json.decodeFromString<FullSchedule>(
+        val fullSchedule = json.decodeFromString<FullSchedule>(
             string = scheduleFromSiteRetrofitService.getSchedule(cookie = cookie, group = group).string(),
         )
         setSchedule(fullSchedule)
